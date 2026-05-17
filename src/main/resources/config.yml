@@ -1,0 +1,44 @@
+# Language for plugin messages (commands, menus, errors)
+language: en_us
+
+# Translation settings
+translations:
+  # Use client-side translations from resource pack (may show keys if pack is missing)
+  use_client_side: true
+  # Server language if client-side is disabled (fallback to plugin lang)
+  server_language: "en_us"
+
+# Item availability settings
+# enabled: hard on/off switch for the item itself
+# recipe_enabled: controls crafting separately and must be set explicitly
+items:
+  crescent_bow:
+    enabled: true
+    recipe_enabled: true
+  crescent_spear:
+    enabled: true
+    recipe_enabled: true
+  chisel:
+    enabled: true
+    recipe_enabled: true
+  katana:
+    enabled: true
+    recipe_enabled: true
+  iron_wind_blade:
+    enabled: true
+    recipe_enabled: true
+  diamond_wind_blade:
+    enabled: true
+    recipe_enabled: true
+  netherite_wind_blade:
+    enabled: true
+    recipe_enabled: true
+  iron_scythe:
+    enabled: true
+    recipe_enabled: true
+  diamond_scythe:
+    enabled: true
+    recipe_enabled: true
+  netherite_scythe:
+    enabled: true
+    recipe_enabled: true

@@ -1,0 +1,21 @@
+name: 'PepeForge'
+version: '${project.version}'
+main: pepin.pepeforge.PepeForgePlugin
+api-version: '1.21'
+authors:
+  - Pepin
+description: Custom items plugin for PepeForge.
+
+commands:
+  pepeforge:
+    description: Gives or opens custom PepeForge items.
+    usage: /pepeforge <give|items>
+    aliases: [pf]
+
+permissions:
+  pepeforge.give:
+    description: Allows giving custom PepeForge items.
+    default: op
+  pepeforge.items:
+    description: Allows opening the custom PepeForge items menu.
+    default: op

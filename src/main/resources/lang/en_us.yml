@@ -1,0 +1,115 @@
+messages:
+  prefix: "&6[PepeForge] "
+  command:
+    players_only: "&cOnly players can use this command."
+    no_permission: "&cYou do not have permission to use this command."
+    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_scythe|diamond_scythe|netherite_scythe> <player> or /pepeforge items"
+    unknown_subcommand: "&cUnknown subcommand."
+    unknown_item: "&cUnknown item: {item}"
+    item_disabled: "&cThat item is currently disabled: {item}"
+    player_not_found: "&cPlayer not found: {player}"
+    give_success_sender: "&aGave {item} to {player}."
+    give_success_target: "&aYou received {item}&a."
+  menu:
+    title: "&8Pepe Items"
+    item_received: "&aItem added to your inventory."
+  two_handed:
+    offhand_required: "&cThis weapon requires an empty off-hand."
+  katana:
+    cooldown: "&cKatana recharging... {bar} &7{seconds}s"
+  crescent_spear:
+    combo: "&bCrescent combo {hits} {bar} &7{seconds}s"
+    proc: "&bCrescent combo {hits} {bar} &fLaunch!"
+items:
+  crescent_bow:
+    fallback_name: "&bCrescent Bow"
+    lore:
+      - "&6---------------"
+      - "&eCrescent Volley"
+      - "&3Fires a 3-arrow crescent spread."
+      - "&3Consumes one arrow per volley."
+      - "&5Epic"
+      - "&6---------------"
+  crescent_spear:
+    fallback_name: "&bCrescent Spear"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &bCrescent Launch"
+      - "&3Every third strike deals bonus damage and launches the target upward."
+      - "&3Gain Speed I for 15s after a launch."
+      - "&5Epic"
+      - "&6---------------"
+  chisel:
+    fallback_name: "&bChisel"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &bCarve"
+      - "&3Right-click cycles decorative block variants."
+      - "&3Sneak and right-click cycles backward."
+      - "&fCommon"
+      - "&6---------------"
+  katana:
+    fallback_name: "&9Katana"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &bParry"
+      - "&3Right-click to enter a brief parry stance."
+      - "&3Blocks melee and reflects projectiles."
+      - "&7Two-Handed"
+      - "&9Rare"
+      - "&6---------------"
+  iron_wind_blade:
+    fallback_name: "&fIron Wind Blade"
+    lore:
+      - "&6---------------"
+      - "&eSwift Strike"
+      - "&3Gain Speed I for 2s after hitting."
+      - "&fCommon"
+      - "&6---------------"
+  diamond_wind_blade:
+    fallback_name: "&bDiamond Wind Blade"
+    lore:
+      - "&6---------------"
+      - "&eSwift Strike"
+      - "&3Gain Speed I while holding."
+      - "&bRare"
+      - "&6---------------"
+  netherite_wind_blade:
+    fallback_name: "&8Netherite Wind Blade"
+    lore:
+      - "&6---------------"
+      - "&eSwift Strike"
+      - "&3Gain Speed I while holding."
+      - "&3Gain Speed II for 3s after hitting."
+      - "&5Epic"
+      - "&6---------------"
+  iron_scythe:
+    fallback_name: "&fIron Scythe"
+    lore:
+      - "&6---------------"
+      - "&eSweep Harvest"
+      - "&33x3 harvest of ripe crops."
+      - "&3Replants from the harvest first,"
+      - "&3then uses inventory if needed."
+      - "&fCommon"
+      - "&6---------------"
+  diamond_scythe:
+    fallback_name: "&bDiamond Scythe"
+    lore:
+      - "&6---------------"
+      - "&eSweep Harvest"
+      - "&35x5 harvest of ripe crops."
+      - "&3Replants from the harvest first,"
+      - "&3then uses inventory if needed."
+      - "&bRare"
+      - "&6---------------"
+  netherite_scythe:
+    fallback_name: "&8Netherite Scythe"
+    lore:
+      - "&6---------------"
+      - "&eSweep Harvest"
+      - "&37x7 harvest of ripe crops."
+      - "&3Replants from the harvest first,"
+      - "&3then uses inventory if needed."
+      - "&5Epic"
+      - "&6---------------"

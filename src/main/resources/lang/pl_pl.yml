@@ -1,0 +1,112 @@
+messages:
+  prefix: "&6[PepeForge] "
+  command:
+    players_only: "&cTylko gracze mogą użyć tej komendy."
+    no_permission: "&cNie masz uprawnień do użycia tej komendy."
+    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_scythe|diamond_scythe|netherite_scythe> <player> lub /pepeforge items"
+    unknown_subcommand: "&cNieznana podkomenda."
+    unknown_item: "&cNieznany przedmiot: {item}"
+    item_disabled: "&cTen przedmiot jest obecnie wyłączony: {item}"
+    player_not_found: "&cNie znaleziono gracza: {player}"
+    give_success_sender: "&aPrzekazano {item} graczowi {player}."
+    give_success_target: "&aOtrzymano {item}&a."
+  menu:
+    title: "&8Przedmioty Pepe"
+    item_received: "&aPrzedmiot dodany do ekwipunku."
+  two_handed:
+    offhand_required: "&cTa broń wymaga pustej drugiej ręki."
+  katana:
+    cooldown: "&cKatana ładuje się... {bar} &7{seconds}s"
+  crescent_spear:
+    combo: "&bCombo włóczni {hits} {bar} &7{seconds}s"
+    proc: "&bCombo włóczni {hits} {bar} &fPodbicie!"
+items:
+  crescent_bow:
+    fallback_name: "&bŁuk Półksiężyca"
+    lore:
+      - "&6---------------"
+      - "&eSalwa Półksiężyca"
+      - "&3Wystrzeliwuje salwę 3 strzał."
+      - "&3Zużywa jedną strzałę na salwę."
+      - "&5Epicka"
+      - "&6---------------"
+  crescent_spear:
+    fallback_name: "&bWłócznia Półksiężyca"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &bKsiężycowe Podbicie"
+      - "&3Co trzecie trafienie zadaje bonusowe obrażenia i wybija przeciwnika w górę."
+      - "&3Po podbiciu daje Speed I na 15s."
+      - "&5Epicka"
+      - "&6---------------"
+  chisel:
+    fallback_name: "&bDłuto"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &bRzeźbienie"
+      - "&3Prawy przycisk zmienia dekoracyjne warianty bloków."
+      - "&3Shift + prawy przycisk obraca wstecz."
+      - "&fPospolita"
+      - "&6---------------"
+  katana:
+    fallback_name: "&9Katana"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &bParowanie"
+      - "&3Prawy przycisk otwiera krótkie okno parry."
+      - "&3Blokuje melee i odbija projectile."
+      - "&7Dwuręczna"
+      - "&9Rzadka"
+      - "&6---------------"
+  iron_wind_blade:
+    fallback_name: "&fŻelazne Ostrze Wiatru"
+    lore:
+      - "&6---------------"
+      - "&eSzybkie Cięcie"
+      - "&3Daje Speed I na 2s po trafieniu."
+      - "&fPospolita"
+      - "&6---------------"
+  diamond_wind_blade:
+    fallback_name: "&bDiamentowe Ostrze Wiatru"
+    lore:
+      - "&6---------------"
+      - "&eSzybkie Cięcie"
+      - "&3Daje Speed I podczas trzymania."
+      - "&bRzadka"
+      - "&6---------------"
+  netherite_wind_blade:
+    fallback_name: "&8Netherytowe Ostrze Wiatru"
+    lore:
+      - "&6---------------"
+      - "&eSzybkie Cięcie"
+      - "&3Daje Speed I podczas trzymania."
+      - "&3Daje Speed II na 3s po trafieniu."
+      - "&5Epicka"
+      - "&6---------------"
+  iron_scythe:
+    fallback_name: "&fŻelazna Kosa"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &aŻniwa"
+      - "&3Zbiera dojrzałe plony w obszarze 3x3."
+      - "&3Automatycznie przesadza z dropu lub ekwipunku."
+      - "&fPospolita"
+      - "&6---------------"
+  diamond_scythe:
+    fallback_name: "&bDiamentowa Kosa"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &aŻniwa"
+      - "&3Zbiera dojrzałe plony w obszarze 5x5."
+      - "&3Automatycznie przesadza z dropu lub ekwipunku."
+      - "&bRzadka"
+      - "&6---------------"
+  netherite_scythe:
+    fallback_name: "&8Netherytowa Kosa"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &aŻniwa"
+      - "&3Zbiera dojrzałe plony w obszarze 7x7."
+      - "&3Automatycznie przesadza z dropu lub ekwipunku."
+      - "&5Epicka"
+      - "&6---------------"

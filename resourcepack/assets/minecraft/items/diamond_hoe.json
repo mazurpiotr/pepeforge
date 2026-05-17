@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/diamond_hoe"
+    },
+    "entries": [
+      {
+        "threshold": 1002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "pepeforge:diamond_scythe/diamond_scythe"
+        }
+      }
+    ]
+  }
+}

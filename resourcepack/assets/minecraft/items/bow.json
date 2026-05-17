@@ -1,0 +1,55 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/bow"
+    },
+    "entries": [
+      {
+        "threshold": 1001,
+        "model": {
+          "type": "minecraft:condition",
+          "property": "minecraft:using_item",
+          "on_false": {
+            "type": "minecraft:model",
+            "model": "pepeforge:crescent_bow/crescent_bow"
+          },
+          "on_true": {
+            "type": "minecraft:range_dispatch",
+            "property": "minecraft:use_duration",
+            "remaining": false,
+            "entries": [
+              {
+                "threshold": 18,
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "pepeforge:crescent_bow/crescent_bow_pulling_2"
+                }
+              },
+              {
+                "threshold": 13,
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "pepeforge:crescent_bow/crescent_bow_pulling_1"
+                }
+              },
+              {
+                "threshold": 1,
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "pepeforge:crescent_bow/crescent_bow_pulling_0"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "pepeforge:crescent_bow/crescent_bow"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
