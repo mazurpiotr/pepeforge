@@ -18,7 +18,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "iron_scythe"),
             1001,
-            1
+            0
     ),
     DIAMOND(
             ItemIds.DIAMOND_SCYTHE,
@@ -33,7 +33,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "diamond_scythe"),
             1002,
-            2
+            1
     ),
     NETHERITE(
             ItemIds.NETHERITE_SCYTHE,
@@ -48,7 +48,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "netherite_scythe"),
             1003,
-            3
+            2
     );
 
     private final String itemId;

@@ -88,7 +88,7 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &aŻniwa"
-      - "&3Zbiera dojrzałe plony w obszarze 3x3."
+      - "&3Zbiera dojrzałe plony z jednego pola."
       - "&3Automatycznie przesadza z dropu lub ekwipunku."
       - "&fPospolita"
       - "&6---------------"
@@ -97,7 +97,7 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &aŻniwa"
-      - "&3Zbiera dojrzałe plony w obszarze 5x5."
+      - "&3Zbiera dojrzałe plony w obszarze 3x3."
       - "&3Automatycznie przesadza z dropu lub ekwipunku."
       - "&bRzadka"
       - "&6---------------"
@@ -106,7 +106,7 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &aŻniwa"
-      - "&3Zbiera dojrzałe plony w obszarze 7x7."
+      - "&3Zbiera dojrzałe plony w obszarze 5x5."
       - "&3Automatycznie przesadza z dropu lub ekwipunku."
       - "&5Epicka"
       - "&6---------------"
