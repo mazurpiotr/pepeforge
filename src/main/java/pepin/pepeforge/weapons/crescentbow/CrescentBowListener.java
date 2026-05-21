@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.weapons.crescent.CrescentMoonPower;
 
 public final class CrescentBowListener implements Listener {
 
@@ -40,6 +41,7 @@ public final class CrescentBowListener implements Listener {
             return;
         }
 
+        baseArrow.setDamage(Math.max(0.0D, baseArrow.getDamage() + CrescentMoonPower.getDamageModifier(player)));
         spawnSideArrow(player, baseArrow, CrescentBowDefinition.SIDE_ARROW_YAW_DEGREES);
         spawnSideArrow(player, baseArrow, -CrescentBowDefinition.SIDE_ARROW_YAW_DEGREES);
         damageBow(bow, 1);

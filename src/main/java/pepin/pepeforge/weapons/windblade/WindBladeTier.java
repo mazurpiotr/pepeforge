@@ -2,6 +2,8 @@ package pepin.pepeforge.weapons.windblade;
 
 import org.bukkit.Material;
 import pepin.pepeforge.item.ItemIds;
+import pepin.pepeforge.item.ItemNameColor;
+import pepin.pepeforge.item.ItemRarity;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -13,12 +15,10 @@ public enum WindBladeTier {
             ItemIds.IRON_WIND_BLADE,
             "iron_wind_blade",
             "item.pepeforge.iron_wind_blade",
-            "WHITE",
+            ItemNameColor.WHITE,
             5,
-            4,
-            "WHITE",
+            ItemRarity.COMMON,
             Material.IRON_SWORD,
-            Material.IRON_INGOT,
             1001,
             5.0,
             2.1,
@@ -30,12 +30,10 @@ public enum WindBladeTier {
             ItemIds.DIAMOND_WIND_BLADE,
             "diamond_wind_blade",
             "item.pepeforge.diamond_wind_blade",
-            "AQUA",
+            ItemNameColor.AQUA,
             5,
-            4,
-            "BLUE",
+            ItemRarity.RARE,
             Material.DIAMOND_SWORD,
-            Material.DIAMOND,
             1002,
             6.0,
             2.2,
@@ -47,12 +45,10 @@ public enum WindBladeTier {
             ItemIds.NETHERITE_WIND_BLADE,
             "netherite_wind_blade",
             "item.pepeforge.netherite_wind_blade",
-            "DARK_GRAY",
+            ItemNameColor.DARK_GRAY,
             6,
-            5,
-            "DARK_PURPLE",
+            ItemRarity.EPIC,
             Material.NETHERITE_SWORD,
-            Material.NETHERITE_INGOT,
             1003,
             7.0,
             2.2,
@@ -67,12 +63,10 @@ public enum WindBladeTier {
     private final String itemId;
     private final String langPath;
     private final String translationKeyBase;
-    private final String nameColorName;
+    private final ItemNameColor nameColor;
     private final int loreLineCount;
-    private final int rarityLoreLineIndex;
-    private final String rarityColorName;
+    private final ItemRarity rarity;
     private final Material baseMaterial;
-    private final Material recipeMaterial;
     private final int customModelData;
     private final double attackDamage;
     private final double attackSpeed;
@@ -84,12 +78,10 @@ public enum WindBladeTier {
             String itemId,
             String langPath,
             String translationKeyBase,
-            String nameColorName,
+            ItemNameColor nameColor,
             int loreLineCount,
-            int rarityLoreLineIndex,
-            String rarityColorName,
+            ItemRarity rarity,
             Material baseMaterial,
-            Material recipeMaterial,
             int customModelData,
             double attackDamage,
             double attackSpeed,
@@ -100,12 +92,10 @@ public enum WindBladeTier {
         this.itemId = itemId;
         this.langPath = langPath;
         this.translationKeyBase = translationKeyBase;
-        this.nameColorName = nameColorName;
+        this.nameColor = nameColor;
         this.loreLineCount = loreLineCount;
-        this.rarityLoreLineIndex = rarityLoreLineIndex;
-        this.rarityColorName = rarityColorName;
+        this.rarity = rarity;
         this.baseMaterial = baseMaterial;
-        this.recipeMaterial = recipeMaterial;
         this.customModelData = customModelData;
         this.attackDamage = attackDamage;
         this.attackSpeed = attackSpeed;
@@ -133,28 +123,20 @@ public enum WindBladeTier {
         return translationKeyBase;
     }
 
-    public String nameColorName() {
-        return nameColorName;
-    }
-
     public int loreLineCount() {
         return loreLineCount;
     }
 
-    public int rarityLoreLineIndex() {
-        return rarityLoreLineIndex;
+    public ItemNameColor nameColor() {
+        return nameColor;
     }
 
-    public String rarityColorName() {
-        return rarityColorName;
+    public ItemRarity rarity() {
+        return rarity;
     }
 
     public Material baseMaterial() {
         return baseMaterial;
-    }
-
-    public Material recipeMaterial() {
-        return recipeMaterial;
     }
 
     public int customModelData() {

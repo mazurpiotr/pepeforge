@@ -2,16 +2,17 @@ package pepin.pepeforge.weapons.katana;
 
 import org.bukkit.Material;
 import pepin.pepeforge.item.ItemIds;
+import pepin.pepeforge.item.ItemNameColor;
+import pepin.pepeforge.item.ItemRarity;
 
 public final class KatanaDefinition {
 
     public static final String ITEM_ID = ItemIds.KATANA;
     public static final String LANG_PATH = "katana";
     public static final String TRANSLATION_KEY_BASE = "item.pepeforge.katana";
-    public static final String NAME_COLOR_NAME = "BLUE";
+    public static final ItemNameColor NAME_COLOR = ItemNameColor.BLUE;
     public static final int LORE_LINE_COUNT = 7;
-    public static final int RARITY_LORE_LINE_INDEX = 6;
-    public static final String RARITY_COLOR_NAME = "BLUE";
+    public static final ItemRarity RARITY = ItemRarity.RARE;
 
     public static final Material BASE_MATERIAL = Material.IRON_SWORD;
     public static final int CUSTOM_MODEL_DATA = 1004;

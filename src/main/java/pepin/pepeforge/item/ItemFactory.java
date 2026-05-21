@@ -45,11 +45,11 @@ public final class ItemFactory {
         this.lang = lang;
     }
 
-    private void setItemNameBasedOnConfig(ItemMeta meta, String langPath, String translationKeyBase, String nameColorName) {
+    private void setItemNameBasedOnConfig(ItemMeta meta, String langPath, String translationKeyBase, ItemNameColor nameColor) {
         boolean useClientSide = plugin.getConfig().getBoolean("translations.use_client_side", true);
         if (useClientSide) {
-            ItemMetaCompat.setTranslatableItemNameIfSupported(meta, translationKeyBase + ".name", nameColorName);
-            ItemMetaCompat.setTranslatableDisplayNameIfSupported(meta, translationKeyBase + ".name", nameColorName);
+            ItemMetaCompat.setTranslatableItemNameIfSupported(meta, translationKeyBase + ".name", nameColor.colorName());
+            ItemMetaCompat.setTranslatableDisplayNameIfSupported(meta, translationKeyBase + ".name", nameColor.colorName());
         } else {
             String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
             String name = lang.getItemNameForLang(langPath, serverLang);
@@ -58,17 +58,21 @@ public final class ItemFactory {
         }
     }
 
-    private void setItemLoreBasedOnConfig(ItemMeta meta, String langPath, String translationKeyBase, int loreLineCount, Integer rarityLoreLineIndex, String rarityColorName) {
+    private void setItemLoreBasedOnConfig(ItemMeta meta, String langPath, String translationKeyBase, int loreLineCount, ItemRarity rarity) {
         boolean useClientSide = plugin.getConfig().getBoolean("translations.use_client_side", true);
         if (useClientSide) {
             List<String> loreKeys = buildLoreKeys(translationKeyBase, loreLineCount);
-            List<String> loreColors = buildLoreColors(loreLineCount, rarityLoreLineIndex, rarityColorName);
+            List<String> loreColors = buildLoreColors(loreLineCount, rarity);
             ItemMetaCompat.setTranslatableLoreIfSupported(meta, loreKeys, loreColors);
         } else {
             String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
             List<String> lore = trimLore(lang.getItemLoreForLang(langPath, serverLang), loreLineCount);
             ItemMetaCompat.setLore(meta, lore);
         }
+    }
+
+    private boolean useClientSideTranslations() {
+        return plugin.getConfig().getBoolean("translations.use_client_side", true);
     }
 
     public ItemStack createWindBlade(WindBladeTier tier) {
@@ -84,12 +88,14 @@ public final class ItemFactory {
         ItemMetaCompat.setCustomModelData(meta, tier.customModelData());
         ItemMetaCompat.addMainHandAttribute(meta, Attribute.ATTACK_DAMAGE, tier.itemId() + "_attack_damage", tier.attackDamage());
         ItemMetaCompat.addMainHandAttribute(meta, Attribute.ATTACK_SPEED, tier.itemId() + "_attack_speed", tier.attackSpeed());
-        setItemNameBasedOnConfig(meta, tier.langPath(), tier.translationKeyBase(), tier.nameColorName());
-        setItemLoreBasedOnConfig(meta, tier.langPath(), tier.translationKeyBase(), tier.loreLineCount(), tier.rarityLoreLineIndex(), tier.rarityColorName());
+        setItemNameBasedOnConfig(meta, tier.langPath(), tier.translationKeyBase(), tier.nameColor());
+        setItemLoreBasedOnConfig(meta, tier.langPath(), tier.translationKeyBase(), tier.loreLineCount(), tier.rarity());
 
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, tier.itemId());
         item.setItemMeta(meta);
-        ItemMetaCompat.applyTranslatableItemTextDataIfSupported(item, tier.translationKeyBase() + ".name", tier.nameColorName(), buildLoreKeys(tier.translationKeyBase(), tier.loreLineCount()), buildLoreColors(tier.loreLineCount(), tier.rarityLoreLineIndex(), tier.rarityColorName()));
+        if (useClientSideTranslations()) {
+            ItemMetaCompat.applyTranslatableItemTextDataIfSupported(item, tier.translationKeyBase() + ".name", tier.nameColor().colorName(), buildLoreKeys(tier.translationKeyBase(), tier.loreLineCount()), buildLoreColors(tier.loreLineCount(), tier.rarity()));
+        }
         return item;
     }
 
@@ -104,18 +110,20 @@ public final class ItemFactory {
         ItemMetaCompat.setDisplayName(meta, fallbackName);
         ItemMetaCompat.setLore(meta, fallbackLore);
         ItemMetaCompat.setCustomModelData(meta, CrescentBowDefinition.CUSTOM_MODEL_DATA);
-        setItemNameBasedOnConfig(meta, CrescentBowDefinition.LANG_PATH, CrescentBowDefinition.TRANSLATION_KEY_BASE, CrescentBowDefinition.NAME_COLOR_NAME);
-        setItemLoreBasedOnConfig(meta, CrescentBowDefinition.LANG_PATH, CrescentBowDefinition.TRANSLATION_KEY_BASE, CrescentBowDefinition.LORE_LINE_COUNT, CrescentBowDefinition.RARITY_LORE_LINE_INDEX, CrescentBowDefinition.RARITY_COLOR_NAME);
+        setItemNameBasedOnConfig(meta, CrescentBowDefinition.LANG_PATH, CrescentBowDefinition.TRANSLATION_KEY_BASE, CrescentBowDefinition.NAME_COLOR);
+        setItemLoreBasedOnConfig(meta, CrescentBowDefinition.LANG_PATH, CrescentBowDefinition.TRANSLATION_KEY_BASE, CrescentBowDefinition.LORE_LINE_COUNT, CrescentBowDefinition.RARITY);
 
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, CrescentBowDefinition.ITEM_ID);
         item.setItemMeta(meta);
-        ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
-                item,
-                CrescentBowDefinition.TRANSLATION_KEY_BASE + ".name",
-                CrescentBowDefinition.NAME_COLOR_NAME,
-                buildLoreKeys(CrescentBowDefinition.TRANSLATION_KEY_BASE, CrescentBowDefinition.LORE_LINE_COUNT),
-                buildLoreColors(CrescentBowDefinition.LORE_LINE_COUNT, CrescentBowDefinition.RARITY_LORE_LINE_INDEX, CrescentBowDefinition.RARITY_COLOR_NAME)
-        );
+        if (useClientSideTranslations()) {
+            ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
+                    item,
+                    CrescentBowDefinition.TRANSLATION_KEY_BASE + ".name",
+                    CrescentBowDefinition.NAME_COLOR.colorName(),
+                    buildLoreKeys(CrescentBowDefinition.TRANSLATION_KEY_BASE, CrescentBowDefinition.LORE_LINE_COUNT),
+                    buildLoreColors(CrescentBowDefinition.LORE_LINE_COUNT, CrescentBowDefinition.RARITY)
+            );
+        }
         return item;
     }
 
@@ -130,18 +138,20 @@ public final class ItemFactory {
         ItemMetaCompat.setDisplayName(meta, fallbackName);
         ItemMetaCompat.setLore(meta, fallbackLore);
         ItemMetaCompat.setCustomModelData(meta, CrescentSpearDefinition.CUSTOM_MODEL_DATA);
-        setItemNameBasedOnConfig(meta, CrescentSpearDefinition.LANG_PATH, CrescentSpearDefinition.TRANSLATION_KEY_BASE, CrescentSpearDefinition.NAME_COLOR_NAME);
-        setItemLoreBasedOnConfig(meta, CrescentSpearDefinition.LANG_PATH, CrescentSpearDefinition.TRANSLATION_KEY_BASE, CrescentSpearDefinition.LORE_LINE_COUNT, CrescentSpearDefinition.RARITY_LORE_LINE_INDEX, CrescentSpearDefinition.RARITY_COLOR_NAME);
+        setItemNameBasedOnConfig(meta, CrescentSpearDefinition.LANG_PATH, CrescentSpearDefinition.TRANSLATION_KEY_BASE, CrescentSpearDefinition.NAME_COLOR);
+        setItemLoreBasedOnConfig(meta, CrescentSpearDefinition.LANG_PATH, CrescentSpearDefinition.TRANSLATION_KEY_BASE, CrescentSpearDefinition.LORE_LINE_COUNT, CrescentSpearDefinition.RARITY);
 
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, CrescentSpearDefinition.ITEM_ID);
         item.setItemMeta(meta);
-        ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
-                item,
-                CrescentSpearDefinition.TRANSLATION_KEY_BASE + ".name",
-                CrescentSpearDefinition.NAME_COLOR_NAME,
-                buildLoreKeys(CrescentSpearDefinition.TRANSLATION_KEY_BASE, CrescentSpearDefinition.LORE_LINE_COUNT),
-                buildLoreColors(CrescentSpearDefinition.LORE_LINE_COUNT, CrescentSpearDefinition.RARITY_LORE_LINE_INDEX, CrescentSpearDefinition.RARITY_COLOR_NAME)
-        );
+        if (useClientSideTranslations()) {
+            ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
+                    item,
+                    CrescentSpearDefinition.TRANSLATION_KEY_BASE + ".name",
+                    CrescentSpearDefinition.NAME_COLOR.colorName(),
+                    buildLoreKeys(CrescentSpearDefinition.TRANSLATION_KEY_BASE, CrescentSpearDefinition.LORE_LINE_COUNT),
+                    buildLoreColors(CrescentSpearDefinition.LORE_LINE_COUNT, CrescentSpearDefinition.RARITY)
+            );
+        }
         return item;
     }
 
@@ -156,18 +166,20 @@ public final class ItemFactory {
         ItemMetaCompat.setDisplayName(meta, fallbackName);
         ItemMetaCompat.setLore(meta, fallbackLore);
         ItemMetaCompat.setCustomModelData(meta, ChiselDefinition.CUSTOM_MODEL_DATA);
-        setItemNameBasedOnConfig(meta, ChiselDefinition.LANG_PATH, ChiselDefinition.TRANSLATION_KEY_BASE, ChiselDefinition.NAME_COLOR_NAME);
-        setItemLoreBasedOnConfig(meta, ChiselDefinition.LANG_PATH, ChiselDefinition.TRANSLATION_KEY_BASE, ChiselDefinition.LORE_LINE_COUNT, ChiselDefinition.RARITY_LORE_LINE_INDEX, ChiselDefinition.RARITY_COLOR_NAME);
+        setItemNameBasedOnConfig(meta, ChiselDefinition.LANG_PATH, ChiselDefinition.TRANSLATION_KEY_BASE, ChiselDefinition.NAME_COLOR);
+        setItemLoreBasedOnConfig(meta, ChiselDefinition.LANG_PATH, ChiselDefinition.TRANSLATION_KEY_BASE, ChiselDefinition.LORE_LINE_COUNT, ChiselDefinition.RARITY);
 
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, ChiselDefinition.ITEM_ID);
         item.setItemMeta(meta);
-        ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
-                item,
-                ChiselDefinition.TRANSLATION_KEY_BASE + ".name",
-                ChiselDefinition.NAME_COLOR_NAME,
-                buildLoreKeys(ChiselDefinition.TRANSLATION_KEY_BASE, ChiselDefinition.LORE_LINE_COUNT),
-                buildLoreColors(ChiselDefinition.LORE_LINE_COUNT, ChiselDefinition.RARITY_LORE_LINE_INDEX, ChiselDefinition.RARITY_COLOR_NAME)
-        );
+        if (useClientSideTranslations()) {
+            ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
+                    item,
+                    ChiselDefinition.TRANSLATION_KEY_BASE + ".name",
+                    ChiselDefinition.NAME_COLOR.colorName(),
+                    buildLoreKeys(ChiselDefinition.TRANSLATION_KEY_BASE, ChiselDefinition.LORE_LINE_COUNT),
+                    buildLoreColors(ChiselDefinition.LORE_LINE_COUNT, ChiselDefinition.RARITY)
+            );
+        }
         return item;
     }
 
@@ -185,18 +197,20 @@ public final class ItemFactory {
         ItemMetaCompat.addMainHandAttribute(meta, Attribute.ATTACK_DAMAGE, KatanaDefinition.ITEM_ID + "_attack_damage", KatanaDefinition.ATTACK_DAMAGE);
         ItemMetaCompat.addMainHandAttribute(meta, Attribute.ATTACK_SPEED, KatanaDefinition.ITEM_ID + "_attack_speed", KatanaDefinition.ATTACK_SPEED);
         ItemMetaCompat.addMainHandAttribute(meta, Attribute.ENTITY_INTERACTION_RANGE, KatanaDefinition.ITEM_ID + "_attack_range", KatanaDefinition.ATTACK_RANGE_BONUS);
-        setItemNameBasedOnConfig(meta, KatanaDefinition.LANG_PATH, KatanaDefinition.TRANSLATION_KEY_BASE, KatanaDefinition.NAME_COLOR_NAME);
-        setItemLoreBasedOnConfig(meta, KatanaDefinition.LANG_PATH, KatanaDefinition.TRANSLATION_KEY_BASE, KatanaDefinition.LORE_LINE_COUNT, KatanaDefinition.RARITY_LORE_LINE_INDEX, KatanaDefinition.RARITY_COLOR_NAME);
+        setItemNameBasedOnConfig(meta, KatanaDefinition.LANG_PATH, KatanaDefinition.TRANSLATION_KEY_BASE, KatanaDefinition.NAME_COLOR);
+        setItemLoreBasedOnConfig(meta, KatanaDefinition.LANG_PATH, KatanaDefinition.TRANSLATION_KEY_BASE, KatanaDefinition.LORE_LINE_COUNT, KatanaDefinition.RARITY);
 
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, KatanaDefinition.ITEM_ID);
         item.setItemMeta(meta);
-        ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
-                item,
-                KatanaDefinition.TRANSLATION_KEY_BASE + ".name",
-                KatanaDefinition.NAME_COLOR_NAME,
-                buildLoreKeys(KatanaDefinition.TRANSLATION_KEY_BASE, KatanaDefinition.LORE_LINE_COUNT),
-                buildLoreColors(KatanaDefinition.LORE_LINE_COUNT, KatanaDefinition.RARITY_LORE_LINE_INDEX, KatanaDefinition.RARITY_COLOR_NAME)
-        );
+        if (useClientSideTranslations()) {
+            ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
+                    item,
+                    KatanaDefinition.TRANSLATION_KEY_BASE + ".name",
+                    KatanaDefinition.NAME_COLOR.colorName(),
+                    buildLoreKeys(KatanaDefinition.TRANSLATION_KEY_BASE, KatanaDefinition.LORE_LINE_COUNT),
+                    buildLoreColors(KatanaDefinition.LORE_LINE_COUNT, KatanaDefinition.RARITY)
+            );
+        }
         return item;
     }
 
@@ -212,12 +226,14 @@ public final class ItemFactory {
         ItemMetaCompat.setLore(meta, fallbackLore);
         ItemMetaCompat.setCustomModelData(meta, tier.customModelData());
         ItemMetaCompat.setItemModelIfSupported(meta, tier.modelKey());
-        setItemNameBasedOnConfig(meta, tier.langPath(), tier.translationKeyBase(), tier.nameColorName());
-        setItemLoreBasedOnConfig(meta, tier.langPath(), tier.translationKeyBase(), tier.loreLineCount(), tier.rarityLoreLineIndex(), tier.rarityColorName());
+        setItemNameBasedOnConfig(meta, tier.langPath(), tier.translationKeyBase(), tier.nameColor());
+        setItemLoreBasedOnConfig(meta, tier.langPath(), tier.translationKeyBase(), tier.loreLineCount(), tier.rarity());
 
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, tier.itemId());
         item.setItemMeta(meta);
-        ItemMetaCompat.applyTranslatableItemTextDataIfSupported(item, tier.translationKeyBase() + ".name", tier.nameColorName(), buildLoreKeys(tier.translationKeyBase(), tier.loreLineCount()), buildLoreColors(tier.loreLineCount(), tier.rarityLoreLineIndex(), tier.rarityColorName()));
+        if (useClientSideTranslations()) {
+            ItemMetaCompat.applyTranslatableItemTextDataIfSupported(item, tier.translationKeyBase() + ".name", tier.nameColor().colorName(), buildLoreKeys(tier.translationKeyBase(), tier.loreLineCount()), buildLoreColors(tier.loreLineCount(), tier.rarity()));
+        }
         return item;
     }
 
@@ -433,10 +449,11 @@ public final class ItemFactory {
         return new ArrayList<>(lore.subList(0, maxLines));
     }
 
-    private List<String> buildLoreColors(int loreLineCount, int rarityLoreLineIndex, String rarityColorName) {
+    private List<String> buildLoreColors(int loreLineCount, ItemRarity rarity) {
         List<String> colors = new ArrayList<>(loreLineCount);
+        int rarityLoreLineNumber = loreLineCount - 1;
         for (int i = 1; i <= loreLineCount; i++) {
-            colors.add(i == rarityLoreLineIndex ? rarityColorName : null);
+            colors.add(i == rarityLoreLineNumber ? rarity.colorName() : null);
         }
         return colors;
     }

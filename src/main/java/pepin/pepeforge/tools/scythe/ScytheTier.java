@@ -3,16 +3,17 @@ package pepin.pepeforge.tools.scythe;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import pepin.pepeforge.item.ItemIds;
+import pepin.pepeforge.item.ItemNameColor;
+import pepin.pepeforge.item.ItemRarity;
 
 public enum ScytheTier {
     IRON(
             ItemIds.IRON_SCYTHE,
             "iron_scythe",
             "item.pepeforge.iron_scythe",
-            "WHITE",
+            ItemNameColor.WHITE,
             6,
-            5,
-            "WHITE",
+            ItemRarity.COMMON,
             Material.IRON_HOE,
             Material.IRON_INGOT,
             Material.STICK,
@@ -24,10 +25,9 @@ public enum ScytheTier {
             ItemIds.DIAMOND_SCYTHE,
             "diamond_scythe",
             "item.pepeforge.diamond_scythe",
-            "AQUA",
+            ItemNameColor.AQUA,
             6,
-            5,
-            "BLUE",
+            ItemRarity.RARE,
             Material.DIAMOND_HOE,
             Material.DIAMOND,
             Material.STICK,
@@ -39,10 +39,9 @@ public enum ScytheTier {
             ItemIds.NETHERITE_SCYTHE,
             "netherite_scythe",
             "item.pepeforge.netherite_scythe",
-            "DARK_GRAY",
+            ItemNameColor.DARK_GRAY,
             6,
-            5,
-            "DARK_PURPLE",
+            ItemRarity.EPIC,
             Material.NETHERITE_HOE,
             Material.NETHERITE_INGOT,
             Material.STICK,
@@ -54,10 +53,9 @@ public enum ScytheTier {
     private final String itemId;
     private final String langPath;
     private final String translationKeyBase;
-    private final String nameColorName;
+    private final ItemNameColor nameColor;
     private final int loreLineCount;
-    private final int rarityLoreLineIndex;
-    private final String rarityColorName;
+    private final ItemRarity rarity;
     private final Material baseMaterial;
     private final Material bladeMaterial;
     private final Material handleMaterial;
@@ -69,10 +67,9 @@ public enum ScytheTier {
             String itemId,
             String langPath,
             String translationKeyBase,
-            String nameColorName,
+            ItemNameColor nameColor,
             int loreLineCount,
-            int rarityLoreLineIndex,
-            String rarityColorName,
+            ItemRarity rarity,
             Material baseMaterial,
             Material bladeMaterial,
             Material handleMaterial,
@@ -83,10 +80,9 @@ public enum ScytheTier {
         this.itemId = itemId;
         this.langPath = langPath;
         this.translationKeyBase = translationKeyBase;
-        this.nameColorName = nameColorName;
+        this.nameColor = nameColor;
         this.loreLineCount = loreLineCount;
-        this.rarityLoreLineIndex = rarityLoreLineIndex;
-        this.rarityColorName = rarityColorName;
+        this.rarity = rarity;
         this.baseMaterial = baseMaterial;
         this.bladeMaterial = bladeMaterial;
         this.handleMaterial = handleMaterial;
@@ -107,20 +103,16 @@ public enum ScytheTier {
         return translationKeyBase;
     }
 
-    public String nameColorName() {
-        return nameColorName;
-    }
-
     public int loreLineCount() {
         return loreLineCount;
     }
 
-    public int rarityLoreLineIndex() {
-        return rarityLoreLineIndex;
+    public ItemNameColor nameColor() {
+        return nameColor;
     }
 
-    public String rarityColorName() {
-        return rarityColorName;
+    public ItemRarity rarity() {
+        return rarity;
     }
 
     public Material baseMaterial() {

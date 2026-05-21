@@ -12,6 +12,10 @@ import pepin.pepeforge.item.ItemFactory;
 
 public final class WindBladeRecipes {
 
+    private static final Material IRON_RECIPE_MATERIAL = Material.IRON_INGOT;
+    private static final Material DIAMOND_RECIPE_MATERIAL = Material.DIAMOND;
+    private static final Material BREEZE_CORE_MATERIAL = Material.BREEZE_ROD;
+
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
 
@@ -47,8 +51,8 @@ public final class WindBladeRecipes {
          * [ ][B][ ]
          */
         recipe.shape(" M ", " M ", " B ");
-        recipe.setIngredient('M', tier.recipeMaterial());
-        recipe.setIngredient('B', Material.BREEZE_ROD);
+        recipe.setIngredient('M', recipeMaterialFor(tier));
+        recipe.setIngredient('B', BREEZE_CORE_MATERIAL);
         plugin.getServer().addRecipe(recipe);
     }
 
@@ -69,5 +73,13 @@ public final class WindBladeRecipes {
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_INGOT)
         );
         plugin.getServer().addRecipe(recipe);
+    }
+
+    private Material recipeMaterialFor(WindBladeTier tier) {
+        return switch (tier) {
+            case IRON -> IRON_RECIPE_MATERIAL;
+            case DIAMOND -> DIAMOND_RECIPE_MATERIAL;
+            case NETHERITE -> Material.NETHERITE_INGOT;
+        };
     }
 }

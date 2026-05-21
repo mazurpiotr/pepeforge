@@ -33,7 +33,8 @@ public final class CrescentBowRecipeDiscoveryListener implements Listener {
     private void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
         if (inventory.contains(Material.BOW)
-                && inventory.contains(Material.BREEZE_ROD)
+                && inventory.contains(Material.AMETHYST_SHARD)
+                && inventory.contains(Material.STICK)
                 && inventory.contains(Material.PHANTOM_MEMBRANE)) {
             player.discoverRecipe(CrescentBowRecipeKeys.CRESCENT_BOW);
         }

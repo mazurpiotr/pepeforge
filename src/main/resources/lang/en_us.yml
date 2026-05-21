@@ -18,25 +18,26 @@ messages:
   katana:
     cooldown: "&cKatana recharging... {bar} &7{seconds}s"
   crescent_spear:
-    combo: "&bCrescent combo {hits} {bar} &7{seconds}s"
-    proc: "&bCrescent combo {hits} {bar} &fLaunch!"
+    charge: "&dMoon charge {bar}"
+    ready: "&dMoon charge ready! &fNext strike empowered {bar}"
 items:
   crescent_bow:
     fallback_name: "&bCrescent Bow"
     lore:
       - "&6---------------"
-      - "&eCrescent Volley"
+      - "&eAbility: &dCrescent Volley"
       - "&3Fires a 3-arrow crescent spread."
       - "&3Consumes one arrow per volley."
+      - "&3Deals 1 less damage by day, but 2 bonus damage under moonlight."
       - "&5Epic"
       - "&6---------------"
   crescent_spear:
     fallback_name: "&bCrescent Spear"
     lore:
       - "&6---------------"
-      - "&eAbility: &bCrescent Launch"
-      - "&3Every third strike deals bonus damage and launches the target upward."
-      - "&3Gain Speed I for 15s after a launch."
+      - "&eAbility: &dMoonlit Flurry"
+      - "&3Hits charge an empowered strike. A charged attack unleashes 3 rapid slashes."
+      - "&3Deals 1 less damage by day, but 2 bonus damage under moonlight."
       - "&5Epic"
       - "&6---------------"
   chisel:
@@ -62,7 +63,7 @@ items:
     fallback_name: "&fIron Wind Blade"
     lore:
       - "&6---------------"
-      - "&eSwift Strike"
+      - "&eAbility: &bSwift Strike"
       - "&3Gain Speed I for 2s after hitting."
       - "&fCommon"
       - "&6---------------"
@@ -70,7 +71,7 @@ items:
     fallback_name: "&bDiamond Wind Blade"
     lore:
       - "&6---------------"
-      - "&eSwift Strike"
+      - "&eAbility: &bSwift Strike"
       - "&3Gain Speed I while holding."
       - "&bRare"
       - "&6---------------"
@@ -78,7 +79,7 @@ items:
     fallback_name: "&8Netherite Wind Blade"
     lore:
       - "&6---------------"
-      - "&eSwift Strike"
+      - "&eAbility: &bSwift Strike"
       - "&3Gain Speed I while holding."
       - "&3Gain Speed II for 3s after hitting."
       - "&5Epic"
@@ -87,7 +88,7 @@ items:
     fallback_name: "&fIron Scythe"
     lore:
       - "&6---------------"
-      - "&eSweep Harvest"
+      - "&eAbility: &aSweep Harvest"
       - "&31x1 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."
@@ -97,7 +98,7 @@ items:
     fallback_name: "&bDiamond Scythe"
     lore:
       - "&6---------------"
-      - "&eSweep Harvest"
+      - "&eAbility: &aSweep Harvest"
       - "&33x3 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."
@@ -107,7 +108,7 @@ items:
     fallback_name: "&8Netherite Scythe"
     lore:
       - "&6---------------"
-      - "&eSweep Harvest"
+      - "&eAbility: &aSweep Harvest"
       - "&35x5 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."

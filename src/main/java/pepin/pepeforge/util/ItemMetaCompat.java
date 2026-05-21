@@ -6,6 +6,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Constructor;
@@ -41,24 +42,16 @@ public final class ItemMetaCompat {
     }
 
     public static void setCustomModelData(ItemMeta meta, int value) {
-        meta.setCustomModelData(value);
+        CustomModelDataComponent component = meta.getCustomModelDataComponent();
+        component.setFloats(List.of((float) value));
+        meta.setCustomModelDataComponent(component);
     }
 
     public static String readCustomModelData(ItemMeta meta) {
-        try {
-            Method hasComponent = meta.getClass().getMethod("hasCustomModelDataComponent");
-            boolean present = (boolean) hasComponent.invoke(meta);
-            if (!present) {
-                return meta.hasCustomModelData() ? String.valueOf(meta.getCustomModelData()) : "-";
-            }
-            Method getComponent = meta.getClass().getMethod("getCustomModelDataComponent");
-            Object component = getComponent.invoke(meta);
-            Method getFloats = component.getClass().getMethod("getFloats");
-            Object floats = getFloats.invoke(component);
-            return String.valueOf(floats);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-            return meta.hasCustomModelData() ? String.valueOf(meta.getCustomModelData()) : "-";
+        if (!meta.hasCustomModelDataComponent()) {
+            return "-";
         }
+        return String.valueOf(meta.getCustomModelDataComponent().getFloats());
     }
 
     public static String readItemModel(ItemMeta meta) {

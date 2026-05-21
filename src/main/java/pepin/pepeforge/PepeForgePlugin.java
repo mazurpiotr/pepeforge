@@ -14,6 +14,7 @@ import pepin.pepeforge.tools.scythe.ScytheRecipes;
 import pepin.pepeforge.weapons.katana.KatanaListener;
 import pepin.pepeforge.weapons.katana.KatanaRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.katana.KatanaRecipes;
+import pepin.pepeforge.weapons.crescent.CrescentMoonGlow;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearListener;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearRecipes;
@@ -71,6 +72,8 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new WindBladeRecipeDiscoveryListener(this, itemFactory), this);
         getServer().getPluginManager().registerEvents(new CrescentBowListener(itemFactory), this);
         getServer().getPluginManager().registerEvents(new CrescentBowRecipeDiscoveryListener(this), this);
+        CrescentMoonGlow crescentMoonGlow = new CrescentMoonGlow(this, itemFactory);
+        crescentMoonGlow.startTask();
         CrescentSpearListener crescentSpearListener = new CrescentSpearListener(this, itemFactory, lang);
         crescentSpearListener.startStatusTask();
         getServer().getPluginManager().registerEvents(crescentSpearListener, this);

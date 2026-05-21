@@ -8,6 +8,10 @@ import pepin.pepeforge.item.ItemFactory;
 
 public final class CrescentBowRecipes {
 
+    private static final Material CURVE_MATERIAL = Material.PHANTOM_MEMBRANE;
+    private static final Material CORE_MATERIAL = Material.AMETHYST_SHARD;
+    private static final Material HANDLE_MATERIAL = Material.STICK;
+
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
 
@@ -31,9 +35,9 @@ public final class CrescentBowRecipes {
          * [P][A][S]
          */
         recipe.shape("PAS", "P A", "PAS");
-        recipe.setIngredient('P', Material.PHANTOM_MEMBRANE);
-        recipe.setIngredient('A', Material.AMETHYST_SHARD);
-        recipe.setIngredient('S', Material.STICK);
+        recipe.setIngredient('P', CURVE_MATERIAL);
+        recipe.setIngredient('A', CORE_MATERIAL);
+        recipe.setIngredient('S', HANDLE_MATERIAL);
         plugin.getServer().addRecipe(recipe);
 
         ShapedRecipe mirroredRecipe = new ShapedRecipe(CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED, itemFactory.createCrescentBow());
@@ -43,9 +47,9 @@ public final class CrescentBowRecipes {
          * [S][A][P]
          */
         mirroredRecipe.shape("SAP", "A P", "SAP");
-        mirroredRecipe.setIngredient('P', Material.PHANTOM_MEMBRANE);
-        mirroredRecipe.setIngredient('A', Material.AMETHYST_SHARD);
-        mirroredRecipe.setIngredient('S', Material.STICK);
+        mirroredRecipe.setIngredient('P', CURVE_MATERIAL);
+        mirroredRecipe.setIngredient('A', CORE_MATERIAL);
+        mirroredRecipe.setIngredient('S', HANDLE_MATERIAL);
         plugin.getServer().addRecipe(mirroredRecipe);
     }
 

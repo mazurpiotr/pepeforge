@@ -3,9 +3,11 @@ package pepin.pepeforge.weapons.crescentspear;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -16,30 +18,31 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.weapons.crescent.CrescentMoonPower;
 
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.UUID;
 
 public final class CrescentSpearListener implements Listener {
 
-    private static final long COMBO_WINDOW_MILLIS = CrescentSpearDefinition.COMBO_WINDOW_TICKS * 50L;
-    private static final long PROC_FEEDBACK_MILLIS = CrescentSpearDefinition.PROC_FEEDBACK_TICKS * 50L;
-    private static final int COMBO_BAR_SEGMENTS = 20;
+    private static final int CHARGE_BAR_SEGMENTS = 20;
+    private static final double ACTIVE_FRONT_ARC_DOT = 0.5D;
 
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final PluginLang lang;
-    private final Map<UUID, Integer> hitCounter = new HashMap<>();
-    private final Map<UUID, Long> lastHitAt = new HashMap<>();
+    private final Map<UUID, Integer> charge = new HashMap<>();
+    private final Map<UUID, Long> lastChargeGainTick = new HashMap<>();
     private final Map<UUID, Long> lastCountedTick = new HashMap<>();
-    private final Map<UUID, Long> procUntil = new HashMap<>();
+    private final Map<UUID, Long> specialAttackUntilTick = new HashMap<>();
+    private final Set<UUID> armedPlayers = new HashSet<>();
 
     public CrescentSpearListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
         this.plugin = plugin;
@@ -49,39 +52,39 @@ public final class CrescentSpearListener implements Listener {
 
     public void startStatusTask() {
         plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
-            long now = System.currentTimeMillis();
             for (Player player : plugin.getServer().getOnlinePlayers()) {
-                if (!itemFactory.isCrescentSpear(player.getInventory().getItemInMainHand())) {
-                    continue;
-                }
-
                 UUID playerId = player.getUniqueId();
-                long procUntilMillis = procUntil.getOrDefault(playerId, 0L);
-                if (procUntilMillis > now) {
-                    showProcActionBar(player, procUntilMillis - now);
-                    continue;
-                }
-                procUntil.remove(playerId);
-
-                int comboCount = hitCounter.getOrDefault(playerId, 0);
-                if (comboCount <= 0) {
-                    continue;
-                }
-
-                long lastHitMillis = lastHitAt.getOrDefault(playerId, 0L);
-                long elapsed = now - lastHitMillis;
-                if (elapsed > COMBO_WINDOW_MILLIS) {
-                    hitCounter.remove(playerId);
-                    lastHitAt.remove(playerId);
-                    continue;
+                int currentCharge = charge.getOrDefault(playerId, 0);
+                boolean armed = armedPlayers.contains(playerId);
+                boolean holdingSpear = itemFactory.isCrescentSpear(player.getInventory().getItemInMainHand());
+                if (holdingSpear) {
+                    if (armed) {
+                        showReadyActionBar(player);
+                    } else if (currentCharge > 0) {
+                        showChargeActionBar(player, currentCharge);
+                    }
                 }
 
-                showComboActionBar(player, comboCount, COMBO_WINDOW_MILLIS - elapsed);
+                if (currentCharge > 0 && !armed) {
+                    long currentTick = player.getWorld().getGameTime();
+                    long lastGainTick = lastChargeGainTick.getOrDefault(playerId, Long.MIN_VALUE);
+                    if (currentTick - lastGainTick < CrescentSpearDefinition.CHARGE_DECAY_DELAY_TICKS) {
+                        continue;
+                    }
+
+                    int decayedCharge = Math.max(0, currentCharge - CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL);
+                    if (decayedCharge == 0) {
+                        charge.remove(playerId);
+                        lastChargeGainTick.remove(playerId);
+                    } else {
+                        charge.put(playerId, decayedCharge);
+                    }
+                }
             }
-        }, 1L, 2L);
+        }, 1L, CrescentSpearDefinition.STATUS_INTERVAL_TICKS);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) {
             return;
@@ -93,105 +96,192 @@ public final class CrescentSpearListener implements Listener {
         }
 
         Entity target = event.getEntity();
-        if (!(target instanceof LivingEntity livingTarget) || target == player) {
+        if (!(target instanceof LivingEntity) || target == player) {
             return;
         }
 
+        event.setDamage(Math.max(0.0D, event.getDamage() + CrescentMoonPower.getDamageModifier(player)));
+
         UUID playerId = player.getUniqueId();
         long currentTick = player.getWorld().getGameTime();
+        long specialUntilTick = specialAttackUntilTick.getOrDefault(playerId, -1L);
+        if (specialUntilTick >= currentTick) {
+            return;
+        }
+        specialAttackUntilTick.remove(playerId);
+
+        if (armedPlayers.remove(playerId)) {
+            charge.remove(playerId);
+            lastChargeGainTick.remove(playerId);
+            triggerActiveSkill(player);
+            return;
+        }
+
         Long previousTick = lastCountedTick.get(playerId);
         // One spear swing can clip multiple targets in the same tick. Count it once
-        // so the combo cannot jump several steps from a single attack animation.
+        // so the charge meter cannot jump several steps from one attack animation.
         if (previousTick != null && previousTick == currentTick) {
             return;
         }
 
-        long now = System.currentTimeMillis();
-        long lastHitMillis = lastHitAt.getOrDefault(playerId, 0L);
-
-        int comboCount;
-        if (now - lastHitMillis > COMBO_WINDOW_MILLIS) {
-            comboCount = 1;
-        } else {
-            comboCount = hitCounter.getOrDefault(playerId, 0) + 1;
-        }
-
-        hitCounter.put(playerId, comboCount);
-        lastHitAt.put(playerId, now);
         lastCountedTick.put(playerId, currentTick);
-        if (comboCount < CrescentSpearDefinition.HIT_COMBO_TRIGGER) {
-            return;
-        }
+        lastChargeGainTick.put(playerId, currentTick);
+        int nextCharge = Math.min(
+                CrescentSpearDefinition.CHARGE_MAX,
+                charge.getOrDefault(playerId, 0) + CrescentSpearDefinition.CHARGE_PER_HIT
+        );
+        charge.put(playerId, nextCharge);
 
-        event.setDamage(event.getDamage() + CrescentSpearDefinition.PROC_DAMAGE_BONUS);
-        hitCounter.remove(playerId);
-        lastHitAt.remove(playerId);
-        procUntil.put(playerId, now + PROC_FEEDBACK_MILLIS);
-        launchTarget(livingTarget);
-        applySpeedIfBetter(player);
-        playLaunchEffects(player.getWorld(), livingTarget);
+        if (nextCharge >= CrescentSpearDefinition.CHARGE_MAX) {
+            armedPlayers.add(playerId);
+            showReadyActionBar(player);
+        } else {
+            showChargeActionBar(player, nextCharge);
+        }
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
-        hitCounter.remove(playerId);
-        lastHitAt.remove(playerId);
+        charge.remove(playerId);
+        lastChargeGainTick.remove(playerId);
         lastCountedTick.remove(playerId);
-        procUntil.remove(playerId);
+        specialAttackUntilTick.remove(playerId);
+        armedPlayers.remove(playerId);
     }
 
-    private void launchTarget(LivingEntity target) {
-        Vector velocity = target.getVelocity().clone();
-        velocity.setY(Math.max(velocity.getY(), CrescentSpearDefinition.LAUNCH_UPWARD_VELOCITY));
-        target.setVelocity(velocity);
-    }
+    private void triggerActiveSkill(Player player) {
+        Location effectPoint = player.getEyeLocation().add(player.getLocation().getDirection().normalize().multiply(CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE));
 
-    private void applySpeedIfBetter(Player player) {
-        PotionEffect candidate = new PotionEffect(
-                PotionEffectType.SPEED,
-                CrescentSpearDefinition.SPEED_DURATION_TICKS,
-                CrescentSpearDefinition.SPEED_AMPLIFIER,
-                true,
-                false,
-                true
+        playSpecialEffects(player.getWorld(), effectPoint);
+
+        UUID playerId = player.getUniqueId();
+        specialAttackUntilTick.put(
+                playerId,
+                player.getWorld().getGameTime()
+                        + CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS
+                        + (long) ((CrescentSpearDefinition.ACTIVE_HIT_COUNT - 1) * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS)
         );
 
-        PotionEffect current = player.getPotionEffect(PotionEffectType.SPEED);
-        if (current != null) {
-            if (current.getAmplifier() > candidate.getAmplifier()) {
-                return;
+        double hitDamage = resolveActiveHitDamage(player);
+        for (int i = 0; i < CrescentSpearDefinition.ACTIVE_HIT_COUNT; i++) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+                playActiveSwingVisuals(player);
+
+                LivingEntity target = findActiveTarget(player);
+                if (target == null || target.isDead() || !target.isValid()) {
+                    return;
+                }
+
+                playSpecialEffects(player.getWorld(), target.getLocation().add(0.0D, 1.0D, 0.0D));
+                target.setNoDamageTicks(0);
+                target.damage(hitDamage, player);
+            }, CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS + (long) i * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS);
+        }
+    }
+
+    private LivingEntity findActiveTarget(Player player) {
+        LivingEntity bestTarget = null;
+        double bestDistanceSquared = Double.MAX_VALUE;
+        Vector lookDirection = player.getEyeLocation().getDirection().normalize();
+
+        for (Entity entity : player.getNearbyEntities(
+                CrescentSpearDefinition.ACTIVE_TARGET_RANGE,
+                CrescentSpearDefinition.ACTIVE_TARGET_RANGE,
+                CrescentSpearDefinition.ACTIVE_TARGET_RANGE
+        )) {
+            if (!(entity instanceof LivingEntity livingTarget) || livingTarget == player || livingTarget.isDead()) {
+                continue;
             }
-            if (current.getAmplifier() == candidate.getAmplifier()
-                    && current.getDuration() >= candidate.getDuration()) {
-                return;
+
+            Vector toTarget = livingTarget.getEyeLocation().toVector().subtract(player.getEyeLocation().toVector());
+            double distanceSquared = toTarget.lengthSquared();
+            if (distanceSquared > CrescentSpearDefinition.ACTIVE_TARGET_RANGE * CrescentSpearDefinition.ACTIVE_TARGET_RANGE) {
+                continue;
+            }
+
+            Vector directionToTarget = toTarget.clone().normalize();
+            if (lookDirection.dot(directionToTarget) < ACTIVE_FRONT_ARC_DOT) {
+                continue;
+            }
+
+            if (distanceSquared < bestDistanceSquared) {
+                bestDistanceSquared = distanceSquared;
+                bestTarget = livingTarget;
             }
         }
-
-        player.addPotionEffect(candidate);
+        return bestTarget;
     }
 
-    private void playLaunchEffects(World world, LivingEntity target) {
-        world.playSound(target.getLocation(), Sound.ENTITY_BREEZE_WIND_BURST, 0.95f, 1.1f);
-        world.spawnParticle(Particle.GUST_EMITTER_LARGE, target.getLocation().add(0.0, 0.9, 0.0), 1, 0.0, 0.0, 0.0, 0.0);
+    private void playActiveSwingVisuals(Player player) {
+        player.swingMainHand();
+
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        Vector sweepDirection = player.getEyeLocation().getDirection().clone().setY(0.0D);
+        if (sweepDirection.lengthSquared() < 1.0E-6D) {
+            sweepDirection = new Vector(0.0D, 0.0D, 1.0D);
+        } else {
+            sweepDirection.normalize();
+        }
+
+        double angleRadians = Math.toRadians(random.nextDouble(-22.0D, 22.0D));
+        double cos = Math.cos(angleRadians);
+        double sin = Math.sin(angleRadians);
+        Vector rotatedDirection = new Vector(
+                sweepDirection.getX() * cos - sweepDirection.getZ() * sin,
+                0.0D,
+                sweepDirection.getX() * sin + sweepDirection.getZ() * cos
+        );
+
+        double distance = random.nextDouble(
+                CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE - 0.25D,
+                CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE + 0.15D
+        );
+        double verticalOffset = random.nextDouble(-0.08D, 0.08D);
+        Location slashPoint = player.getEyeLocation()
+                .add(rotatedDirection.multiply(distance))
+                .add(0.0D, verticalOffset, 0.0D);
+        World world = player.getWorld();
+        world.spawnParticle(Particle.SWEEP_ATTACK, slashPoint, 1, 0.08D, 0.08D, 0.08D, 0.0D);
+        world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.55f, 1.55f);
     }
 
-    private void showComboActionBar(Player player, int comboCount, long remainingMillis) {
-        double progress = Math.max(0.0D, Math.min(1.0D, (double) remainingMillis / COMBO_WINDOW_MILLIS));
-        String bar = buildProgressBar(progress);
-        String message = lang.text("messages.crescent_spear.combo")
-                .replace("{hits}", comboCount + "/" + CrescentSpearDefinition.HIT_COMBO_TRIGGER)
-                .replace("{bar}", bar)
-                .replace("{seconds}", String.format(Locale.US, "%.1f", remainingMillis / 1000.0D));
+    private double resolveActiveHitDamage(Player player) {
+        if (player.getAttribute(Attribute.ATTACK_DAMAGE) == null) {
+            return 4.0D;
+        }
+        return Math.max(1.0D, player.getAttribute(Attribute.ATTACK_DAMAGE).getValue());
+    }
+
+    private void playSpecialEffects(World world, Location point) {
+        world.spawnParticle(
+                Particle.END_ROD,
+                point,
+                2,
+                0.03D, 0.03D, 0.03D,
+                0.01D
+        );
+        world.playSound(
+                point,
+                Sound.BLOCK_AMETHYST_BLOCK_CHIME,
+                0.8f,
+                1.4f
+        );
+    }
+
+    private void showChargeActionBar(Player player, int currentCharge) {
+        double progress = Math.max(0.0D, Math.min(1.0D, (double) currentCharge / CrescentSpearDefinition.CHARGE_MAX));
+        String message = lang.text("messages.crescent_spear.charge")
+                .replace("{bar}", buildProgressBar(progress));
         showActionBar(player, message);
     }
 
-    private void showProcActionBar(Player player, long remainingMillis) {
-        double progress = Math.max(0.0D, Math.min(1.0D, (double) remainingMillis / PROC_FEEDBACK_MILLIS));
-        String bar = buildProgressBar(progress);
-        String message = lang.text("messages.crescent_spear.proc")
-                .replace("{hits}", CrescentSpearDefinition.HIT_COMBO_TRIGGER + "/" + CrescentSpearDefinition.HIT_COMBO_TRIGGER)
-                .replace("{bar}", bar);
+    private void showReadyActionBar(Player player) {
+        String message = lang.text("messages.crescent_spear.ready")
+                .replace("{bar}", buildProgressBar(1.0D));
         showActionBar(player, message);
     }
 
@@ -203,9 +293,9 @@ public final class CrescentSpearListener implements Listener {
     }
 
     private String buildProgressBar(double progress) {
-        int filled = (int) Math.round(progress * COMBO_BAR_SEGMENTS);
-        StringBuilder bar = new StringBuilder("&b");
-        for (int i = 0; i < COMBO_BAR_SEGMENTS; i++) {
+        int filled = (int) Math.round(progress * CHARGE_BAR_SEGMENTS);
+        StringBuilder bar = new StringBuilder("&d");
+        for (int i = 0; i < CHARGE_BAR_SEGMENTS; i++) {
             if (i == filled) {
                 bar.append("&7");
             }

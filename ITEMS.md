@@ -43,12 +43,15 @@ Netherite upgrade uses Smithing Table with Diamond Wind Blade + Netherite Ingot.
 
 ## 🏹 Crescent Bow
 
-Special ranged weapon that fires a 3-arrow volley.
+Moon-themed ranged weapon that fires a 3-arrow volley.
 
 | Feature | Details |
 |---------|---------|
 | Arrows | Fires 3 arrows in crescent spread (center + 2 sides) |
 | Ammo | Consumes 1 arrow per volley |
+| Visual | Subtly shimmers under moonlight |
+| Day | Deals 1 less damage during the day |
+| Moonlight | Deals 2 bonus damage at night under open sky |
 | Rarity | Epic |
 
 **Crafting** (Shaped Recipe):
@@ -61,12 +64,15 @@ Where P = Phantom Membrane, S = Stick, A = Amethyst Shard
 
 ## 🔱 Crescent Spear
 
-Special melee weapon that launches enemies on every third hit.
+Moon-themed melee weapon with an armed follow-up burst.
 
 | Feature | Details |
 |---------|---------|
-| Proc | Every 3rd hit deals bonus damage and launches the target upward |
-| Buff | Grants Speed I for 15s after a launch |
+| Charge | Each successful hit adds 20% charge, while the meter slowly decays between attacks |
+| Active | The next melee hit at full charge triggers 3 rapid follow-up attacks |
+| Day | Deals 1 less damage during the day |
+| Moonlight | Deals 2 bonus damage at night under open sky |
+| Visual | Subtly shimmers under moonlight |
 | Rarity | Epic |
 
 **Crafting** (Shaped Recipe):

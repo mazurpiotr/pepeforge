@@ -18,25 +18,26 @@ messages:
   katana:
     cooldown: "&cKatana ładuje się... {bar} &7{seconds}s"
   crescent_spear:
-    combo: "&bCombo włóczni {hits} {bar} &7{seconds}s"
-    proc: "&bCombo włóczni {hits} {bar} &fPodbicie!"
+    charge: "&dŁadunek księżyca {bar}"
+    ready: "&dŁadunek księżyca gotowy! &fNastępne trafienie wzmocnione {bar}"
 items:
   crescent_bow:
     fallback_name: "&bŁuk Półksiężyca"
     lore:
       - "&6---------------"
-      - "&eSalwa Półksiężyca"
+      - "&eUmiejętność: &dSalwa Półksiężyca"
       - "&3Wystrzeliwuje salwę 3 strzał."
       - "&3Zużywa jedną strzałę na salwę."
+      - "&3Za dnia zadaje 1 mniej obrażeń, ale pod światłem księżyca zadaje 2 więcej."
       - "&5Epicka"
       - "&6---------------"
   crescent_spear:
     fallback_name: "&bWłócznia Półksiężyca"
     lore:
       - "&6---------------"
-      - "&eUmiejętność: &bKsiężycowe Podbicie"
-      - "&3Co trzecie trafienie zadaje bonusowe obrażenia i wybija przeciwnika w górę."
-      - "&3Po podbiciu daje Speed I na 15s."
+      - "&eUmiejętność: &dKsiężycowa Seria"
+      - "&3Trafienia ładują wzmocnione uderzenie. Naładowany atak zadaje 3 szybkie cięcia."
+      - "&3Za dnia zadaje 1 mniej obrażeń, ale pod światłem księżyca zadaje 2 więcej."
       - "&5Epicka"
       - "&6---------------"
   chisel:
@@ -62,7 +63,7 @@ items:
     fallback_name: "&fŻelazne Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eSzybkie Cięcie"
+      - "&eUmiejętność: &bSzybkie Cięcie"
       - "&3Daje Speed I na 2s po trafieniu."
       - "&fPospolita"
       - "&6---------------"
@@ -70,7 +71,7 @@ items:
     fallback_name: "&bDiamentowe Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eSzybkie Cięcie"
+      - "&eUmiejętność: &bSzybkie Cięcie"
       - "&3Daje Speed I podczas trzymania."
       - "&bRzadka"
       - "&6---------------"
@@ -78,7 +79,7 @@ items:
     fallback_name: "&8Netherytowe Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eSzybkie Cięcie"
+      - "&eUmiejętność: &bSzybkie Cięcie"
       - "&3Daje Speed I podczas trzymania."
       - "&3Daje Speed II na 3s po trafieniu."
       - "&5Epicka"
