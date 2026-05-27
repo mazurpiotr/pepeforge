@@ -61,12 +61,8 @@ Two-handed rhythm weapons for fixed reach, widening area cuts, and space control
 | Restriction | Requires an empty off-hand for custom mechanics |
 
 **Crafting** (Shaped Recipe):
-```
- M 
-MMM
- S 
-```
-Where M = Iron Ingot or Diamond, S = Stick.
+
+![Greatsword](media/pepeforge_greatsword.gif)
 
 Netherite upgrade uses Smithing Table with Diamond Greatsword + Netherite Ingot.
 
@@ -124,12 +120,8 @@ Two-handed parry weapon built around short defensive timing windows.
 | Rarity | Rare |
 
 **Crafting** (Shaped Recipe):
-```
- I 
- I 
- S 
-```
-Where I = Iron Ingot, S = Stick
+
+![Katana](media/pepeforge_katana.png)
 
 ## 🌾 Scythe
 
