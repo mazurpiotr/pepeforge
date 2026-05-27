@@ -1,6 +1,5 @@
 package pepin.pepeforge.weapons.windblade;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -9,6 +8,7 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.SmithingTransformRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.recipe.RecipeRegistrar;
 
 public final class WindBladeRecipes {
 
@@ -31,9 +31,9 @@ public final class WindBladeRecipes {
     }
 
     public void unregisterAll() {
-        Bukkit.removeRecipe(WindBladeRecipeKeys.IRON_WIND_BLADE);
-        Bukkit.removeRecipe(WindBladeRecipeKeys.DIAMOND_WIND_BLADE);
-        Bukkit.removeRecipe(WindBladeRecipeKeys.NETHERITE_WIND_BLADE);
+        RecipeRegistrar.remove(plugin, WindBladeRecipeKeys.IRON_WIND_BLADE);
+        RecipeRegistrar.remove(plugin, WindBladeRecipeKeys.DIAMOND_WIND_BLADE);
+        RecipeRegistrar.remove(plugin, WindBladeRecipeKeys.NETHERITE_WIND_BLADE);
     }
 
     private void registerTieredBlade(WindBladeTier tier) {
@@ -42,7 +42,7 @@ public final class WindBladeRecipes {
         }
 
         NamespacedKey key = WindBladeRecipeKeys.forTier(tier);
-        Bukkit.removeRecipe(key);
+        RecipeRegistrar.remove(plugin, key);
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createWindBlade(tier));
         /*
@@ -53,7 +53,7 @@ public final class WindBladeRecipes {
         recipe.shape(" M ", " M ", " B ");
         recipe.setIngredient('M', recipeMaterialFor(tier));
         recipe.setIngredient('B', BREEZE_CORE_MATERIAL);
-        plugin.getServer().addRecipe(recipe);
+        RecipeRegistrar.add(plugin, key, recipe);
     }
 
     private void registerNetheriteUpgrade() {
@@ -62,7 +62,7 @@ public final class WindBladeRecipes {
         }
 
         NamespacedKey key = WindBladeRecipeKeys.NETHERITE_WIND_BLADE;
-        Bukkit.removeRecipe(key);
+        RecipeRegistrar.remove(plugin, key);
 
         ItemStack result = itemFactory.createWindBlade(WindBladeTier.NETHERITE);
         SmithingTransformRecipe recipe = new SmithingTransformRecipe(
@@ -72,7 +72,7 @@ public final class WindBladeRecipes {
                 new RecipeChoice.ExactChoice(itemFactory.createWindBlade(WindBladeTier.DIAMOND)),
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_INGOT)
         );
-        plugin.getServer().addRecipe(recipe);
+        RecipeRegistrar.add(plugin, key, recipe);
     }
 
     private Material recipeMaterialFor(WindBladeTier tier) {

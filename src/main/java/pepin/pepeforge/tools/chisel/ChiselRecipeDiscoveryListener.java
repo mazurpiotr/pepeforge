@@ -1,6 +1,5 @@
-package pepin.pepeforge.weapons.crescentspear;
+package pepin.pepeforge.tools.chisel;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,11 +8,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class CrescentSpearRecipeDiscoveryListener implements Listener {
+public final class ChiselRecipeDiscoveryListener implements Listener {
 
     private final JavaPlugin plugin;
 
-    public CrescentSpearRecipeDiscoveryListener(JavaPlugin plugin) {
+    public ChiselRecipeDiscoveryListener(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -32,9 +31,10 @@ public final class CrescentSpearRecipeDiscoveryListener implements Listener {
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        if (inventory.contains(Material.AMETHYST_SHARD)
-                && inventory.contains(Material.STICK)) {
-            player.discoverRecipe(CrescentSpearRecipeKeys.CRESCENT_SPEAR);
+        if (inventory.contains(ChiselDefinition.TOP_MATERIAL)
+                && inventory.contains(ChiselDefinition.CORE_MATERIAL)
+                && inventory.contains(ChiselDefinition.HANDLE_MATERIAL)) {
+            player.discoverRecipe(ChiselRecipeKeys.CHISEL);
         }
     }
 }

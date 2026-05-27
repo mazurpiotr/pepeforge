@@ -1,9 +1,9 @@
 package pepin.pepeforge.tools.chisel;
 
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.recipe.RecipeRegistrar;
 
 public final class ChiselRecipes {
 
@@ -20,7 +20,7 @@ public final class ChiselRecipes {
             return;
         }
 
-        Bukkit.removeRecipe(ChiselRecipeKeys.CHISEL);
+        RecipeRegistrar.remove(plugin, ChiselRecipeKeys.CHISEL);
 
         ShapedRecipe recipe = new ShapedRecipe(ChiselRecipeKeys.CHISEL, itemFactory.createChisel());
         /*
@@ -32,10 +32,10 @@ public final class ChiselRecipes {
         recipe.setIngredient('I', ChiselDefinition.TOP_MATERIAL);
         recipe.setIngredient('C', ChiselDefinition.CORE_MATERIAL);
         recipe.setIngredient('S', ChiselDefinition.HANDLE_MATERIAL);
-        plugin.getServer().addRecipe(recipe);
+        RecipeRegistrar.add(plugin, ChiselRecipeKeys.CHISEL, recipe);
     }
 
     public void unregisterAll() {
-        Bukkit.removeRecipe(ChiselRecipeKeys.CHISEL);
+        RecipeRegistrar.remove(plugin, ChiselRecipeKeys.CHISEL);
     }
 }

@@ -14,8 +14,12 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class PluginLang {
+
+    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("&#([0-9a-fA-F]{6})");
 
     private final YamlConfiguration messages;
     private final Map<String, YamlConfiguration> langFiles = new HashMap<>();
@@ -94,38 +98,31 @@ public final class PluginLang {
     }
 
     public String itemFallbackName(String itemKey) {
-        return color(messages.getString("items." + itemKey + ".fallback_name", itemKey));
+        return color(resolveText("items." + itemKey + ".fallback_name", itemKey));
     }
 
     public List<String> itemFallbackLore(String itemKey) {
-        List<String> values = messages.getStringList("items." + itemKey + ".lore");
-        if (values == null || values.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<String> colored = new ArrayList<>(values.size());
-        for (String value : values) {
-            colored.add(color(value));
-        }
-        return colored;
+        return coloredList(resolveStringList("items." + itemKey + ".lore", language));
     }
 
     public String getItemNameForLang(String itemKey, String lang) {
         YamlConfiguration langConfig = langFiles.get(lang);
-        if (langConfig == null) {
-            return itemFallbackName(itemKey); // Fallback to current messages
+        String path = "items." + itemKey + ".fallback_name";
+        if (langConfig != null) {
+            String value = langConfig.getString(path);
+            if (value != null) {
+                return color(value);
+            }
         }
-        return color(langConfig.getString("items." + itemKey + ".fallback_name", itemKey));
+
+        return color(resolveText(path, itemKey, lang));
     }
 
     public List<String> getItemLoreForLang(String itemKey, String lang) {
-        YamlConfiguration langConfig = langFiles.get(lang);
-        if (langConfig == null) {
-            return itemFallbackLore(itemKey);
-        }
-        List<String> values = langConfig.getStringList("items." + itemKey + ".lore");
-        if (values == null || values.isEmpty()) {
-            return Collections.emptyList();
-        }
+        return coloredList(resolveStringList("items." + itemKey + ".lore", lang));
+    }
+
+    private List<String> coloredList(List<String> values) {
         List<String> colored = new ArrayList<>(values.size());
         for (String value : values) {
             colored.add(color(value));
@@ -134,7 +131,22 @@ public final class PluginLang {
     }
 
     private String color(String value) {
-        return ChatColor.translateAlternateColorCodes('&', value);
+        return ChatColor.translateAlternateColorCodes('&', translateHexColors(value));
+    }
+
+    private String translateHexColors(String value) {
+        Matcher matcher = HEX_COLOR_PATTERN.matcher(value);
+        StringBuffer buffer = new StringBuffer();
+        while (matcher.find()) {
+            String hex = matcher.group(1);
+            StringBuilder replacement = new StringBuilder("&x");
+            for (char character : hex.toCharArray()) {
+                replacement.append('&').append(character);
+            }
+            matcher.appendReplacement(buffer, Matcher.quoteReplacement(replacement.toString()));
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
     private String resolveText(String path, String fallback) {
@@ -160,5 +172,57 @@ public final class PluginLang {
         }
 
         return fallback;
+    }
+
+    private String resolveText(String path, String fallback, String preferredLanguage) {
+        YamlConfiguration bundledPreferredLanguage = bundledLangFiles.get(preferredLanguage);
+        if (bundledPreferredLanguage != null) {
+            String value = bundledPreferredLanguage.getString(path);
+            if (value != null) {
+                return value;
+            }
+        }
+
+        YamlConfiguration bundledEnglish = bundledLangFiles.get("en_us");
+        if (bundledEnglish != null) {
+            String value = bundledEnglish.getString(path);
+            if (value != null) {
+                return value;
+            }
+        }
+
+        return resolveText(path, fallback);
+    }
+
+    private List<String> resolveStringList(String path, String preferredLanguage) {
+        List<String> values = Collections.emptyList();
+
+        YamlConfiguration langConfig = langFiles.get(preferredLanguage);
+        if (langConfig != null) {
+            values = langConfig.getStringList(path);
+        } else {
+            values = messages.getStringList(path);
+        }
+        if (!values.isEmpty()) {
+            return values;
+        }
+
+        YamlConfiguration bundledPreferredLanguage = bundledLangFiles.get(preferredLanguage);
+        if (bundledPreferredLanguage != null) {
+            values = bundledPreferredLanguage.getStringList(path);
+            if (!values.isEmpty()) {
+                return values;
+            }
+        }
+
+        YamlConfiguration bundledEnglish = bundledLangFiles.get("en_us");
+        if (bundledEnglish != null) {
+            values = bundledEnglish.getStringList(path);
+            if (!values.isEmpty()) {
+                return values;
+            }
+        }
+
+        return Collections.emptyList();
     }
 }

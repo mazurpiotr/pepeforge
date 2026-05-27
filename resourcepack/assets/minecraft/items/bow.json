@@ -8,7 +8,7 @@
     },
     "entries": [
       {
-        "threshold": 1001,
+        "threshold": 221001,
         "model": {
           "type": "minecraft:condition",
           "property": "minecraft:using_item",
@@ -48,6 +48,13 @@
               "model": "pepeforge:crescent_bow/crescent_bow"
             }
           }
+        }
+      },
+      {
+        "threshold": 221002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/bow"
         }
       }
     ]

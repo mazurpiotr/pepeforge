@@ -1,10 +1,10 @@
 package pepin.pepeforge.weapons.crescentbow;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.recipe.RecipeRegistrar;
 
 public final class CrescentBowRecipes {
 
@@ -25,8 +25,8 @@ public final class CrescentBowRecipes {
             return;
         }
 
-        Bukkit.removeRecipe(CrescentBowRecipeKeys.CRESCENT_BOW);
-        Bukkit.removeRecipe(CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED);
+        RecipeRegistrar.remove(plugin, CrescentBowRecipeKeys.CRESCENT_BOW);
+        RecipeRegistrar.remove(plugin, CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED);
 
         ShapedRecipe recipe = new ShapedRecipe(CrescentBowRecipeKeys.CRESCENT_BOW, itemFactory.createCrescentBow());
         /*
@@ -38,7 +38,7 @@ public final class CrescentBowRecipes {
         recipe.setIngredient('P', CURVE_MATERIAL);
         recipe.setIngredient('A', CORE_MATERIAL);
         recipe.setIngredient('S', HANDLE_MATERIAL);
-        plugin.getServer().addRecipe(recipe);
+        RecipeRegistrar.add(plugin, CrescentBowRecipeKeys.CRESCENT_BOW, recipe);
 
         ShapedRecipe mirroredRecipe = new ShapedRecipe(CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED, itemFactory.createCrescentBow());
         /*
@@ -50,11 +50,11 @@ public final class CrescentBowRecipes {
         mirroredRecipe.setIngredient('P', CURVE_MATERIAL);
         mirroredRecipe.setIngredient('A', CORE_MATERIAL);
         mirroredRecipe.setIngredient('S', HANDLE_MATERIAL);
-        plugin.getServer().addRecipe(mirroredRecipe);
+        RecipeRegistrar.add(plugin, CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED, mirroredRecipe);
     }
 
     public void unregisterAll() {
-        Bukkit.removeRecipe(CrescentBowRecipeKeys.CRESCENT_BOW);
-        Bukkit.removeRecipe(CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED);
+        RecipeRegistrar.remove(plugin, CrescentBowRecipeKeys.CRESCENT_BOW);
+        RecipeRegistrar.remove(plugin, CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED);
     }
 }

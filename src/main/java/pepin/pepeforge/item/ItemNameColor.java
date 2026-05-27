@@ -1,18 +1,18 @@
 package pepin.pepeforge.item;
 
 public enum ItemNameColor {
-    WHITE("WHITE"),
-    AQUA("AQUA"),
-    BLUE("BLUE"),
-    DARK_GRAY("DARK_GRAY");
+    IRON(ItemColorPalette.IRON_NAME),
+    DIAMOND(ItemColorPalette.DIAMOND_NAME),
+    CRESCENT(ItemColorPalette.CRESCENT_NAME),
+    NETHERITE(ItemColorPalette.NETHERITE_NAME);
 
-    private final String colorName;
+    private final ItemColorPalette color;
 
-    ItemNameColor(String colorName) {
-        this.colorName = colorName;
+    ItemNameColor(ItemColorPalette color) {
+        this.color = color;
     }
 
     public String colorName() {
-        return colorName;
+        return color.colorName();
     }
 }

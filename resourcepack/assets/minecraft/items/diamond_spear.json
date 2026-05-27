@@ -8,10 +8,17 @@
     },
     "entries": [
       {
-        "threshold": 1001,
+        "threshold": 231001,
         "model": {
           "type": "minecraft:model",
           "model": "pepeforge:crescent_spear/crescent_spear"
+        }
+      },
+      {
+        "threshold": 231002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/diamond_spear"
         }
       }
     ]

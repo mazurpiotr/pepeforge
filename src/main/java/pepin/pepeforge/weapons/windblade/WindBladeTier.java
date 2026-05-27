@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.windblade;
 
 import org.bukkit.Material;
+import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
@@ -15,11 +16,11 @@ public enum WindBladeTier {
             ItemIds.IRON_WIND_BLADE,
             "iron_wind_blade",
             "item.pepeforge.iron_wind_blade",
-            ItemNameColor.WHITE,
+            ItemNameColor.IRON,
             5,
             ItemRarity.COMMON,
             Material.IRON_SWORD,
-            1001,
+            CustomModelDataIds.IRON_WIND_BLADE,
             5.0,
             2.1,
             false,
@@ -30,11 +31,11 @@ public enum WindBladeTier {
             ItemIds.DIAMOND_WIND_BLADE,
             "diamond_wind_blade",
             "item.pepeforge.diamond_wind_blade",
-            ItemNameColor.AQUA,
+            ItemNameColor.DIAMOND,
             5,
             ItemRarity.RARE,
             Material.DIAMOND_SWORD,
-            1002,
+            CustomModelDataIds.DIAMOND_WIND_BLADE,
             6.0,
             2.2,
             true,
@@ -45,11 +46,11 @@ public enum WindBladeTier {
             ItemIds.NETHERITE_WIND_BLADE,
             "netherite_wind_blade",
             "item.pepeforge.netherite_wind_blade",
-            ItemNameColor.DARK_GRAY,
+            ItemNameColor.NETHERITE,
             6,
             ItemRarity.EPIC,
             Material.NETHERITE_SWORD,
-            1003,
+            CustomModelDataIds.NETHERITE_WIND_BLADE,
             7.0,
             2.2,
             true,

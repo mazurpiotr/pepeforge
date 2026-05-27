@@ -1,17 +1,18 @@
 package pepin.pepeforge.item;
 
 public enum ItemRarity {
-    COMMON("WHITE"),
-    RARE("BLUE"),
-    EPIC("DARK_PURPLE");
+    COMMON(ItemColorPalette.COMMON_RARITY),
+    RARE(ItemColorPalette.RARE_RARITY),
+    EPIC(ItemColorPalette.EPIC_RARITY),
+    LEGENDARY(ItemColorPalette.LEGENDARY_RARITY);
 
-    private final String colorName;
+    private final ItemColorPalette color;
 
-    ItemRarity(String colorName) {
-        this.colorName = colorName;
+    ItemRarity(ItemColorPalette color) {
+        this.color = color;
     }
 
     public String colorName() {
-        return colorName;
+        return color.colorName();
     }
 }

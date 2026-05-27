@@ -227,8 +227,17 @@ public final class ItemMetaCompat {
             }
 
             Class<?> textColorClass = Class.forName("net.kyori.adventure.text.format.TextColor");
-            Class<?> namedTextColorClass = Class.forName("net.kyori.adventure.text.format.NamedTextColor");
-            Object color = namedTextColorClass.getField(colorName).get(null);
+            Object color;
+            if (colorName.startsWith("#")) {
+                Method fromHexString = textColorClass.getMethod("fromHexString", String.class);
+                color = fromHexString.invoke(null, colorName);
+                if (color == null) {
+                    return component;
+                }
+            } else {
+                Class<?> namedTextColorClass = Class.forName("net.kyori.adventure.text.format.NamedTextColor");
+                color = namedTextColorClass.getField(colorName).get(null);
+            }
             Method colorMethod = component.getClass().getMethod("color", textColorClass);
             return colorMethod.invoke(component, color);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {

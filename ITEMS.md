@@ -4,7 +4,7 @@ Detailed item and recipe reference for the current PepeForge item set.
 
 ## 🪚 Chisel
 
-Decorative utility tool for cycling carved block variants.
+Decorative utility tool for cycling supported block variants.
 
 | Feature | Details |
 |---------|---------|
@@ -41,9 +41,38 @@ Where M = tier material (Iron/Diamond Ingot) and B = Breeze Rod.
 
 Netherite upgrade uses Smithing Table with Diamond Wind Blade + Netherite Ingot.
 
+## ⚔️ Greatsword
+
+Two-handed rhythm weapons for fixed reach, widening area cuts, and space control.
+
+| Tier | Attack Damage | Effect |
+|------|---------------|--------|
+| **Iron Greatsword** | 6 | Same rhythm mechanics, lower damage |
+| **Diamond Greatsword** | 7 | Same rhythm mechanics, higher damage |
+| **Netherite Greatsword** | 8 | Same rhythm mechanics, highest damage |
+
+| Feature | Details |
+|---------|---------|
+| Rhythm | Well-timed swings build rhythm stages |
+| Sweeping Cut | Timed swings trigger a forward area attack with a wider arc at higher rhythm stages |
+| Cleave | Direct hits also damage nearby targets |
+| Defense | Active rhythm reduces incoming frontal damage |
+| Break Penalty | Bad timing or timeout briefly applies Mining Fatigue |
+| Restriction | Requires an empty off-hand for custom mechanics |
+
+**Crafting** (Shaped Recipe):
+```
+ M 
+MMM
+ S 
+```
+Where M = Iron Ingot or Diamond, S = Stick.
+
+Netherite upgrade uses Smithing Table with Diamond Greatsword + Netherite Ingot.
+
 ## 🏹 Crescent Bow
 
-Moon-themed ranged weapon that fires a 3-arrow volley.
+Moon-themed ranged weapon that fires a three-arrow volley.
 
 | Feature | Details |
 |---------|---------|
@@ -104,7 +133,7 @@ Where I = Iron Ingot, S = Stick
 
 ## 🌾 Scythe
 
-Harvest tool with auto-replant functionality.
+Farming tool for harvesting ripe crops and replanting them automatically.
 
 | Tier | Harvest Area | Effect |
 |------|--------------|--------|
@@ -140,6 +169,9 @@ Available internal item names for `/pepeforge give`:
 - `iron_wind_blade`
 - `diamond_wind_blade`
 - `netherite_wind_blade`
+- `iron_greatsword`
+- `diamond_greatsword`
+- `netherite_greatsword`
 - `iron_scythe`
 - `diamond_scythe`
 - `netherite_scythe`

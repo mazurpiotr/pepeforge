@@ -8,24 +8,38 @@
     },
     "entries": [
       {
-        "threshold": 1001,
+        "threshold": 211001,
         "model": {
           "type": "minecraft:model",
           "model": "pepeforge:iron_wind_blade/iron_wind_blade"
         }
       },
       {
-        "threshold": 1004,
+        "threshold": 211002,
         "model": {
           "type": "minecraft:model",
           "model": "pepeforge:katana/katana"
         }
       },
       {
-        "threshold": 1005,
+        "threshold": 211003,
         "model": {
           "type": "minecraft:model",
           "model": "pepeforge:katana/katana_parry"
+        }
+      },
+      {
+        "threshold": 211004,
+        "model": {
+          "type": "minecraft:model",
+          "model": "pepeforge:iron_greatsword/iron_greatsword"
+        }
+      },
+      {
+        "threshold": 211005,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/iron_sword"
         }
       }
     ]

@@ -33,7 +33,7 @@ public final class WindBladeRecipeDiscoveryListener implements Listener {
         plugin.getServer().getScheduler().runTask(plugin, () -> discoverFor(player));
     }
 
-    private void discoverFor(Player player) {
+    public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
 
         if (inventory.contains(Material.IRON_INGOT) && inventory.contains(Material.BREEZE_ROD)) {

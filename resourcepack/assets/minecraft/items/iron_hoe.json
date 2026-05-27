@@ -8,10 +8,17 @@
     },
     "entries": [
       {
-        "threshold": 1001,
+        "threshold": 251001,
         "model": {
           "type": "minecraft:model",
           "model": "pepeforge:iron_scythe/iron_scythe"
+        }
+      },
+      {
+        "threshold": 251002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/iron_hoe"
         }
       }
     ]

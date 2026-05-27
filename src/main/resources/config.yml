@@ -3,9 +3,11 @@ language: en_us
 
 # Translation settings
 translations:
-  # Use client-side translations from resource pack (may show keys if pack is missing)
+  # Use client-side item name/lore translations from the resource pack.
+  # This requires Paper/Folia/Purpur item text data components.
+  # Spigot automatically falls back to server-side text from lang/*.yml.
   use_client_side: true
-  # Server language if client-side is disabled (fallback to plugin lang)
+  # Server language if client-side translation is disabled or unsupported.
   server_language: "en_us"
 
 # Item availability settings
@@ -31,6 +33,15 @@ items:
     enabled: true
     recipe_enabled: true
   netherite_wind_blade:
+    enabled: true
+    recipe_enabled: true
+  iron_greatsword:
+    enabled: true
+    recipe_enabled: true
+  diamond_greatsword:
+    enabled: true
+    recipe_enabled: true
+  netherite_greatsword:
     enabled: true
     recipe_enabled: true
   iron_scythe:

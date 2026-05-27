@@ -1,4 +1,4 @@
-package pepin.pepeforge.weapons.katana;
+package pepin.pepeforge.weapons.greatsword;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -6,16 +6,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRecipeDiscoverEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
+import pepin.pepeforge.item.ItemFactory;
 
-public final class KatanaRecipeDiscoveryListener implements Listener {
+public final class GreatswordRecipeDiscoveryListener implements Listener {
 
     private final JavaPlugin plugin;
+    private final ItemFactory itemFactory;
 
-    public KatanaRecipeDiscoveryListener(JavaPlugin plugin) {
+    public GreatswordRecipeDiscoveryListener(JavaPlugin plugin, ItemFactory itemFactory) {
         this.plugin = plugin;
+        this.itemFactory = itemFactory;
     }
 
     @EventHandler
@@ -33,18 +35,17 @@ public final class KatanaRecipeDiscoveryListener implements Listener {
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        if (inventory.contains(Material.IRON_INGOT) && inventory.contains(Material.STICK)) {
-            player.discoverRecipe(KatanaRecipeKeys.KATANA);
-        }
-    }
 
-    @EventHandler
-    public void onPlayerRecipeDiscover(PlayerRecipeDiscoverEvent event) {
-        if (event.getRecipe() == null || event.getRecipe().getKey() == null) {
-            return;
+        if (inventory.contains(Material.IRON_INGOT) && inventory.contains(Material.STICK)) {
+            player.discoverRecipe(GreatswordRecipeKeys.IRON_GREATSWORD);
         }
-        if (KatanaRecipeKeys.KATANA_MIRRORED.equals(event.getRecipe().getKey())) {
-            event.setCancelled(true);
+        if (inventory.contains(Material.DIAMOND) && inventory.contains(Material.STICK)) {
+            player.discoverRecipe(GreatswordRecipeKeys.DIAMOND_GREATSWORD);
+        }
+        if (inventory.contains(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE)
+                && inventory.contains(Material.NETHERITE_INGOT)
+                && itemFactory.hasGreatsword(inventory, GreatswordTier.DIAMOND)) {
+            player.discoverRecipe(GreatswordRecipeKeys.NETHERITE_GREATSWORD);
         }
     }
 }

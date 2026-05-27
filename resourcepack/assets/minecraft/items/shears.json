@@ -8,10 +8,17 @@
     },
     "entries": [
       {
-        "threshold": 1001,
+        "threshold": 241001,
         "model": {
           "type": "minecraft:model",
           "model": "pepeforge:chisel/chisel"
+        }
+      },
+      {
+        "threshold": 241002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/shears"
         }
       }
     ]

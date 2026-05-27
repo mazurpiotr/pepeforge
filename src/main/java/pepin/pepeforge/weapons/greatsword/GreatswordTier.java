@@ -1,55 +1,59 @@
-package pepin.pepeforge.tools.scythe;
+package pepin.pepeforge.weapons.greatsword;
 
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
 
-public enum ScytheTier {
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+public enum GreatswordTier {
     IRON(
-            ItemIds.IRON_SCYTHE,
-            "iron_scythe",
-            "item.pepeforge.iron_scythe",
+            ItemIds.IRON_GREATSWORD,
+            "iron_greatsword",
+            "item.pepeforge.iron_greatsword",
             ItemNameColor.IRON,
-            6,
+            7,
             ItemRarity.COMMON,
-            Material.IRON_HOE,
+            Material.IRON_SWORD,
             Material.IRON_INGOT,
-            Material.STICK,
-            new NamespacedKey("pepeforge", "iron_scythe"),
-            CustomModelDataIds.IRON_SCYTHE,
-            0
+            CustomModelDataIds.IRON_GREATSWORD,
+            6.0D,
+            1.52D
     ),
     DIAMOND(
-            ItemIds.DIAMOND_SCYTHE,
-            "diamond_scythe",
-            "item.pepeforge.diamond_scythe",
+            ItemIds.DIAMOND_GREATSWORD,
+            "diamond_greatsword",
+            "item.pepeforge.diamond_greatsword",
             ItemNameColor.DIAMOND,
-            6,
+            7,
             ItemRarity.RARE,
-            Material.DIAMOND_HOE,
+            Material.DIAMOND_SWORD,
             Material.DIAMOND,
-            Material.STICK,
-            new NamespacedKey("pepeforge", "diamond_scythe"),
-            CustomModelDataIds.DIAMOND_SCYTHE,
-            1
+            CustomModelDataIds.DIAMOND_GREATSWORD,
+            7.0D,
+            1.52D
     ),
     NETHERITE(
-            ItemIds.NETHERITE_SCYTHE,
-            "netherite_scythe",
-            "item.pepeforge.netherite_scythe",
+            ItemIds.NETHERITE_GREATSWORD,
+            "netherite_greatsword",
+            "item.pepeforge.netherite_greatsword",
             ItemNameColor.NETHERITE,
-            6,
+            7,
             ItemRarity.EPIC,
-            Material.NETHERITE_HOE,
+            Material.NETHERITE_SWORD,
             Material.NETHERITE_INGOT,
-            Material.STICK,
-            new NamespacedKey("pepeforge", "netherite_scythe"),
-            CustomModelDataIds.NETHERITE_SCYTHE,
-            2
+            CustomModelDataIds.NETHERITE_GREATSWORD,
+            8.0D,
+            1.52D
     );
+
+    private static final Map<String, GreatswordTier> BY_ITEM_ID = Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(GreatswordTier::itemId, Function.identity()));
 
     private final String itemId;
     private final String langPath;
@@ -59,12 +63,11 @@ public enum ScytheTier {
     private final ItemRarity rarity;
     private final Material baseMaterial;
     private final Material bladeMaterial;
-    private final Material handleMaterial;
-    private final NamespacedKey modelKey;
     private final int customModelData;
-    private final int radius;
+    private final double attackDamage;
+    private final double attackSpeed;
 
-    ScytheTier(
+    GreatswordTier(
             String itemId,
             String langPath,
             String translationKeyBase,
@@ -73,10 +76,9 @@ public enum ScytheTier {
             ItemRarity rarity,
             Material baseMaterial,
             Material bladeMaterial,
-            Material handleMaterial,
-            NamespacedKey modelKey,
             int customModelData,
-            int radius
+            double attackDamage,
+            double attackSpeed
     ) {
         this.itemId = itemId;
         this.langPath = langPath;
@@ -86,10 +88,16 @@ public enum ScytheTier {
         this.rarity = rarity;
         this.baseMaterial = baseMaterial;
         this.bladeMaterial = bladeMaterial;
-        this.handleMaterial = handleMaterial;
-        this.modelKey = modelKey;
         this.customModelData = customModelData;
-        this.radius = radius;
+        this.attackDamage = attackDamage;
+        this.attackSpeed = attackSpeed;
+    }
+
+    public static GreatswordTier fromItemId(String itemId) {
+        if (itemId == null) {
+            return null;
+        }
+        return BY_ITEM_ID.get(itemId);
     }
 
     public String itemId() {
@@ -104,12 +112,12 @@ public enum ScytheTier {
         return translationKeyBase;
     }
 
-    public int loreLineCount() {
-        return loreLineCount;
-    }
-
     public ItemNameColor nameColor() {
         return nameColor;
+    }
+
+    public int loreLineCount() {
+        return loreLineCount;
     }
 
     public ItemRarity rarity() {
@@ -124,19 +132,15 @@ public enum ScytheTier {
         return bladeMaterial;
     }
 
-    public Material handleMaterial() {
-        return handleMaterial;
-    }
-
-    public NamespacedKey modelKey() {
-        return modelKey;
-    }
-
     public int customModelData() {
         return customModelData;
     }
 
-    public int radius() {
-        return radius;
+    public double attackDamage() {
+        return attackDamage;
+    }
+
+    public double attackSpeed() {
+        return attackSpeed;
     }
 }

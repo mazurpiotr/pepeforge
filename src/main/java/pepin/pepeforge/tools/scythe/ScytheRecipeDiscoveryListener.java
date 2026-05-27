@@ -30,7 +30,7 @@ public final class ScytheRecipeDiscoveryListener implements Listener {
         plugin.getServer().getScheduler().runTask(plugin, () -> discoverFor(player));
     }
 
-    private void discoverFor(Player player) {
+    public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
         discoverIfReady(player, inventory, ScytheTier.IRON, Material.IRON_INGOT);
         discoverIfReady(player, inventory, ScytheTier.DIAMOND, Material.DIAMOND);

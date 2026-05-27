@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRecipeDiscoverEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,13 +31,22 @@ public final class CrescentBowRecipeDiscoveryListener implements Listener {
         plugin.getServer().getScheduler().runTask(plugin, () -> discoverFor(player));
     }
 
-    private void discoverFor(Player player) {
+    public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        if (inventory.contains(Material.BOW)
-                && inventory.contains(Material.AMETHYST_SHARD)
+        if (inventory.contains(Material.AMETHYST_SHARD)
                 && inventory.contains(Material.STICK)
                 && inventory.contains(Material.PHANTOM_MEMBRANE)) {
             player.discoverRecipe(CrescentBowRecipeKeys.CRESCENT_BOW);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRecipeDiscover(PlayerRecipeDiscoverEvent event) {
+        if (event.getRecipe() == null || event.getRecipe().getKey() == null) {
+            return;
+        }
+        if (CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED.equals(event.getRecipe().getKey())) {
+            event.setCancelled(true);
         }
     }
 }

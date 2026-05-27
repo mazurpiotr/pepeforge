@@ -1,9 +1,9 @@
 package pepin.pepeforge.tools.scythe;
 
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.recipe.RecipeRegistrar;
 
 public final class ScytheRecipes {
 
@@ -23,7 +23,7 @@ public final class ScytheRecipes {
 
     public void unregisterAll() {
         for (ScytheTier tier : ScytheTier.values()) {
-            Bukkit.removeRecipe(RecipeKeys.forTier(tier));
+            RecipeRegistrar.remove(plugin, RecipeKeys.forTier(tier));
         }
     }
 
@@ -32,7 +32,7 @@ public final class ScytheRecipes {
             return;
         }
 
-        Bukkit.removeRecipe(RecipeKeys.forTier(tier));
+        RecipeRegistrar.remove(plugin, RecipeKeys.forTier(tier));
 
         ShapedRecipe recipe = new ShapedRecipe(RecipeKeys.forTier(tier), itemFactory.createScythe(tier));
         /*
@@ -43,6 +43,6 @@ public final class ScytheRecipes {
         recipe.shape("BBB", " S ", "S  ");
         recipe.setIngredient('B', tier.bladeMaterial());
         recipe.setIngredient('S', tier.handleMaterial());
-        plugin.getServer().addRecipe(recipe);
+        RecipeRegistrar.add(plugin, RecipeKeys.forTier(tier), recipe);
     }
 }

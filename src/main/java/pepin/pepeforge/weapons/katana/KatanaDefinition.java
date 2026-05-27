@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.katana;
 
 import org.bukkit.Material;
+import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
@@ -10,17 +11,17 @@ public final class KatanaDefinition {
     public static final String ITEM_ID = ItemIds.KATANA;
     public static final String LANG_PATH = "katana";
     public static final String TRANSLATION_KEY_BASE = "item.pepeforge.katana";
-    public static final ItemNameColor NAME_COLOR = ItemNameColor.BLUE;
+    public static final ItemNameColor NAME_COLOR = ItemNameColor.IRON;
     public static final int LORE_LINE_COUNT = 7;
     public static final ItemRarity RARITY = ItemRarity.RARE;
 
     public static final Material BASE_MATERIAL = Material.IRON_SWORD;
-    public static final int CUSTOM_MODEL_DATA = 1004;
+    public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.KATANA;
     /*
      * This temporary parry visual uses a second flat item model.
      * Later we can replace it with a dedicated Blockbench pose if we want a stronger animation.
      */
-    public static final int PARRY_MODEL_DATA = 1005;
+    public static final int PARRY_MODEL_DATA = CustomModelDataIds.KATANA_PARRY;
 
     public static final double ATTACK_DAMAGE = 5.0;
     public static final double ATTACK_SPEED = 2.4;

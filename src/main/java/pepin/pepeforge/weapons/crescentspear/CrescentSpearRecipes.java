@@ -1,10 +1,10 @@
 package pepin.pepeforge.weapons.crescentspear;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.recipe.RecipeRegistrar;
 
 public final class CrescentSpearRecipes {
 
@@ -24,7 +24,7 @@ public final class CrescentSpearRecipes {
             return;
         }
 
-        Bukkit.removeRecipe(CrescentSpearRecipeKeys.CRESCENT_SPEAR);
+        RecipeRegistrar.remove(plugin, CrescentSpearRecipeKeys.CRESCENT_SPEAR);
 
         ShapedRecipe recipe = new ShapedRecipe(CrescentSpearRecipeKeys.CRESCENT_SPEAR, itemFactory.createCrescentSpear());
         /*
@@ -35,10 +35,10 @@ public final class CrescentSpearRecipes {
         recipe.shape(" A ", " S ", " S ");
         recipe.setIngredient('A', BLADE_MATERIAL);
         recipe.setIngredient('S', HANDLE_MATERIAL);
-        plugin.getServer().addRecipe(recipe);
+        RecipeRegistrar.add(plugin, CrescentSpearRecipeKeys.CRESCENT_SPEAR, recipe);
     }
 
     public void unregisterAll() {
-        Bukkit.removeRecipe(CrescentSpearRecipeKeys.CRESCENT_SPEAR);
+        RecipeRegistrar.remove(plugin, CrescentSpearRecipeKeys.CRESCENT_SPEAR);
     }
 }

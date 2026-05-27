@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cOnly players can use this command."
     no_permission: "&cYou do not have permission to use this command."
-    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_scythe|diamond_scythe|netherite_scythe> <player> or /pepeforge items"
+    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe> <player> or /pepeforge items"
     unknown_subcommand: "&cUnknown subcommand."
     unknown_item: "&cUnknown item: {item}"
     item_disabled: "&cThat item is currently disabled: {item}"
@@ -20,60 +20,62 @@ messages:
   crescent_spear:
     charge: "&dMoon charge {bar}"
     ready: "&dMoon charge ready! &fNext strike empowered {bar}"
+  greatsword:
+    rhythm: "&6Rhythm {bar} &f{stage}/{max_stage}"
 items:
   crescent_bow:
-    fallback_name: "&bCrescent Bow"
+    fallback_name: "&#667DB4Crescent Bow"
     lore:
       - "&6---------------"
       - "&eAbility: &dCrescent Volley"
       - "&3Fires a 3-arrow crescent spread."
       - "&3Consumes one arrow per volley."
       - "&3Deals 1 less damage by day, but 2 bonus damage under moonlight."
-      - "&5Epic"
+      - "&#805AD5Epic"
       - "&6---------------"
   crescent_spear:
-    fallback_name: "&bCrescent Spear"
+    fallback_name: "&#667DB4Crescent Spear"
     lore:
       - "&6---------------"
       - "&eAbility: &dMoonlit Flurry"
       - "&3Hits charge an empowered strike. A charged attack unleashes 3 rapid slashes."
       - "&3Deals 1 less damage by day, but 2 bonus damage under moonlight."
-      - "&5Epic"
+      - "&#805AD5Epic"
       - "&6---------------"
   chisel:
-    fallback_name: "&bChisel"
+    fallback_name: "&#33EBCBChisel"
     lore:
       - "&6---------------"
       - "&eAbility: &bCarve"
       - "&3Right-click cycles decorative block variants."
       - "&3Sneak and right-click cycles backward."
-      - "&fCommon"
+      - "&#A0AEC0Common"
       - "&6---------------"
   katana:
-    fallback_name: "&9Katana"
+    fallback_name: "&#3182CEKatana"
     lore:
       - "&6---------------"
       - "&eAbility: &bParry"
       - "&3Right-click to enter a brief parry stance."
       - "&3Blocks melee and reflects projectiles."
       - "&7Two-Handed"
-      - "&9Rare"
+      - "&#3182CERare"
       - "&6---------------"
   iron_wind_blade:
-    fallback_name: "&fIron Wind Blade"
+    fallback_name: "&#BEBEBEIron Wind Blade"
     lore:
       - "&6---------------"
       - "&eAbility: &bSwift Strike"
       - "&3Gain Speed I for 2s after hitting."
-      - "&fCommon"
+      - "&#A0AEC0Common"
       - "&6---------------"
   diamond_wind_blade:
-    fallback_name: "&bDiamond Wind Blade"
+    fallback_name: "&#33EBCBDiamond Wind Blade"
     lore:
       - "&6---------------"
       - "&eAbility: &bSwift Strike"
       - "&3Gain Speed I while holding."
-      - "&bRare"
+      - "&#3182CERare"
       - "&6---------------"
   netherite_wind_blade:
     fallback_name: "&8Netherite Wind Blade"
@@ -82,27 +84,57 @@ items:
       - "&eAbility: &bSwift Strike"
       - "&3Gain Speed I while holding."
       - "&3Gain Speed II for 3s after hitting."
-      - "&5Epic"
+      - "&#805AD5Epic"
+      - "&6---------------"
+  iron_greatsword:
+    fallback_name: "&#BEBEBEIron Greatsword"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &6Rhythm Cleave"
+      - "&3Timed swings release area cuts."
+      - "&3Rhythm widens the attack arc."
+      - "&7Two-Handed"
+      - "&#A0AEC0Common"
+      - "&6---------------"
+  diamond_greatsword:
+    fallback_name: "&#33EBCBDiamond Greatsword"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &6Rhythm Cleave"
+      - "&3Timed swings release area cuts."
+      - "&3Rhythm widens the attack arc."
+      - "&7Two-Handed"
+      - "&#3182CERare"
+      - "&6---------------"
+  netherite_greatsword:
+    fallback_name: "&8Netherite Greatsword"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &6Rhythm Cleave"
+      - "&3Timed swings release area cuts."
+      - "&3Rhythm widens the attack arc."
+      - "&7Two-Handed"
+      - "&#805AD5Epic"
       - "&6---------------"
   iron_scythe:
-    fallback_name: "&fIron Scythe"
+    fallback_name: "&#BEBEBEIron Scythe"
     lore:
       - "&6---------------"
       - "&eAbility: &aSweep Harvest"
       - "&31x1 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."
-      - "&fCommon"
+      - "&#A0AEC0Common"
       - "&6---------------"
   diamond_scythe:
-    fallback_name: "&bDiamond Scythe"
+    fallback_name: "&#33EBCBDiamond Scythe"
     lore:
       - "&6---------------"
       - "&eAbility: &aSweep Harvest"
       - "&33x3 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."
-      - "&bRare"
+      - "&#3182CERare"
       - "&6---------------"
   netherite_scythe:
     fallback_name: "&8Netherite Scythe"
@@ -112,5 +144,5 @@ items:
       - "&35x5 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."
-      - "&5Epic"
+      - "&#805AD5Epic"
       - "&6---------------"
