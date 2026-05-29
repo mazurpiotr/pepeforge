@@ -29,6 +29,7 @@ import pepin.pepeforge.weapons.greatsword.GreatswordRecipes;
 import pepin.pepeforge.weapons.windblade.WindBladeListener;
 import pepin.pepeforge.weapons.windblade.WindBladeRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.windblade.WindBladeRecipes;
+import pepin.pepeforge.recipe.SmithingUpgradeListener;
 
 public final class PepeForgePlugin extends JavaPlugin {
 
@@ -101,6 +102,8 @@ public final class PepeForgePlugin extends JavaPlugin {
         greatswordListener = new GreatswordListener(this, itemFactory, lang);
         greatswordListener.startStatusTask();
         getServer().getPluginManager().registerEvents(greatswordListener, this);
+        // Smithing upgrade listener restores custom model data for smithing recipes
+        getServer().getPluginManager().registerEvents(new SmithingUpgradeListener(itemFactory), this);
         GreatswordRecipeDiscoveryListener greatswordRecipeDiscoveryListener = new GreatswordRecipeDiscoveryListener(this, itemFactory);
         getServer().getPluginManager().registerEvents(greatswordRecipeDiscoveryListener, this);
 
