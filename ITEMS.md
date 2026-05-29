@@ -66,9 +66,9 @@ Moon-themed ranged weapon that fires a three-arrow volley.
 |---------|---------|
 | Arrows | Fires 3 arrows in crescent spread (center + 2 sides) |
 | Ammo | Consumes 1 arrow per volley |
-| Visual | Subtly shimmers under moonlight |
 | Day | Deals 1 less damage during the day |
 | Moonlight | Deals 2 bonus damage at night under open sky |
+| Visual | Subtly shimmers under moonlight |
 | Rarity | Epic |
 
 **Crafting** (Shaped Recipe):
