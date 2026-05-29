@@ -14,12 +14,8 @@ Decorative utility tool for cycling supported block variants.
 | Rarity | Common |
 
 **Crafting** (Shaped Recipe):
-```
- I 
- C 
- S 
-```
-Where I = Iron Ingot, C = Copper Ingot, S = Stick
+
+![Chisel](media/receipes/pepeforge_chisel.png)
 
 ## ⚔️ Wind Blade
 
@@ -32,12 +28,8 @@ Elemental melee weapons with speed effects.
 | **Netherite Wind Blade** | 7 | Speed I while holding + Speed II for 3s on hit |
 
 **Crafting** (Shaped Recipe):
-```
- M 
- M 
- B 
-```
-Where M = tier material (Iron/Diamond Ingot) and B = Breeze Rod.
+
+![Wind Blade](media/receipes/pepeforge_wind_blade.gif)
 
 Netherite upgrade uses Smithing Table with Diamond Wind Blade + Netherite Ingot.
 
@@ -62,7 +54,7 @@ Two-handed rhythm weapons for fixed reach, widening area cuts, and space control
 
 **Crafting** (Shaped Recipe):
 
-![Greatsword](media/pepeforge_greatsword.gif)
+![Greatsword](media/receipes/pepeforge_greatsword.gif)
 
 Netherite upgrade uses Smithing Table with Diamond Greatsword + Netherite Ingot.
 
@@ -80,12 +72,8 @@ Moon-themed ranged weapon that fires a three-arrow volley.
 | Rarity | Epic |
 
 **Crafting** (Shaped Recipe):
-```
- PSA
- P S
- PSA
-```
-Where P = Phantom Membrane, S = Stick, A = Amethyst Shard
+
+![Crescent Bow](media/receipes/pepeforge_crescent_bow.png)
 
 ## 🔱 Crescent Spear
 
@@ -101,12 +89,8 @@ Moon-themed melee weapon with an armed follow-up burst.
 | Rarity | Epic |
 
 **Crafting** (Shaped Recipe):
-```
- A 
- S 
- S 
-```
-Where A = Amethyst Shard, S = Stick
+
+![Crescent Spear](media/receipes/pepeforge_crescent_spear.png)
 
 ## 🗡️ Katana
 
@@ -121,7 +105,7 @@ Two-handed parry weapon built around short defensive timing windows.
 
 **Crafting** (Shaped Recipe):
 
-![Katana](media/pepeforge_katana.png)
+![Katana](media/receipes/pepeforge_katana.png)
 
 ## 🌾 Scythe
 
@@ -134,12 +118,8 @@ Farming tool for harvesting ripe crops and replanting them automatically.
 | **Netherite Scythe** | 5×5 | Harvests ripe crops, replants from drops |
 
 **Crafting** (Shaped Recipe):
-```
-MMM
- S 
-S  
-```
-Where M = tier material (Iron/Diamond/Netherite Ingot), S = Stick
+
+![Scythe](media/receipes/pepeforge_scythe.gif)
 
 **Supported Crops**:
 - Wheat
