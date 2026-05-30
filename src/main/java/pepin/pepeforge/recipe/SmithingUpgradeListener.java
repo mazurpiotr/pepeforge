@@ -28,11 +28,11 @@ public final class SmithingUpgradeListener implements Listener {
 
     public SmithingUpgradeListener(ItemFactory itemFactory) {
         this.itemFactory = itemFactory;
-        // UWAGA: Sztywno ustawiamy "pepeforge", aby idealnie pasowało do Twojego NBT!
+        // Hardcoded key for storing custom item ID in PersistentDataContainer
         this.itemIdKey = new NamespacedKey("pepeforge", "item_id"); 
     }
 
-    // 1. EVENT: Podgląd w kowadle (gdy gracz wkłada przedmioty)
+    // 1. EVENT: Show the custom result in the smithing table UI
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPrepareSmithing(PrepareSmithingEvent event) {
         ItemStack result = calculateCustomSmithingResult(event.getInventory());
@@ -41,20 +41,20 @@ public final class SmithingUpgradeListener implements Listener {
         }
     }
 
-    // 2. EVENT: Faktyczne wyciągnięcie przedmiotu (zabezpieczenie przed nadpisaniem przez Vanillę)
+    // 2. EVENT: Replace the item being taken with our custom result
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSmithItem(SmithItemEvent event) {
         if (event.getInventory() instanceof SmithingInventory inventory) {
             ItemStack result = calculateCustomSmithingResult(inventory);
             
             if (result != null) {
-                // Podmieniamy przedmiot, który gracz ma na kursorze
+                // Replace the item being taken with our custom result
                 event.setCurrentItem(result); 
             }
         }
     }
 
-    // --- Główna logika sprawdzająca ---
+    // --- Main logic ---
 
     private ItemStack calculateCustomSmithingResult(SmithingInventory inventory) {
         ItemStack template = inventory.getItem(0);
@@ -66,11 +66,11 @@ public final class SmithingUpgradeListener implements Listener {
         if (addition == null || addition.getType() != Material.NETHERITE_INGOT) return null;
 
         String customId = getCustomItemId(baseItem);
-        if (customId == null) return null; // To nie jest nasz customowy przedmiot
+        if (customId == null) return null; // Not our custom item, let vanilla handle it
 
         ItemStack properResult = null;
 
-        // Dopasowanie do ID
+        // Match based on custom ID to determine the correct upgrade result
         switch (customId) {
             case "diamond_greatsword":
                 properResult = itemFactory.createGreatsword(GreatswordTier.NETHERITE);
@@ -110,14 +110,14 @@ public final class SmithingUpgradeListener implements Listener {
         ItemMeta sourceMeta = source.getItemMeta();
         ItemMeta targetMeta = target.getItemMeta();
 
-        // Kopiowanie zaklinowań (flaga 'true' pozwala ominąć waniliowe restrykcje przy kopiowaniu)
+        // Copy enchantments, flag true to allow unsafe enchantments (in case of custom items)
         if (sourceMeta.hasEnchants()) {
             for (Map.Entry<Enchantment, Integer> entry : sourceMeta.getEnchants().entrySet()) {
                 targetMeta.addEnchant(entry.getKey(), entry.getValue(), true);
             }
         }
 
-        // Kopiowanie uszkodzeń
+        // Copy damage
         if (sourceMeta instanceof Damageable sourceDamage && targetMeta instanceof Damageable targetDamage) {
             targetDamage.setDamage(sourceDamage.getDamage());
         }
