@@ -3,7 +3,7 @@
 # PepeForge
 ![License](https://img.shields.io/github/license/mazurpiotr/pepeforge?style=for-the-badge)
 ![Version](https://img.shields.io/badge/version-1.0-blue?style=for-the-badge)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1+-brightgreen?style=for-the-badge)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11+-brightgreen?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Purpur-fuchsia?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active_Development-yellow?style=for-the-badge)
