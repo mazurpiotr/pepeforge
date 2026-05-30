@@ -102,8 +102,6 @@ public final class PepeForgePlugin extends JavaPlugin {
         greatswordListener = new GreatswordListener(this, itemFactory, lang);
         greatswordListener.startStatusTask();
         getServer().getPluginManager().registerEvents(greatswordListener, this);
-        // Smithing upgrade listener restores custom model data for smithing recipes
-        getServer().getPluginManager().registerEvents(new SmithingUpgradeListener(itemFactory), this);
         GreatswordRecipeDiscoveryListener greatswordRecipeDiscoveryListener = new GreatswordRecipeDiscoveryListener(this, itemFactory);
         getServer().getPluginManager().registerEvents(greatswordRecipeDiscoveryListener, this);
 
@@ -118,6 +116,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         });
         getServer().getPluginManager().registerEvents(recipeDiscoveryRefresher, this);
         recipeDiscoveryRefresher.refreshAllOnlinePlayers();
+
+        // Smithing upgrade listener restores custom model data for smithing recipes
+        getServer().getPluginManager().registerEvents(new SmithingUpgradeListener(itemFactory), this);
     }
 
     @Override

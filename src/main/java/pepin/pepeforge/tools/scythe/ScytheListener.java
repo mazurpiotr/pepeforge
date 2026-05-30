@@ -196,11 +196,19 @@ public final class ScytheListener implements Listener {
     }
 
     private boolean removeOneFromInventory(Player player, Material material) {
-        for (ItemStack stack : player.getInventory().getContents()) {
+        ItemStack[] contents = player.getInventory().getContents();
+        for (int index = 0; index < contents.length; index++) {
+            ItemStack stack = contents[index];
             if (stack == null || stack.getType() != material || stack.getAmount() <= 0) {
                 continue;
             }
-            stack.setAmount(stack.getAmount() - 1);
+
+            int nextAmount = stack.getAmount() - 1;
+            if (nextAmount <= 0) {
+                player.getInventory().setItem(index, null);
+            } else {
+                stack.setAmount(nextAmount);
+            }
             return true;
         }
         return false;
