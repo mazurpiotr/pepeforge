@@ -101,7 +101,7 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &6Rytmiczne Cięcie"
-      - "&3Kliki w rytmie wyprowadzają cięcia obszarowe."
+      - "&3Ataki wykonywane w rytmie wyprowadzają cięcia obszarowe."
       - "&3Rytm poszerza łuk ataku."
       - "&7Dwuręczna"
       - "&#3182CERzadka"
@@ -111,7 +111,7 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &6Rytmiczne Cięcie"
-      - "&3Kliki w rytmie wyprowadzają cięcia obszarowe."
+      - "&3Ataki wykonywane w rytmie wyprowadzają cięcia obszarowe."
       - "&3Rytm poszerza łuk ataku."
       - "&7Dwuręczna"
       - "&#805AD5Epicka"
