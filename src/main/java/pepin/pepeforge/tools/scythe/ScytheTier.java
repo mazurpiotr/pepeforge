@@ -7,6 +7,11 @@ import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public enum ScytheTier {
     IRON(
             ItemIds.IRON_SCYTHE,
@@ -51,6 +56,10 @@ public enum ScytheTier {
             2
     );
 
+    private static final Map<String, ScytheTier> BY_ITEM_ID = Arrays.stream(values())
+        .collect(Collectors.toUnmodifiableMap(ScytheTier::itemId, Function.identity()));
+
+
     private final String itemId;
     private final String langPath;
     private final String translationKeyBase;
@@ -94,6 +103,13 @@ public enum ScytheTier {
 
     public String itemId() {
         return itemId;
+    }
+
+    public static ScytheTier fromItemId(String itemId) {
+        if (itemId == null) {
+            return null;
+        }
+        return BY_ITEM_ID.get(itemId);
     }
 
     public String langPath() {

@@ -8,13 +8,16 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
+import pepin.pepeforge.item.ItemFactory;
 
 public final class ScytheRecipeDiscoveryListener implements Listener {
 
     private final JavaPlugin plugin;
+    private final ItemFactory itemFactory;
 
-    public ScytheRecipeDiscoveryListener(JavaPlugin plugin) {
+    public ScytheRecipeDiscoveryListener(JavaPlugin plugin, ItemFactory itemFactory) {
         this.plugin = plugin;
+        this.itemFactory = itemFactory;
     }
 
     @EventHandler
@@ -32,14 +35,17 @@ public final class ScytheRecipeDiscoveryListener implements Listener {
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        discoverIfReady(player, inventory, ScytheTier.IRON, Material.IRON_INGOT);
-        discoverIfReady(player, inventory, ScytheTier.DIAMOND, Material.DIAMOND);
-        discoverIfReady(player, inventory, ScytheTier.NETHERITE, Material.NETHERITE_INGOT);
-    }
 
-    private void discoverIfReady(Player player, Inventory inventory, ScytheTier tier, Material bladeMaterial) {
-        if (inventory.contains(bladeMaterial) && inventory.contains(Material.STICK)) {
-            player.discoverRecipe(RecipeKeys.forTier(tier));
+        if (inventory.contains(Material.IRON_INGOT) && inventory.contains(Material.STICK)) {
+            player.discoverRecipe(ScytheRecipeKeys.IRON_SCYTHE);
+        }
+        if (inventory.contains(Material.DIAMOND) && inventory.contains(Material.STICK)) {
+            player.discoverRecipe(ScytheRecipeKeys.DIAMOND_SCYTHE);
+        }
+        if (inventory.contains(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE)
+                && inventory.contains(Material.NETHERITE_INGOT)
+                && itemFactory.hasScythe(inventory, ScytheTier.DIAMOND)) {
+            player.discoverRecipe(ScytheRecipeKeys.NETHERITE_SCYTHE);
         }
     }
 }

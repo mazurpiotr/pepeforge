@@ -121,7 +121,7 @@ items:
     lore:
       - "&6---------------"
       - "&eAbility: &aSweep Harvest"
-      - "&31x1 harvest of ripe crops."
+      - "&33x3 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."
       - "&#A0AEC0Common"
@@ -131,7 +131,7 @@ items:
     lore:
       - "&6---------------"
       - "&eAbility: &aSweep Harvest"
-      - "&33x3 harvest of ripe crops."
+      - "&35x5 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."
       - "&#3182CERare"
@@ -141,7 +141,7 @@ items:
     lore:
       - "&6---------------"
       - "&eAbility: &aSweep Harvest"
-      - "&35x5 harvest of ripe crops."
+      - "&37x7 harvest of ripe crops."
       - "&3Replants from the harvest first,"
       - "&3then uses inventory if needed."
       - "&#805AD5Epic"

@@ -21,6 +21,7 @@ public enum GreatswordTier {
             ItemRarity.COMMON,
             Material.IRON_SWORD,
             Material.IRON_INGOT,
+            Material.STICK,
             CustomModelDataIds.IRON_GREATSWORD,
             6.0D,
             1.52D
@@ -34,6 +35,7 @@ public enum GreatswordTier {
             ItemRarity.RARE,
             Material.DIAMOND_SWORD,
             Material.DIAMOND,
+            Material.STICK,
             CustomModelDataIds.DIAMOND_GREATSWORD,
             7.0D,
             1.52D
@@ -47,6 +49,7 @@ public enum GreatswordTier {
             ItemRarity.EPIC,
             Material.NETHERITE_SWORD,
             Material.NETHERITE_INGOT,
+            Material.STICK,
             CustomModelDataIds.NETHERITE_GREATSWORD,
             8.0D,
             1.52D
@@ -63,6 +66,7 @@ public enum GreatswordTier {
     private final ItemRarity rarity;
     private final Material baseMaterial;
     private final Material bladeMaterial;
+    private final Material handleMaterial;
     private final int customModelData;
     private final double attackDamage;
     private final double attackSpeed;
@@ -76,6 +80,7 @@ public enum GreatswordTier {
             ItemRarity rarity,
             Material baseMaterial,
             Material bladeMaterial,
+            Material handleMaterial,
             int customModelData,
             double attackDamage,
             double attackSpeed
@@ -88,6 +93,7 @@ public enum GreatswordTier {
         this.rarity = rarity;
         this.baseMaterial = baseMaterial;
         this.bladeMaterial = bladeMaterial;
+        this.handleMaterial = handleMaterial;
         this.customModelData = customModelData;
         this.attackDamage = attackDamage;
         this.attackSpeed = attackSpeed;
@@ -130,6 +136,10 @@ public enum GreatswordTier {
 
     public Material bladeMaterial() {
         return bladeMaterial;
+    }
+
+    public Material handleMaterial() {
+        return handleMaterial;
     }
 
     public int customModelData() {

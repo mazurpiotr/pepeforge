@@ -12,10 +12,6 @@ import pepin.pepeforge.recipe.RecipeRegistrar;
 
 public final class WindBladeRecipes {
 
-    private static final Material IRON_RECIPE_MATERIAL = Material.IRON_INGOT;
-    private static final Material DIAMOND_RECIPE_MATERIAL = Material.DIAMOND;
-    private static final Material BREEZE_CORE_MATERIAL = Material.BREEZE_ROD;
-
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
 
@@ -25,24 +21,24 @@ public final class WindBladeRecipes {
     }
 
     public void registerAll() {
-        registerTieredBlade(WindBladeTier.IRON);
-        registerTieredBlade(WindBladeTier.DIAMOND);
+        registerShaped(WindBladeTier.IRON);
+        registerShaped(WindBladeTier.DIAMOND);
         registerNetheriteUpgrade();
     }
 
     public void unregisterAll() {
-        RecipeRegistrar.remove(plugin, WindBladeRecipeKeys.IRON_WIND_BLADE);
-        RecipeRegistrar.remove(plugin, WindBladeRecipeKeys.DIAMOND_WIND_BLADE);
-        RecipeRegistrar.remove(plugin, WindBladeRecipeKeys.NETHERITE_WIND_BLADE);
+        for (WindBladeTier tier : WindBladeTier.values()) {
+            RecipeRegistrar.remove(plugin, WindBladeRecipeKeys.forTier(tier));
+        }
     }
 
-    private void registerTieredBlade(WindBladeTier tier) {
+    private void registerShaped(WindBladeTier tier) {
+        NamespacedKey key = WindBladeRecipeKeys.forTier(tier);
+        RecipeRegistrar.remove(plugin, key);
+
         if (!itemFactory.isRecipeEnabled(tier.itemId())) {
             return;
         }
-
-        NamespacedKey key = WindBladeRecipeKeys.forTier(tier);
-        RecipeRegistrar.remove(plugin, key);
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createWindBlade(tier));
         /*
@@ -51,8 +47,8 @@ public final class WindBladeRecipes {
          * [ ][B][ ]
          */
         recipe.shape(" M ", " M ", " B ");
-        recipe.setIngredient('M', recipeMaterialFor(tier));
-        recipe.setIngredient('B', BREEZE_CORE_MATERIAL);
+        recipe.setIngredient('M', tier.bladeMaterial());
+        recipe.setIngredient('B', tier.handleMaterial());
         RecipeRegistrar.add(plugin, key, recipe);
     }
 
@@ -73,13 +69,5 @@ public final class WindBladeRecipes {
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_INGOT)
         );
         RecipeRegistrar.add(plugin, key, recipe);
-    }
-
-    private Material recipeMaterialFor(WindBladeTier tier) {
-        return switch (tier) {
-            case IRON -> IRON_RECIPE_MATERIAL;
-            case DIAMOND -> DIAMOND_RECIPE_MATERIAL;
-            case NETHERITE -> Material.NETHERITE_INGOT;
-        };
     }
 }

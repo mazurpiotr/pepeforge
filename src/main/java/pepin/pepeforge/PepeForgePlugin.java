@@ -77,7 +77,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         ChiselRecipeDiscoveryListener chiselRecipeDiscoveryListener = new ChiselRecipeDiscoveryListener(this);
         getServer().getPluginManager().registerEvents(chiselRecipeDiscoveryListener, this);
         getServer().getPluginManager().registerEvents(new ScytheListener(itemFactory), this);
-        ScytheRecipeDiscoveryListener scytheRecipeDiscoveryListener = new ScytheRecipeDiscoveryListener(this);
+        ScytheRecipeDiscoveryListener scytheRecipeDiscoveryListener = new ScytheRecipeDiscoveryListener(this, itemFactory);
         getServer().getPluginManager().registerEvents(scytheRecipeDiscoveryListener, this);
         WindBladeListener windBladeListener = new WindBladeListener(this, itemFactory);
         windBladeListener.startHoldingTask();

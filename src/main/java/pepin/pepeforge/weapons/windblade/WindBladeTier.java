@@ -20,6 +20,8 @@ public enum WindBladeTier {
             5,
             ItemRarity.COMMON,
             Material.IRON_SWORD,
+            Material.IRON_INGOT,
+            Material.BREEZE_ROD,
             CustomModelDataIds.IRON_WIND_BLADE,
             5.0,
             2.1,
@@ -35,6 +37,8 @@ public enum WindBladeTier {
             5,
             ItemRarity.RARE,
             Material.DIAMOND_SWORD,
+            Material.DIAMOND,
+            Material.BREEZE_ROD,
             CustomModelDataIds.DIAMOND_WIND_BLADE,
             6.0,
             2.2,
@@ -50,6 +54,8 @@ public enum WindBladeTier {
             6,
             ItemRarity.EPIC,
             Material.NETHERITE_SWORD,
+            Material.NETHERITE_INGOT,
+            Material.BREEZE_ROD,
             CustomModelDataIds.NETHERITE_WIND_BLADE,
             7.0,
             2.2,
@@ -68,6 +74,8 @@ public enum WindBladeTier {
     private final int loreLineCount;
     private final ItemRarity rarity;
     private final Material baseMaterial;
+    private final Material bladeMaterial;
+    private final Material handleMaterial;
     private final int customModelData;
     private final double attackDamage;
     private final double attackSpeed;
@@ -83,6 +91,8 @@ public enum WindBladeTier {
             int loreLineCount,
             ItemRarity rarity,
             Material baseMaterial,
+            Material bladeMaterial,
+            Material handleMaterial,
             int customModelData,
             double attackDamage,
             double attackSpeed,
@@ -97,6 +107,8 @@ public enum WindBladeTier {
         this.loreLineCount = loreLineCount;
         this.rarity = rarity;
         this.baseMaterial = baseMaterial;
+        this.bladeMaterial = bladeMaterial;
+        this.handleMaterial = handleMaterial;
         this.customModelData = customModelData;
         this.attackDamage = attackDamage;
         this.attackSpeed = attackSpeed;
@@ -138,6 +150,14 @@ public enum WindBladeTier {
 
     public Material baseMaterial() {
         return baseMaterial;
+    }
+
+    public Material bladeMaterial() {
+        return bladeMaterial;
+    }
+
+    public Material handleMaterial() {
+        return handleMaterial;
     }
 
     public int customModelData() {

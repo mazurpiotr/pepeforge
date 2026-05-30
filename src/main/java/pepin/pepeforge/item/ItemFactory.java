@@ -343,17 +343,21 @@ public final class ItemFactory {
         return false;
     }
 
+    public boolean hasScythe(Inventory inventory, ScytheTier wantedTier) {
+        for (ItemStack item : inventory.getContents()) {
+            if (getScytheTier(item) == wantedTier) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ScytheTier getScytheTier(ItemStack item) {
         String itemId = getItemId(item);
         if (itemId == null || !isItemEnabled(itemId)) {
             return null;
         }
-        for (ScytheTier tier : ScytheTier.values()) {
-            if (tier.itemId().equals(itemId)) {
-                return tier;
-            }
-        }
-        return null;
+        return ScytheTier.fromItemId(itemId);
     }
 
     public String getItemId(ItemStack item) {
