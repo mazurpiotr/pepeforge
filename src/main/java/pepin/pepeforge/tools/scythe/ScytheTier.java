@@ -25,7 +25,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "iron_scythe"),
             CustomModelDataIds.IRON_SCYTHE,
-            0
+            1
     ),
     DIAMOND(
             ItemIds.DIAMOND_SCYTHE,
@@ -39,7 +39,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "diamond_scythe"),
             CustomModelDataIds.DIAMOND_SCYTHE,
-            1
+            2
     ),
     NETHERITE(
             ItemIds.NETHERITE_SCYTHE,
@@ -53,7 +53,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "netherite_scythe"),
             CustomModelDataIds.NETHERITE_SCYTHE,
-            2
+            3
     );
 
     private static final Map<String, ScytheTier> BY_ITEM_ID = Arrays.stream(values())
