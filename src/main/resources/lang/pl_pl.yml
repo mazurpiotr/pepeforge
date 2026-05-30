@@ -48,7 +48,7 @@ items:
       - "&6---------------"
       - "&eUmiejętność: &bRzeźbienie"
       - "&3Prawy przycisk zmienia dekoracyjne warianty bloków."
-      - "&3Shift + prawy przycisk obraca wstecz."
+      - "&3Shift + prawy przycisk przełącza warianty wstecz."
       - "&#A0AEC0Pospolita"
       - "&6---------------"
   katana:
@@ -56,8 +56,8 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &bParowanie"
-      - "&3Prawy przycisk otwiera krótkie okno parry."
-      - "&3Blokuje melee i odbija projectile."
+      - "&3Prawy przycisk otwiera krótkie okno parowania."
+      - "&3Blokuje ataki i odbija pociski."
       - "&7Dwuręczna"
       - "&#3182CERzadka"
       - "&6---------------"
@@ -91,9 +91,9 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &6Rytmiczne Cięcie"
-      - "&3Kliki w rytmie wyprowadzają cięcia obszarowe."
+      - "&3Ataki wykonywane w rytmie wyprowadzają cięcia obszarowe."
       - "&3Rytm poszerza łuk ataku."
-      - "&7Dwuręczny"
+      - "&7Dwuręczna"
       - "&#A0AEC0Pospolita"
       - "&6---------------"
   diamond_greatsword:
@@ -103,7 +103,7 @@ items:
       - "&eUmiejętność: &6Rytmiczne Cięcie"
       - "&3Kliki w rytmie wyprowadzają cięcia obszarowe."
       - "&3Rytm poszerza łuk ataku."
-      - "&7Dwuręczny"
+      - "&7Dwuręczna"
       - "&#3182CERzadka"
       - "&6---------------"
   netherite_greatsword:
@@ -113,7 +113,7 @@ items:
       - "&eUmiejętność: &6Rytmiczne Cięcie"
       - "&3Kliki w rytmie wyprowadzają cięcia obszarowe."
       - "&3Rytm poszerza łuk ataku."
-      - "&7Dwuręczny"
+      - "&7Dwuręczna"
       - "&#805AD5Epicka"
       - "&6---------------"
   iron_scythe:
