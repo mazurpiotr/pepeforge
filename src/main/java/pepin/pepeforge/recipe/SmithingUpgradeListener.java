@@ -16,6 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.weapons.greatsword.GreatswordTier;
+import pepin.pepeforge.tools.scythe.ScytheTier;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
 
 import java.util.Map;
@@ -77,6 +78,12 @@ public final class SmithingUpgradeListener implements Listener {
             case "diamond_wind_blade":
                 properResult = itemFactory.createWindBlade(WindBladeTier.NETHERITE);
                 break;
+            case "diamond_scythe":
+                properResult = itemFactory.createScythe(ScytheTier.NETHERITE);
+                break;
+            case "crescent_spear":
+                // Explicitly block upgrade to Netherite Spear to prevent losing model/identity
+                return new ItemStack(Material.AIR);
             default:
                 return null;
         }
