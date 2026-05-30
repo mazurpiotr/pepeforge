@@ -60,7 +60,7 @@ Suggestions, feedback and feature requests are always appreciated.
 
 ## Compatibility
 
-- Minecraft 1.21.1+
+- Minecraft 1.21.11+
 - Java 21+
 - Paper & Purpur recommended
 - Spigot supported with limited features
