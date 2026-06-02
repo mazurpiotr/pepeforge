@@ -17,6 +17,8 @@ messages:
     offhand_required: "&cTa broń wymaga pustej drugiej ręki."
   katana:
     cooldown: "&cKatana ładuje się... {bar} &7{seconds}s"
+  wind_blade:
+    cooldown: "&cZryw odnawia się... {bar} &7{seconds}s"
   crescent_spear:
     charge: "&dŁadunek księżyca {bar}"
     ready: "&dŁadunek księżyca gotowy! &fNastępne trafienie wzmocnione {bar}"
@@ -65,25 +67,28 @@ items:
     fallback_name: "&#BEBEBEŻelazne Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eUmiejętność: &bSzybkie Cięcie"
-      - "&3Daje Speed I na 2s po trafieniu."
+      - "&eUmiejętność: &bSzybkie Cięcie / Zryw Wiatru"
+      - "&3Daje Speed I na 10s po trafieniu."
+      - "&3Prawy przycisk wykonuje zryw (5s odnowienia)."
       - "&#A0AEC0Pospolita"
       - "&6---------------"
   diamond_wind_blade:
     fallback_name: "&#33EBCBDiamentowe Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eUmiejętność: &bSzybkie Cięcie"
+      - "&eUmiejętność: &bSzybkie Cięcie / Zryw Wiatru"
       - "&3Daje Speed I podczas trzymania."
+      - "&3Prawy przycisk wykonuje zryw (5s odnowienia)."
       - "&#3182CERzadka"
       - "&6---------------"
   netherite_wind_blade:
     fallback_name: "&8Netherytowe Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eUmiejętność: &bSzybkie Cięcie"
+      - "&eUmiejętność: &bSzybkie Cięcie / Zryw Wiatru"
       - "&3Daje Speed I podczas trzymania."
-      - "&3Daje Speed II na 3s po trafieniu."
+      - "&3Daje Speed II na 10s po trafieniu."
+      - "&3Prawy przycisk wykonuje zryw (5s odnowienia)."
       - "&#805AD5Epicka"
       - "&6---------------"
   iron_greatsword:
@@ -142,4 +147,24 @@ items:
       - "&3Zbiera dojrzałe plony w obszarze 7x7."
       - "&3Automatycznie przesadza z dropu lub ekwipunku."
       - "&#805AD5Epicka"
+      - "&6---------------"
+  crimson_sword:
+    fallback_name: "&4Karmazynowy Miecz"
+    lore:
+      - "&6---------------"
+      - "&ePoziom: &c{level} &7({xp}/{max_xp} XP)"
+      - "&8Legendarny miecz karmiący się krwią."
+      - ""
+      - "&7Odblokowane cechy:"
+      - "{features}"
+      - "&6---------------"
+  crimson_sword:
+    fallback_name: "&4Karmazynowy Miecz"
+    lore:
+      - "&6---------------"
+      - "&ePoziom: &c{level} &7({xp}/{max_xp} XP)"
+      - "&8Legendarny miecz karmiący się krwią."
+      - ""
+      - "&7Odblokowane cechy:"
+      - "{features}"
       - "&6---------------"

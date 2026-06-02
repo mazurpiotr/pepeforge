@@ -7,6 +7,8 @@ import pepin.pepeforge.gui.CustomItemsMenuListener;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.recipe.RecipeDiscoveryRefresher;
+import pepin.pepeforge.util.AuraManager;
+import pepin.pepeforge.util.CooldownManager;
 import pepin.pepeforge.tools.chisel.ChiselListener;
 import pepin.pepeforge.tools.chisel.ChiselRecipeDiscoveryListener;
 import pepin.pepeforge.tools.chisel.ChiselRecipes;
@@ -43,6 +45,8 @@ public final class PepeForgePlugin extends JavaPlugin {
     private KatanaRecipes katanaRecipes;
     private GreatswordRecipes greatswordRecipes;
     private GreatswordListener greatswordListener;
+    private CooldownManager cooldownManager;
+    private AuraManager auraManager;
 
     @Override
     public void onEnable() {
@@ -56,6 +60,8 @@ public final class PepeForgePlugin extends JavaPlugin {
         crescentSpearRecipes = new CrescentSpearRecipes(this, itemFactory);
         katanaRecipes = new KatanaRecipes(this, itemFactory);
         greatswordRecipes = new GreatswordRecipes(this, itemFactory);
+        cooldownManager = new CooldownManager();
+        auraManager = new AuraManager(this, itemFactory);
 
         chiselRecipes.registerAll();
         scytheRecipes.registerAll();
@@ -79,7 +85,8 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ScytheListener(itemFactory), this);
         ScytheRecipeDiscoveryListener scytheRecipeDiscoveryListener = new ScytheRecipeDiscoveryListener(this, itemFactory);
         getServer().getPluginManager().registerEvents(scytheRecipeDiscoveryListener, this);
-        WindBladeListener windBladeListener = new WindBladeListener(this, itemFactory);
+        auraManager.startTask();
+        WindBladeListener windBladeListener = new WindBladeListener(this, itemFactory, lang, cooldownManager, auraManager);
         windBladeListener.startHoldingTask();
         getServer().getPluginManager().registerEvents(windBladeListener, this);
         WindBladeRecipeDiscoveryListener windBladeRecipeDiscoveryListener = new WindBladeRecipeDiscoveryListener(this, itemFactory);
@@ -94,7 +101,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(crescentSpearListener, this);
         CrescentSpearRecipeDiscoveryListener crescentSpearRecipeDiscoveryListener = new CrescentSpearRecipeDiscoveryListener(this);
         getServer().getPluginManager().registerEvents(crescentSpearRecipeDiscoveryListener, this);
-        KatanaListener katanaListener = new KatanaListener(this, itemFactory, lang);
+        KatanaListener katanaListener = new KatanaListener(this, itemFactory, lang, cooldownManager);
         katanaListener.startStatusTask();
         getServer().getPluginManager().registerEvents(katanaListener, this);
         KatanaRecipeDiscoveryListener katanaRecipeDiscoveryListener = new KatanaRecipeDiscoveryListener(this);
@@ -146,6 +153,12 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
         if (greatswordListener != null) {
             greatswordListener.clearAllPlayerState();
+        }
+        if (auraManager != null) {
+            auraManager.stop();
+        }
+        if (cooldownManager != null) {
+            cooldownManager.clearAll();
         }
     }
 }

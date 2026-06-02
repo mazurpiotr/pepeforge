@@ -53,3 +53,6 @@ items:
   netherite_scythe:
     enabled: true
     recipe_enabled: true
+  crimson_sword:
+    enabled: true
+    recipe_enabled: true
