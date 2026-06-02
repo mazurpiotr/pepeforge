@@ -6,13 +6,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitTask;
 import pepin.pepeforge.item.ItemFactory;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class AuraManager {
 
@@ -20,8 +19,8 @@ public final class AuraManager {
 
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
-    private final Map<UUID, Long> windAuraUntil = new HashMap<>();
-    private BukkitTask task;
+    private final Map<UUID, Long> windAuraUntil = new ConcurrentHashMap<>();
+    private ScheduledTaskCompat task;
 
     public AuraManager(JavaPlugin plugin, ItemFactory itemFactory) {
         this.plugin = plugin;
@@ -33,7 +32,7 @@ public final class AuraManager {
             return;
         }
 
-        task = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        task = SchedulerCompat.runTimer(plugin, () -> {
             long now = System.currentTimeMillis();
             cleanupExpired(now);
 
@@ -43,12 +42,18 @@ public final class AuraManager {
                     continue;
                 }
 
-                ItemStack held = player.getInventory().getItemInMainHand();
-                if (itemFactory.getWindBladeTier(held) == null || !player.hasPotionEffect(PotionEffectType.SPEED)) {
-                    continue;
-                }
+                SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    if (!player.isOnline()) {
+                        return;
+                    }
 
-                playWindAura(player);
+                    ItemStack held = player.getInventory().getItemInMainHand();
+                    if (itemFactory.getWindBladeTier(held) == null || !player.hasPotionEffect(PotionEffectType.SPEED)) {
+                        return;
+                    }
+
+                    playWindAura(player);
+                });
             }
         }, 1L, 2L);
     }

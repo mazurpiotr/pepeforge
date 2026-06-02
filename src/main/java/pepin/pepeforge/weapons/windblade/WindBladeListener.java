@@ -1,8 +1,6 @@
 package pepin.pepeforge.weapons.windblade;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -195,19 +193,20 @@ public final class WindBladeListener implements Listener {
     }
 
     private void showActionBar(Player player, String message) {
-        String coloredMessage = ChatColor.translateAlternateColorCodes('&', message);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(coloredMessage));
+        player.sendActionBar(
+            LegacyComponentSerializer.legacyAmpersand().deserialize(message)
+        );
     }
 
     private String buildProgressBar(double progress) {
-        int filledSegments = (int) Math.round(progress * COOLDOWN_BAR_SEGMENTS);
-        StringBuilder bar = new StringBuilder("&a");
+        int filled = (int) Math.round(progress * COOLDOWN_BAR_SEGMENTS);
+
+        StringBuilder bar = new StringBuilder();
+
         for (int i = 0; i < COOLDOWN_BAR_SEGMENTS; i++) {
-            if (i == filledSegments) {
-                bar.append("&7");
-            }
-            bar.append('|');
+            bar.append(i < filled ? "&a|" : "&8|");
         }
+
         return bar.toString();
     }
 }

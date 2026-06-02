@@ -1,6 +1,5 @@
 package pepin.pepeforge.weapons.crimsonsword;
 
-import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -9,6 +8,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ItemMetaCompat;
 
@@ -112,7 +115,11 @@ public final class CrimsonSwordManager {
         double requiredXp = level >= CrimsonSwordDefinition.MAX_LEVEL ? 0.0D : requiredXpForLevel(level);
         String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
         String baseName = lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang);
-        String displayName = baseName + ChatColor.GRAY + " [Lv. " + level + "]";
+        Component displayName = Component.text(baseName)
+        .append(Component.text(
+                " [Lv. " + level + "]",
+                NamedTextColor.GRAY
+        ));
 
         ItemMetaCompat.setItemName(meta, displayName);
         if (!plugin.getConfig().getBoolean("translations.use_client_side", true)
@@ -123,26 +130,48 @@ public final class CrimsonSwordManager {
         item.setItemMeta(meta);
     }
 
-    private List<String> buildLore(String serverLang, int level, double xp, double requiredXp) {
-        List<String> lore = new ArrayList<>(lang.getItemLoreForLang(CrimsonSwordDefinition.LANG_PATH, serverLang));
-        List<String> features = unlockedFeatures(level);
-        String featureLine = features.isEmpty()
-                ? ChatColor.DARK_GRAY + "-"
-                : String.join(ChatColor.GRAY + ", ", features);
+    private List<Component> buildLore(String serverLang, int level, double xp, double requiredXp) {
+        List<String> loreLines =
+                new ArrayList<>(lang.getItemLoreForLang(CrimsonSwordDefinition.LANG_PATH, serverLang));
 
-        for (int i = 0; i < lore.size(); i++) {
-            String line = lore.get(i)
+        List<Component> result = new ArrayList<>();
+
+        List<Component> features = unlockedFeatures(level);
+
+        Component featureLine = features.isEmpty()
+                ? Component.text("-", NamedTextColor.DARK_GRAY)
+                : Component.join(
+                        JoinConfiguration.separator(
+                                Component.text(", ", NamedTextColor.GRAY)
+                        ),
+                        features
+                );
+
+        for (String line : loreLines) {
+            line = line
                     .replace("{level}", String.valueOf(level))
                     .replace("{xp}", formatXp(xp))
-                    .replace("{max_xp}", level >= CrimsonSwordDefinition.MAX_LEVEL ? "MAX" : formatXp(requiredXp))
-                    .replace("{features}", featureLine);
-            lore.set(i, line);
-        }
-        return lore;
-    }
+                    .replace("{max_xp}", level >= CrimsonSwordDefinition.MAX_LEVEL
+                            ? "MAX"
+                            : formatXp(requiredXp));
 
-    private List<String> unlockedFeatures(int level) {
-        List<String> features = new ArrayList<>();
+            if (line.contains("{features}")) {
+                String[] parts = line.split("\\{features\\}", 2);
+
+                result.add(
+                        Component.text(parts[0])
+                                .append(featureLine)
+                                .append(Component.text(parts.length > 1 ? parts[1] : ""))
+                );
+            } else {
+                result.add(Component.text(line));
+            }
+        }
+
+        return result;
+    }
+    private List<Component> unlockedFeatures(int level) {
+        List<Component> features = new ArrayList<>();
 
         if (level < 5) {
             return features;
@@ -150,7 +179,12 @@ public final class CrimsonSwordManager {
 
         // Heal on kill
         int heartsHealed = level >= 15 ? 2 : 1;
-        features.add(ChatColor.RED + "Heal " + heartsHealed + "❤ on Kill");
+        features.add(
+            Component.text(
+                "Heal " + heartsHealed + "❤ on Kill",
+                NamedTextColor.RED
+            )
+        );
 
         // Aura bonuses
         if (level >= 10) {
@@ -172,18 +206,35 @@ public final class CrimsonSwordManager {
                 auraSeconds = CrimsonSwordDefinition.LEVEL_10_AURA_TICKS / 20;
             }
 
-            features.add(ChatColor.DARK_RED + "Crimson Aura (" + auraSeconds + "s)");
+            features.add(
+                Component.text(
+                    "Crimson Aura (" + auraSeconds + "s)",
+                    NamedTextColor.DARK_RED
+                )
+            );
 
-            features.add(ChatColor.RED +
-                    "+" + (int) (damageBonus * 100) + "% Damage");
+            features.add(
+                Component.text(
+                    "+" + (int) (damageBonus * 100) + "% Damage",
+                    NamedTextColor.RED
+                )
+            );
 
-            features.add(ChatColor.RED +
-                    "+" + formatPercent(lifesteal * 100) + "% Lifesteal");
+            features.add(
+                Component.text(
+                    "+" + formatPercent(lifesteal * 100) + "% Lifesteal",
+                    NamedTextColor.RED
+                )
+            );
 
             if (level >= 25) {
-                features.add(ChatColor.RED +
+                features.add(
+                    Component.text(
                         "+" + (int) (CrimsonSwordDefinition.CHAIN_DAMAGE_BONUS_PER_STACK * 100) +
-                        "% Damage per Kill (" + CrimsonSwordDefinition.CHAIN_MAX_STACKS + " stacks)");
+                        "% Damage per Kill (" + CrimsonSwordDefinition.CHAIN_MAX_STACKS + " stacks)",
+                        NamedTextColor.RED
+                    )
+                );
             }
         }
 

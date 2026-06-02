@@ -228,7 +228,7 @@ public final class ItemFactory {
         if (!clientSideTranslations) {
             ItemMetaCompat.setDisplayName(meta, fallbackName);
         }
-        ItemMetaCompat.setLore(meta, fallbackLore);
+        ItemMetaCompat.setStringLore(meta, fallbackLore);
         ItemMetaCompat.setCustomModelData(meta, spec.customModelData());
         if (spec.modelKey() != null) {
             ItemMetaCompat.setItemModelIfSupported(meta, spec.modelKey());
