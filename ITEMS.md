@@ -27,6 +27,10 @@ Elemental melee weapons with speed effects.
 | **Diamond Wind Blade** | 6 | Speed I while holding |
 | **Netherite Wind Blade** | 7 | Speed I while holding + Speed II for 3s on hit |
 
+| Feature | Details |
+|---------|---------|
+| Dash | Right-click to activate a dash ability (5-second cooldown). Available on all tiers. |
+
 **Crafting** (Shaped Recipe):
 
 ![Wind Blade](media/receipes/pepeforge_wind_blade.gif)
@@ -130,6 +134,33 @@ Farming tool for harvesting ripe crops and replanting them automatically.
 
 Replant order: Uses harvested seeds first, then inventory fallback.
 
+## 🩸 Crimson Sword
+
+A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
+
+| Property | Details |
+|----------|---------|
+| **Rarity** | Legendary |
+| **Acquisition** | Boss Drop / Quest Reward |
+| **Level Cap** | 30 |
+| **Experience Source** | Damage Dealt |
+| **XP Curve** | Base * 1.15^level |
+| **Level Display** | Item Name & Lore |
+| **Visual Progression** | Particles, Aura, and Special Effects |
+
+**Progression**:
+
+| Level | Effect |
+|-------|--------|
+| **5** | Killing an enemy restores 1 Heart (2 HP). |
+| **10** | Killing an enemy grants +10% Attack Damage, 5% Lifesteal and Crimson Aura for 10 seconds.
+| **15** | While Crimson Aura is active, kills restore 2 Hearts (4 HP) instead of 1. |
+| **20** | Killing an enemy grants +15% Attack Damage, 7.5% Lifesteal and Crimson Aura for 20 seconds.|
+| **25** | While Crimson Aura is active, each kill increases Attack Damage by 2%, stacking up to 5 times. Stacks expire when Crimson Aura ends. |
+| **30** | Killing an enemy grants +20% Attack Damage, 10% Lifesteal and Crimson Aura for 30 seconds.
+
+*Subjected for changes*
+
 ## Give Names
 
 Available internal item names for `/pepeforge give`:
@@ -147,3 +178,4 @@ Available internal item names for `/pepeforge give`:
 - `iron_scythe`
 - `diamond_scythe`
 - `netherite_scythe`
+- `crimson_sword`
