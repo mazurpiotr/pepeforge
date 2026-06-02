@@ -101,7 +101,9 @@
   "item.pepeforge.netherite_scythe.lore.7": "§6---------------",
   "item.pepeforge.crimson_sword.name": "§4Crimson Sword",
   "item.pepeforge.crimson_sword.lore.1": "§6---------------",
-  "item.pepeforge.crimson_sword.lore.2": "§eLevel: §c%s §7(%s/%s XP)",
-  "item.pepeforge.crimson_sword.lore.3": "§8Legendary sword that feeds on blood.",
-  "item.pepeforge.crimson_sword.lore.4": "§6---------------"
+  "item.pepeforge.crimson_sword.lore.2": "§8A legendary sword that feeds on blood.",
+  "item.pepeforge.crimson_sword.lore.3": "§3Damage dealt grants weapon XP.",
+  "item.pepeforge.crimson_sword.lore.4": "§3Kills awaken crimson effects and aura.",
+  "item.pepeforge.crimson_sword.lore.5": "Legendary",
+  "item.pepeforge.crimson_sword.lore.6": "§6---------------"
 }

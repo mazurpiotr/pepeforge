@@ -25,6 +25,8 @@ import pepin.pepeforge.weapons.crescentspear.CrescentSpearRecipes;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowListener;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowRecipes;
+import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordListener;
+import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 import pepin.pepeforge.weapons.greatsword.GreatswordListener;
 import pepin.pepeforge.weapons.greatsword.GreatswordRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.greatsword.GreatswordRecipes;
@@ -45,6 +47,7 @@ public final class PepeForgePlugin extends JavaPlugin {
     private KatanaRecipes katanaRecipes;
     private GreatswordRecipes greatswordRecipes;
     private GreatswordListener greatswordListener;
+    private CrimsonSwordListener crimsonSwordListener;
     private CooldownManager cooldownManager;
     private AuraManager auraManager;
 
@@ -111,6 +114,10 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(greatswordListener, this);
         GreatswordRecipeDiscoveryListener greatswordRecipeDiscoveryListener = new GreatswordRecipeDiscoveryListener(this, itemFactory);
         getServer().getPluginManager().registerEvents(greatswordRecipeDiscoveryListener, this);
+        CrimsonSwordManager crimsonSwordManager = new CrimsonSwordManager(this, lang);
+        crimsonSwordListener = new CrimsonSwordListener(this, itemFactory, crimsonSwordManager);
+        crimsonSwordListener.startAuraTask();
+        getServer().getPluginManager().registerEvents(crimsonSwordListener, this);
 
         RecipeDiscoveryRefresher recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
             chiselRecipeDiscoveryListener.discoverFor(player);
@@ -153,6 +160,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
         if (greatswordListener != null) {
             greatswordListener.clearAllPlayerState();
+        }
+        if (crimsonSwordListener != null) {
+            crimsonSwordListener.stop();
         }
         if (auraManager != null) {
             auraManager.stop();

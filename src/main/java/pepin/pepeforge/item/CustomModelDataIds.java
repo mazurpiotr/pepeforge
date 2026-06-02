@@ -25,6 +25,7 @@ public final class CustomModelDataIds {
     // DIAMOND_SWORD family in the resource pack (vanilla base item grouping, not gameplay grouping)
     public static final int DIAMOND_WIND_BLADE = 212001;
     public static final int DIAMOND_GREATSWORD = 212002;
+    public static final int CRIMSON_SWORD = 212003;
 
     // NETHERITE_SWORD family in the resource pack (vanilla base item grouping, not gameplay grouping)
     public static final int NETHERITE_WIND_BLADE = 213001;

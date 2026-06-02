@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cOnly players can use this command."
     no_permission: "&cYou do not have permission to use this command."
-    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe> <player> or /pepeforge items"
+    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword> <player> or /pepeforge items"
     unknown_subcommand: "&cUnknown subcommand."
     unknown_item: "&cUnknown item: {item}"
     item_disabled: "&cThat item is currently disabled: {item}"
@@ -147,4 +147,16 @@ items:
       - "&3Harvests ripe crops in a 7x7 area."
       - "&3Automatically replants using drops or inventory."
       - "&#805AD5Epic"
+      - "&6---------------"
+  crimson_sword:
+    fallback_name: "&4Crimson Sword"
+    lore:
+      - "&6---------------"
+      - "&eLevel: &c{level} &7({xp}/{max_xp} XP)"
+      - "&8A legendary sword that feeds on blood."
+      - "&3Damage dealt grants weapon XP."
+      - "&3Kills awaken crimson effects and aura."
+      - "&7Unlocked traits:"
+      - "{features}"
+      - "&#D69E2ELegendary"
       - "&6---------------"

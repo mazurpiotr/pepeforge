@@ -98,7 +98,9 @@
   "item.pepeforge.netherite_scythe.lore.6": "§6---------------",
   "item.pepeforge.crimson_sword.name": "§4Karmazynowy Miecz",
   "item.pepeforge.crimson_sword.lore.1": "§6---------------",
-  "item.pepeforge.crimson_sword.lore.2": "§ePoziom: §c%s §7(%s/%s XP)",
-  "item.pepeforge.crimson_sword.lore.3": "§8Legendarny miecz karmiący się krwią.",
-  "item.pepeforge.crimson_sword.lore.4": "§6---------------"
+  "item.pepeforge.crimson_sword.lore.2": "§8Legendarny miecz karmiący się krwią.",
+  "item.pepeforge.crimson_sword.lore.3": "§3Zadane obrażenia dają XP broni.",
+  "item.pepeforge.crimson_sword.lore.4": "§3Zabójstwa budzą karmazynowe efekty i aurę.",
+  "item.pepeforge.crimson_sword.lore.5": "Legendarna",
+  "item.pepeforge.crimson_sword.lore.6": "§6---------------"
 }

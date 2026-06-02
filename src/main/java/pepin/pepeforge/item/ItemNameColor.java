@@ -4,6 +4,7 @@ public enum ItemNameColor {
     IRON(ItemColorPalette.IRON_NAME),
     DIAMOND(ItemColorPalette.DIAMOND_NAME),
     CRESCENT(ItemColorPalette.CRESCENT_NAME),
+    CRIMSON(ItemColorPalette.CRIMSON_NAME),
     NETHERITE(ItemColorPalette.NETHERITE_NAME);
 
     private final ItemColorPalette color;
