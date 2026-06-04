@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ItemMetaCompat;
 
@@ -20,6 +21,10 @@ import java.util.List;
 import java.util.Locale;
 
 public final class CrimsonSwordManager {
+
+    private static final String TRANSLATION_KEY_BASE = CrimsonSwordDefinition.TRANSLATION_KEY_BASE;
+    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER =
+            LegacyComponentSerializer.legacySection();
 
     private final JavaPlugin plugin;
     private final PluginLang lang;
@@ -114,29 +119,68 @@ public final class CrimsonSwordManager {
         double xp = meta.getPersistentDataContainer().getOrDefault(xpKey, PersistentDataType.DOUBLE, 0.0D);
         double requiredXp = level >= CrimsonSwordDefinition.MAX_LEVEL ? 0.0D : requiredXpForLevel(level);
         String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
-        String baseName = lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang);
-        Component displayName = Component.text(baseName)
-        .append(Component.text(
-                " [Lv. " + level + "]",
-                NamedTextColor.GRAY
-        ));
+        boolean clientSideTranslations = useClientSideTranslations();
+        Component displayName = clientSideTranslations
+                ? translatedName(level)
+                : fallbackName(serverLang, level);
 
         ItemMetaCompat.setItemName(meta, displayName);
-        if (!plugin.getConfig().getBoolean("translations.use_client_side", true)
-                || !ItemMetaCompat.supportsItemTextDataComponents()) {
+        if (!clientSideTranslations) {
             ItemMetaCompat.setDisplayName(meta, displayName);
         }
-        ItemMetaCompat.setLore(meta, buildLore(serverLang, level, xp, requiredXp));
+        ItemMetaCompat.setLore(meta, clientSideTranslations
+                ? buildTranslatedLore(level, xp, requiredXp)
+                : buildFallbackLore(serverLang, level, xp, requiredXp));
         item.setItemMeta(meta);
     }
 
-    private List<Component> buildLore(String serverLang, int level, double xp, double requiredXp) {
+    private Component translatedName(int level) {
+        return Component.translatable(TRANSLATION_KEY_BASE + ".name", NamedTextColor.DARK_RED)
+                .append(levelSuffix(level));
+    }
+
+    private Component fallbackName(String serverLang, int level) {
+        String baseName = lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang);
+        return LEGACY_SECTION_SERIALIZER.deserialize(baseName).append(levelSuffix(level));
+    }
+
+    private Component levelSuffix(int level) {
+        return Component.text(" [Lv. " + level + "]", NamedTextColor.GRAY);
+    }
+
+    private List<Component> buildTranslatedLore(int level, double xp, double requiredXp) {
+        List<Component> features = translatedFeatures(level);
+        Component featureLine = features.isEmpty()
+                ? Component.text("-", NamedTextColor.DARK_GRAY)
+                : Component.join(JoinConfiguration.separator(Component.text(", ", NamedTextColor.GRAY)), features);
+
+        List<Component> lore = new ArrayList<>();
+        lore.add(Component.translatable(TRANSLATION_KEY_BASE + ".lore.1"));
+        lore.add(Component.translatable(
+                TRANSLATION_KEY_BASE + ".lore.level",
+                Component.text(level, NamedTextColor.RED),
+                Component.text(formatXp(xp), NamedTextColor.GRAY),
+                level >= CrimsonSwordDefinition.MAX_LEVEL
+                        ? Component.text("MAX", NamedTextColor.GOLD)
+                        : Component.text(formatXp(requiredXp), NamedTextColor.GRAY)
+        ));
+        lore.add(Component.translatable(TRANSLATION_KEY_BASE + ".lore.2"));
+        lore.add(Component.translatable(TRANSLATION_KEY_BASE + ".lore.3"));
+        lore.add(Component.translatable(TRANSLATION_KEY_BASE + ".lore.4"));
+        lore.add(Component.translatable(TRANSLATION_KEY_BASE + ".lore.unlocked"));
+        lore.add(featureLine);
+        lore.add(Component.translatable(TRANSLATION_KEY_BASE + ".lore.rarity", NamedTextColor.GOLD));
+        lore.add(Component.translatable(TRANSLATION_KEY_BASE + ".lore.1"));
+        return lore;
+    }
+
+    private List<Component> buildFallbackLore(String serverLang, int level, double xp, double requiredXp) {
         List<String> loreLines =
                 new ArrayList<>(lang.getItemLoreForLang(CrimsonSwordDefinition.LANG_PATH, serverLang));
 
         List<Component> result = new ArrayList<>();
 
-        List<Component> features = unlockedFeatures(level);
+        List<Component> features = fallbackFeatures(level);
 
         Component featureLine = features.isEmpty()
                 ? Component.text("-", NamedTextColor.DARK_GRAY)
@@ -159,86 +203,134 @@ public final class CrimsonSwordManager {
                 String[] parts = line.split("\\{features\\}", 2);
 
                 result.add(
-                        Component.text(parts[0])
+                        LEGACY_SECTION_SERIALIZER.deserialize(parts[0])
                                 .append(featureLine)
-                                .append(Component.text(parts.length > 1 ? parts[1] : ""))
+                                .append(LEGACY_SECTION_SERIALIZER.deserialize(parts.length > 1 ? parts[1] : ""))
                 );
             } else {
-                result.add(Component.text(line));
+                result.add(LEGACY_SECTION_SERIALIZER.deserialize(line));
             }
         }
 
         return result;
     }
-    private List<Component> unlockedFeatures(int level) {
+
+    private List<Component> translatedFeatures(int level) {
         List<Component> features = new ArrayList<>();
 
-        if (level < 5) {
-            return features;
-        }
+        features.add(Component.translatable(
+                TRANSLATION_KEY_BASE + ".feature.edge",
+                NamedTextColor.RED,
+                Component.text(damageBonusPercent(level), NamedTextColor.RED)
+        ));
 
-        // Heal on kill
-        int heartsHealed = level >= 15 ? 2 : 1;
-        features.add(
-            Component.text(
-                "Heal " + heartsHealed + "❤ on Kill",
-                NamedTextColor.RED
-            )
-        );
-
-        // Aura bonuses
-        if (level >= 10) {
-            double damageBonus;
-            double lifesteal;
-            int auraSeconds;
-
-            if (level >= 30) {
-                damageBonus = CrimsonSwordDefinition.LEVEL_30_DAMAGE_BONUS;
-                lifesteal = CrimsonSwordDefinition.LEVEL_30_LIFESTEAL;
-                auraSeconds = CrimsonSwordDefinition.LEVEL_30_AURA_TICKS / 20;
-            } else if (level >= 20) {
-                damageBonus = CrimsonSwordDefinition.LEVEL_20_DAMAGE_BONUS;
-                lifesteal = CrimsonSwordDefinition.LEVEL_20_LIFESTEAL;
-                auraSeconds = CrimsonSwordDefinition.LEVEL_20_AURA_TICKS / 20;
-            } else {
-                damageBonus = CrimsonSwordDefinition.LEVEL_10_DAMAGE_BONUS;
-                lifesteal = CrimsonSwordDefinition.LEVEL_10_LIFESTEAL;
-                auraSeconds = CrimsonSwordDefinition.LEVEL_10_AURA_TICKS / 20;
-            }
-
-            features.add(
-                Component.text(
-                    "Crimson Aura (" + auraSeconds + "s)",
-                    NamedTextColor.DARK_RED
-                )
-            );
-
-            features.add(
-                Component.text(
-                    "+" + (int) (damageBonus * 100) + "% Damage",
-                    NamedTextColor.RED
-                )
-            );
-
-            features.add(
-                Component.text(
-                    "+" + formatPercent(lifesteal * 100) + "% Lifesteal",
-                    NamedTextColor.RED
-                )
-            );
-
-            if (level >= 25) {
-                features.add(
-                    Component.text(
-                        "+" + (int) (CrimsonSwordDefinition.CHAIN_DAMAGE_BONUS_PER_STACK * 100) +
-                        "% Damage per Kill (" + CrimsonSwordDefinition.CHAIN_MAX_STACKS + " stacks)",
-                        NamedTextColor.RED
-                    )
-                );
-            }
-        }
-
+        addLifestealFeature(level, features, true);
+        addAuraFeature(level, features, true);
         return features;
+    }
+
+    private List<Component> fallbackFeatures(int level) {
+        List<Component> features = new ArrayList<>();
+
+        features.add(LEGACY_SECTION_SERIALIZER.deserialize(
+                lang.text("items.crimson_sword.features.edge")
+                        .replace("{percent}", String.valueOf(damageBonusPercent(level)))
+        ));
+
+        addLifestealFeature(level, features, false);
+        addAuraFeature(level, features, false);
+        return features;
+    }
+
+    private void addLifestealFeature(int level, List<Component> features, boolean translated) {
+        double lifesteal = lifesteal(level);
+        if (lifesteal <= 0.0D) {
+            return;
+        }
+        if (translated) {
+            features.add(Component.translatable(
+                    TRANSLATION_KEY_BASE + ".feature.lifesteal",
+                    NamedTextColor.RED,
+                    Component.text(formatPercent(lifesteal * 100), NamedTextColor.RED)
+            ));
+            return;
+        }
+
+        features.add(LEGACY_SECTION_SERIALIZER.deserialize(
+                lang.text("items.crimson_sword.features.lifesteal")
+                        .replace("{percent}", formatPercent(lifesteal * 100))
+        ));
+    }
+
+    private void addAuraFeature(int level, List<Component> features, boolean translated) {
+        if (level < 10) {
+            return;
+        }
+
+        String seconds = String.valueOf(auraDurationTicks(level) / 20);
+        String drain = formatPercent(auraDrainAmount(level));
+        String radius = formatPercent(CrimsonSwordDefinition.AURA_RADIUS);
+        if (translated) {
+            features.add(Component.translatable(
+                    TRANSLATION_KEY_BASE + ".feature.aura",
+                    NamedTextColor.DARK_RED,
+                    Component.text(seconds, NamedTextColor.DARK_RED),
+                    Component.text(drain, NamedTextColor.DARK_RED),
+                    Component.text(radius, NamedTextColor.DARK_RED)
+            ));
+            return;
+        }
+
+        features.add(LEGACY_SECTION_SERIALIZER.deserialize(
+                lang.text("items.crimson_sword.features.aura")
+                        .replace("{seconds}", seconds)
+                        .replace("{drain}", drain)
+                        .replace("{radius}", radius)
+        ));
+    }
+
+    private int damageBonusPercent(int level) {
+        return (int) (Math.min(level, CrimsonSwordDefinition.MAX_LEVEL)
+                * CrimsonSwordDefinition.DAMAGE_BONUS_PER_LEVEL
+                * 100);
+    }
+
+    private double lifesteal(int level) {
+        if (level >= 25) {
+            return CrimsonSwordDefinition.LEVEL_25_LIFESTEAL;
+        }
+        if (level >= 15) {
+            return CrimsonSwordDefinition.LEVEL_15_LIFESTEAL;
+        }
+        if (level >= 5) {
+            return CrimsonSwordDefinition.LEVEL_5_LIFESTEAL;
+        }
+        return 0.0D;
+    }
+
+    private int auraDurationTicks(int level) {
+        if (level >= 30) {
+            return CrimsonSwordDefinition.LEVEL_30_AURA_TICKS;
+        }
+        if (level >= 20) {
+            return CrimsonSwordDefinition.LEVEL_20_AURA_TICKS;
+        }
+        return CrimsonSwordDefinition.LEVEL_10_AURA_TICKS;
+    }
+
+    private double auraDrainAmount(int level) {
+        if (level >= 30) {
+            return CrimsonSwordDefinition.LEVEL_30_AURA_DRAIN;
+        }
+        if (level >= 20) {
+            return CrimsonSwordDefinition.LEVEL_20_AURA_DRAIN;
+        }
+        return CrimsonSwordDefinition.LEVEL_10_AURA_DRAIN;
+    }
+
+    private boolean useClientSideTranslations() {
+        return plugin.getConfig().getBoolean("translations.use_client_side", true)
+                && ItemMetaCompat.supportsItemTextDataComponents();
     }
 
     private String formatPercent(double value) {

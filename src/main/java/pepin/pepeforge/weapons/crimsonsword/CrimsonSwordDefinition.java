@@ -27,17 +27,19 @@ public final class CrimsonSwordDefinition {
     public static final double BASE_XP = 100.0D;
     public static final double XP_CURVE_MULTIPLIER = 1.15D;
 
-    public static final double LEVEL_10_DAMAGE_BONUS = 0.10D;
-    public static final double LEVEL_20_DAMAGE_BONUS = 0.15D;
-    public static final double LEVEL_30_DAMAGE_BONUS = 0.20D;
-    public static final double LEVEL_10_LIFESTEAL = 0.05D;
-    public static final double LEVEL_20_LIFESTEAL = 0.075D;
-    public static final double LEVEL_30_LIFESTEAL = 0.10D;
+    public static final double DAMAGE_BONUS_PER_LEVEL = 0.01D;
+    public static final double LEVEL_5_LIFESTEAL = 0.05D;
+    public static final double LEVEL_15_LIFESTEAL = 0.075D;
+    public static final double LEVEL_25_LIFESTEAL = 0.10D;
+    public static final double AURA_TRIGGER_DAMAGE = 20.0D;
+    public static final double AURA_RADIUS = 2.5D;
+    public static final int AURA_DRAIN_INTERVAL_TICKS = 20;
+    public static final double LEVEL_10_AURA_DRAIN = 1.0D;
+    public static final double LEVEL_20_AURA_DRAIN = 2.0D;
+    public static final double LEVEL_30_AURA_DRAIN = 3.0D;
     public static final int LEVEL_10_AURA_TICKS = 10 * 20;
     public static final int LEVEL_20_AURA_TICKS = 20 * 20;
     public static final int LEVEL_30_AURA_TICKS = 30 * 20;
-    public static final double CHAIN_DAMAGE_BONUS_PER_STACK = 0.02D;
-    public static final int CHAIN_MAX_STACKS = 5;
 
     private CrimsonSwordDefinition() {
     }

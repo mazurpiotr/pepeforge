@@ -100,7 +100,11 @@
   "item.pepeforge.crimson_sword.lore.1": "§6---------------",
   "item.pepeforge.crimson_sword.lore.2": "§8Legendarny miecz karmiący się krwią.",
   "item.pepeforge.crimson_sword.lore.3": "§3Zadane obrażenia dają XP broni.",
-  "item.pepeforge.crimson_sword.lore.4": "§3Zabójstwa budzą karmazynowe efekty i aurę.",
-  "item.pepeforge.crimson_sword.lore.5": "Legendarna",
-  "item.pepeforge.crimson_sword.lore.6": "§6---------------"
+  "item.pepeforge.crimson_sword.lore.4": "§3Zadawane obrażenia ładują Karmazynową Aurę.",
+  "item.pepeforge.crimson_sword.lore.level": "§ePoziom: §c%s §7(%s/%s XP)",
+  "item.pepeforge.crimson_sword.lore.unlocked": "§7Aktywne efekty:",
+  "item.pepeforge.crimson_sword.lore.rarity": "Legendarna",
+  "item.pepeforge.crimson_sword.feature.edge": "Karmazynowe Ostrze: +%s%% obrażeń",
+  "item.pepeforge.crimson_sword.feature.lifesteal": "+%s%% kradzieży życia",
+  "item.pepeforge.crimson_sword.feature.aura": "Karmazynowa Aura (%ss): %s HP/s w promieniu %s bloków"
 }

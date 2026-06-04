@@ -155,8 +155,12 @@ items:
       - "&ePoziom: &c{level} &7({xp}/{max_xp} XP)"
       - "&8Legendarny miecz karmiący się krwią."
       - "&3Zadane obrażenia dają XP broni."
-      - "&3Zabójstwa budzą karmazynowe efekty i aurę."
+      - "&3Zadawane obrażenia ładują Karmazynową Aurę."
       - "&7Odblokowane cechy:"
       - "{features}"
       - "&#D69E2ELegendarna"
       - "&6---------------"
+    features:
+      edge: "&cKarmazynowe Ostrze: +{percent}% obrażeń"
+      lifesteal: "&c+{percent}% kradzieży życia"
+      aura: "&4Karmazynowa Aura ({seconds}s): {drain} HP/s w promieniu {radius} bloków"

@@ -155,8 +155,12 @@ items:
       - "&eLevel: &c{level} &7({xp}/{max_xp} XP)"
       - "&8A legendary sword that feeds on blood."
       - "&3Damage dealt grants weapon XP."
-      - "&3Kills awaken crimson effects and aura."
+      - "&3Damage charges the Crimson Aura."
       - "&7Unlocked traits:"
       - "{features}"
       - "&#D69E2ELegendary"
       - "&6---------------"
+    features:
+      edge: "&cCrimson Edge: +{percent}% Damage"
+      lifesteal: "&c+{percent}% Lifesteal"
+      aura: "&4Crimson Aura ({seconds}s): {drain} HP/s in {radius} blocks"

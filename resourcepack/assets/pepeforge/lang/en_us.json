@@ -103,7 +103,11 @@
   "item.pepeforge.crimson_sword.lore.1": "§6---------------",
   "item.pepeforge.crimson_sword.lore.2": "§8A legendary sword that feeds on blood.",
   "item.pepeforge.crimson_sword.lore.3": "§3Damage dealt grants weapon XP.",
-  "item.pepeforge.crimson_sword.lore.4": "§3Kills awaken crimson effects and aura.",
-  "item.pepeforge.crimson_sword.lore.5": "Legendary",
-  "item.pepeforge.crimson_sword.lore.6": "§6---------------"
+  "item.pepeforge.crimson_sword.lore.4": "§3Damage charges the Crimson Aura.",
+  "item.pepeforge.crimson_sword.lore.level": "§eLevel: §c%s §7(%s/%s XP)",
+  "item.pepeforge.crimson_sword.lore.unlocked": "§7Unlocked effects:",
+  "item.pepeforge.crimson_sword.lore.rarity": "Legendary",
+  "item.pepeforge.crimson_sword.feature.edge": "Crimson Edge: +%s%% Damage",
+  "item.pepeforge.crimson_sword.feature.lifesteal": "+%s%% Lifesteal",
+  "item.pepeforge.crimson_sword.feature.aura": "Crimson Aura (%ss): %s HP/s in %s blocks"
 }
