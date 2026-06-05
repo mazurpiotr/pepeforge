@@ -1,17 +1,21 @@
 package pepin.pepeforge.tools.scythe;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -41,6 +45,8 @@ public final class ScytheListener implements Listener {
         REQUIRED_SOIL.put(Material.NETHER_WART, Material.SOUL_SAND);
     }
 
+    private static final ThreadLocal<Boolean> PROTECTION_CHECK = ThreadLocal.withInitial(() -> false);
+
     private final ItemFactory itemFactory;
 
     public ScytheListener(ItemFactory itemFactory) {
@@ -49,6 +55,10 @@ public final class ScytheListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onCropBreak(BlockBreakEvent event) {
+        if (PROTECTION_CHECK.get()) {
+            return;
+        }
+
         Player player = event.getPlayer();
         ItemStack tool = player.getInventory().getItemInMainHand();
         ScytheTier tier = itemFactory.getScytheTier(tool);
@@ -68,6 +78,9 @@ public final class ScytheListener implements Listener {
         for (int x = -tier.radius(); x <= tier.radius(); x++) {
             for (int z = -tier.radius(); z <= tier.radius(); z++) {
                 Block block = world.getBlockAt(center.getX() + x, center.getY(), center.getZ() + z);
+                if (!canBreakBlock(player, block)) {
+                    continue;
+                }
                 HarvestEntry entry = prepareHarvest(block, player, tool);
                 if (entry != null) {
                     harvestedBlocks.add(entry);
@@ -111,7 +124,7 @@ public final class ScytheListener implements Listener {
                 if (drop.getAmount() <= 0) {
                     continue;
                 }
-                pooledDrops.merge(drop.getType(), drop.getAmount(), Integer::sum);
+                pooledDrops.merge(drop.getType(), drop.getAmount(), (oldAmount, incomingAmount) -> oldAmount + incomingAmount);
             }
         }
         return pooledDrops;
@@ -136,6 +149,10 @@ public final class ScytheListener implements Listener {
 
     private void executeHarvest(List<HarvestEntry> harvestedBlocks, Map<Material, Integer> pooledDrops, Player player) {
         for (HarvestEntry entry : harvestedBlocks) {
+            if (!canBreakBlock(player, entry.block)) {
+                continue;
+            }
+
             entry.block.setType(Material.AIR, false);
             entry.block.getWorld().spawnParticle(
                     Particle.BLOCK,
@@ -147,6 +164,13 @@ public final class ScytheListener implements Listener {
             );
 
             if (entry.shouldReplant) {
+                Material replantItem = REPLANT_ITEMS.get(entry.cropType);
+                if (replantItem == null) {
+                    continue;
+                }
+                if (!canPlaceBlock(player, entry.block, replantItem)) {
+                    continue;
+                }
                 entry.block.setType(entry.cropType, false);
                 if (entry.block.getBlockData() instanceof Ageable ageable) {
                     ageable.setAge(0);
@@ -216,6 +240,39 @@ public final class ScytheListener implements Listener {
 
     private Material requiredSoil(Material cropType) {
         return REQUIRED_SOIL.getOrDefault(cropType, Material.FARMLAND);
+    }
+
+    private boolean canBreakBlock(Player player, Block block) {
+        if (block == null || player == null) {
+            return false;
+        }
+
+        PROTECTION_CHECK.set(true);
+        try {
+            BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
+            Bukkit.getPluginManager().callEvent(breakEvent);
+            return !breakEvent.isCancelled();
+        } finally {
+            PROTECTION_CHECK.set(false);
+        }
+    }
+
+    private boolean canPlaceBlock(Player player, Block block, Material material) {
+        if (block == null || player == null) {
+            return false;
+        }
+
+        BlockPlaceEvent placeEvent = new BlockPlaceEvent(
+                block,
+                block.getState(),
+                block.getRelative(BlockFace.DOWN),
+                new ItemStack(material),
+                player,
+                true,
+                EquipmentSlot.HAND
+        );
+        Bukkit.getPluginManager().callEvent(placeEvent);
+        return !placeEvent.isCancelled();
     }
 
     private void damageTool(ItemStack tool, int amount) {

@@ -26,6 +26,8 @@ Current content includes:
 
 See [ITEMS.md](ITEMS.md) for the full item and recipe list.
 
+**All custom weapons, tools, and mechanics are designed to strictly respect standard region claims and anti-grief plugins.**
+
 ## Installation
 
 1. Download the latest JAR from [Releases](../../releases)

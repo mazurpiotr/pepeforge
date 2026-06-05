@@ -10,12 +10,36 @@ Decorative utility tool for cycling supported block variants.
 |---------|---------|
 | Use | Right-click a supported block to advance one decorative variant |
 | Reverse | Sneak + right-click to cycle backward |
-| Cost | 1 durability per successful conversion |
 | Rarity | Common |
 
 **Crafting** (Shaped Recipe):
 
 ![Chisel](media/receipes/pepeforge_chisel.png)
+
+## 🌾 Scythe
+
+Farming tool for harvesting ripe crops and replanting them automatically.
+
+| Tier | Harvest Area | Effect |
+|------|--------------|--------|
+| **Iron Scythe** | 1×1 | Harvests ripe crops, replants from drops |
+| **Diamond Scythe** | 3×3 | Harvests ripe crops, replants from drops |
+| **Netherite Scythe** | 5×5 | Harvests ripe crops, replants from drops |
+
+**Supported Crops**:
+- Wheat
+- Carrots
+- Potatoes
+- Beetroots
+- Nether Wart
+
+Replant order: Uses harvested seeds first, then inventory fallback.
+
+**Crafting** (Shaped Recipe):
+
+![Scythe](media/receipes/pepeforge_scythe.gif)
+
+Netherite upgrade uses Smithing Table with Diamond Greatsword + Netherite Ingot.
 
 ## ⚔️ Wind Blade
 
@@ -111,29 +135,6 @@ Two-handed parry weapon built around short defensive timing windows.
 
 ![Katana](media/receipes/pepeforge_katana.png)
 
-## 🌾 Scythe
-
-Farming tool for harvesting ripe crops and replanting them automatically.
-
-| Tier | Harvest Area | Effect |
-|------|--------------|--------|
-| **Iron Scythe** | 1×1 | Harvests ripe crops, replants from drops |
-| **Diamond Scythe** | 3×3 | Harvests ripe crops, replants from drops |
-| **Netherite Scythe** | 5×5 | Harvests ripe crops, replants from drops |
-
-**Crafting** (Shaped Recipe):
-
-![Scythe](media/receipes/pepeforge_scythe.gif)
-
-**Supported Crops**:
-- Wheat
-- Carrots
-- Potatoes
-- Beetroots
-- Nether Wart
-
-Replant order: Uses harvested seeds first, then inventory fallback.
-
 ## 🩸 Crimson Sword
 
 A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
@@ -144,20 +145,18 @@ A legendary weapon that grows stronger through combat, feeding on the blood of i
 | **Acquisition** | Boss Drop / Quest Reward |
 | **Level Cap** | 30 |
 | **Experience Source** | Damage Dealt |
-| **XP Curve** | Base * 1.15^level |
-| **Level Display** | Item Name & Lore |
-| **Visual Progression** | Particles, Aura, and Special Effects |
+| **Passive Scaling** | +1% Damage per weapon level (up to +30% at level 30) |
 
 **Progression**:
 
 | Level | Effect |
 |-------|--------|
-| **5** | Lifesteal unlocks at 3% of dealt damage. |
-| **10** | Crimson Aura unlocks; aura lasts 10 seconds and damage bonus reaches +10%. |
-| **15** | Lifesteal scales to 6% of dealt damage. |
-| **20** | Aura lasts 20 seconds and damage bonus reaches +20%. |
-| **25** | Lifesteal scales to 10% of dealt damage; damage bonus reaches +25%. |
-| **30** | Aura lasts 30 seconds and damage bonus reaches +30%. |
+| **5** | Lifesteal: 3% of damage dealt. |
+| **10** | Crimson Aura (10s): Drains 1 HP/s from entities within 2.5 blocks. |
+| **15** | Lifesteal: 6% of damage dealt. |
+| **20** | Crimson Aura (20s): Drains 2 HP/s from entities within 2.5 blocks. |
+| **25** | Lifesteal: 10% of damage dealt. |
+| **30** | Crimson Aura (30s): Drains 3 HP/s from entities within 2.5 blocks. |
 
 *Subjected for changes*
 
