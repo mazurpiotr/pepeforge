@@ -44,11 +44,13 @@ Each custom item and its recipe can be configured independently.
 
 - `/pepeforge items` - Opens a menu to preview all items
 - `/pepeforge give <item> <player>` - Gives an item to a player
+- `/pepeforge setlevel <level>` - Sets the level of the Crimson Sword in your main hand (for debugging / testing)
 
 ## Permissions
 
 - `pepeforge.give` - Use `/pepeforge give` (OP by default)
 - `pepeforge.items` - Use `/pepeforge items` (OP by default)
+- `pepeforge.setlevel` - Use `/pepeforge setlevel <level>` (OP by default)
 
 ## Issues & Support
 

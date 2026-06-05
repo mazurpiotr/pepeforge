@@ -12,7 +12,7 @@ public final class CrimsonSwordDefinition {
     public static final String LANG_PATH = "crimson_sword";
     public static final String TRANSLATION_KEY_BASE = "item.pepeforge.crimson_sword";
     public static final ItemNameColor NAME_COLOR = ItemNameColor.CRIMSON;
-    public static final int LORE_LINE_COUNT = 8;
+    public static final int LORE_LINE_COUNT = 7;
     public static final ItemRarity RARITY = ItemRarity.LEGENDARY;
 
     public static final Material BASE_MATERIAL = Material.DIAMOND_SWORD;
@@ -28,8 +28,8 @@ public final class CrimsonSwordDefinition {
     public static final double XP_CURVE_MULTIPLIER = 1.15D;
 
     public static final double DAMAGE_BONUS_PER_LEVEL = 0.01D;
-    public static final double LEVEL_5_LIFESTEAL = 0.05D;
-    public static final double LEVEL_15_LIFESTEAL = 0.075D;
+    public static final double LEVEL_5_LIFESTEAL = 0.03D;
+    public static final double LEVEL_15_LIFESTEAL = 0.06D;
     public static final double LEVEL_25_LIFESTEAL = 0.10D;
     public static final double AURA_TRIGGER_DAMAGE = 20.0D;
     public static final double AURA_RADIUS = 2.5D;

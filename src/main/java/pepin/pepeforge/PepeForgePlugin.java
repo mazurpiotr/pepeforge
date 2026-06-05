@@ -73,7 +73,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         katanaRecipes.registerAll();
         greatswordRecipes.registerAll();
 
-        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory);
+        CrimsonSwordManager crimsonSwordManager = new CrimsonSwordManager(this, lang);
+
+        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory, crimsonSwordManager);
         PluginCommand command = getCommand("pepeforge");
         if (command != null) {
             command.setExecutor(commandExecutor);
@@ -111,7 +113,6 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(greatswordListener, this);
         GreatswordRecipeDiscoveryListener greatswordRecipeDiscoveryListener = new GreatswordRecipeDiscoveryListener(this, itemFactory);
         getServer().getPluginManager().registerEvents(greatswordRecipeDiscoveryListener, this);
-        CrimsonSwordManager crimsonSwordManager = new CrimsonSwordManager(this, lang);
         crimsonSwordListener = new CrimsonSwordListener(this, itemFactory, crimsonSwordManager);
         crimsonSwordListener.startAuraTask();
         getServer().getPluginManager().registerEvents(crimsonSwordListener, this);

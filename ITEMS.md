@@ -152,12 +152,12 @@ A legendary weapon that grows stronger through combat, feeding on the blood of i
 
 | Level | Effect |
 |-------|--------|
-| **5** | Killing an enemy restores 1 Heart (2 HP). |
-| **10** | Killing an enemy grants +10% Attack Damage, 5% Lifesteal and Crimson Aura for 10 seconds.
-| **15** | While Crimson Aura is active, kills restore 2 Hearts (4 HP) instead of 1. |
-| **20** | Killing an enemy grants +15% Attack Damage, 7.5% Lifesteal and Crimson Aura for 20 seconds.|
-| **25** | While Crimson Aura is active, each kill increases Attack Damage by 2%, stacking up to 5 times. Stacks expire when Crimson Aura ends. |
-| **30** | Killing an enemy grants +20% Attack Damage, 10% Lifesteal and Crimson Aura for 30 seconds.
+| **5** | Lifesteal unlocks at 3% of dealt damage. |
+| **10** | Crimson Aura unlocks; aura lasts 10 seconds and damage bonus reaches +10%. |
+| **15** | Lifesteal scales to 6% of dealt damage. |
+| **20** | Aura lasts 20 seconds and damage bonus reaches +20%. |
+| **25** | Lifesteal scales to 10% of dealt damage; damage bonus reaches +25%. |
+| **30** | Aura lasts 30 seconds and damage bonus reaches +30%. |
 
 *Subjected for changes*
 

@@ -101,13 +101,16 @@
   "item.pepeforge.netherite_scythe.lore.7": "§6---------------",
   "item.pepeforge.crimson_sword.name": "§4Crimson Sword",
   "item.pepeforge.crimson_sword.lore.1": "§6---------------",
-  "item.pepeforge.crimson_sword.lore.2": "§8A legendary sword that feeds on blood.",
-  "item.pepeforge.crimson_sword.lore.3": "§3Damage dealt grants weapon XP.",
-  "item.pepeforge.crimson_sword.lore.4": "§3Damage charges the Crimson Aura.",
+  "item.pepeforge.crimson_sword.lore.2": "§3The weapon gains XP from dealt damage.",
+  "item.pepeforge.crimson_sword.lore.3": "§3Dealt damage charges the Crimson Aura.",
   "item.pepeforge.crimson_sword.lore.level": "§eLevel: §c%s §7(%s/%s XP)",
-  "item.pepeforge.crimson_sword.lore.unlocked": "§7Unlocked effects:",
+  "item.pepeforge.crimson_sword.lore.unlocked": "§7Active traits:",
   "item.pepeforge.crimson_sword.lore.rarity": "Legendary",
-  "item.pepeforge.crimson_sword.feature.edge": "Crimson Edge: +%s%% Damage",
-  "item.pepeforge.crimson_sword.feature.lifesteal": "+%s%% Lifesteal",
-  "item.pepeforge.crimson_sword.feature.aura": "Crimson Aura (%ss): %s HP/s in %s blocks"
-}
+  "item.pepeforge.crimson_sword.feature.edge": "Crimson Edge: +%s%% damage",
+  "item.pepeforge.crimson_sword.feature.lifesteal": "Lifesteal: +%s%%",
+  "item.pepeforge.crimson_sword.feature.lifesteal_next": "Lifesteal: +%s%% (next level: Lv %s, +%s%%)",
+  "item.pepeforge.crimson_sword.feature.lifesteal_locked": "Lifesteal: Unlocks at level 5",
+  "item.pepeforge.crimson_sword.feature.aura": "Crimson Aura (%ss): %s HP/s within %s blocks",
+  "item.pepeforge.crimson_sword.feature.aura_next": "Crimson Aura (%ss): %s HP/s within %s blocks (next at Lv %s: %ss, %s HP/s)",
+  "item.pepeforge.crimson_sword.feature.aura_locked": "Crimson Aura: Unlocks at level 10"
+  }

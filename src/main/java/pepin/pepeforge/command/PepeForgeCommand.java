@@ -10,6 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.gui.CustomItemsMenu;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
+import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,10 +22,12 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
 
     private final PluginLang lang;
     private final ItemFactory itemFactory;
+    private final CrimsonSwordManager crimsonSwordManager;
 
-    public PepeForgeCommand(PluginLang lang, ItemFactory itemFactory) {
+    public PepeForgeCommand(PluginLang lang, ItemFactory itemFactory, CrimsonSwordManager crimsonSwordManager) {
         this.lang = lang;
         this.itemFactory = itemFactory;
+        this.crimsonSwordManager = crimsonSwordManager;
     }
 
     @Override
@@ -43,6 +47,34 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             player.openInventory(CustomItemsMenu.create(lang, itemFactory));
+            return true;
+        }
+
+        if ("setlevel".equalsIgnoreCase(args[0])) {
+            if (!sender.hasPermission("pepeforge.setlevel") && !sender.isOp()) {
+                sender.sendMessage(lang.message("messages.command.no_permission"));
+                return true;
+            }
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(lang.message("messages.command.players_only"));
+                return true;
+            }
+            if (args.length != 2) {
+                sender.sendMessage(lang.message("messages.command.usage"));
+                return true;
+            }
+            ItemStack item = player.getInventory().getItemInMainHand();
+            if (!CrimsonSwordDefinition.ITEM_ID.equals(itemFactory.getItemId(item))) {
+                sender.sendMessage(lang.message("messages.command.crimson_sword_only"));
+                return true;
+            }
+            try {
+                int level = Integer.parseInt(args[1]);
+                crimsonSwordManager.setLevel(item, level);
+                sender.sendMessage(lang.message("messages.command.setlevel_success", Map.of("level", String.valueOf(level))));
+            } catch (NumberFormatException e) {
+                sender.sendMessage(lang.message("messages.command.invalid_level"));
+            }
             return true;
         }
 
@@ -87,13 +119,18 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("give", "items").stream()
+            return List.of("give", "items", "setlevel").stream()
                     .filter(option -> option.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }
         if (args.length == 2 && "give".equalsIgnoreCase(args[0])) {
             return itemFactory.knownGiveNames().stream()
                     .filter(name -> name.startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+        if (args.length == 2 && "setlevel".equalsIgnoreCase(args[0])) {
+            return List.of("1", "10", "20", "30").stream()
+                    .filter(option -> option.startsWith(args[1]))
                     .collect(Collectors.toList());
         }
         if (args.length == 3 && "give".equalsIgnoreCase(args[0])) {
