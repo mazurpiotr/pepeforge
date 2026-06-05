@@ -30,11 +30,12 @@ See [ITEMS.md](ITEMS.md) for the full item and recipe list.
 
 ## Installation
 
-1. Download the latest JAR from [Releases](../../releases)
-2. Place `pepeforge-1.0.0.jar` in your server's `plugins/` folder
-3. (Optional) Download the resource pack from [Releases](../../releases) for custom item models, textures and client-side item translation
-   - For server-side distribution, using `ResourcePackManager` is recommended.
-4. Restart server
+1. Download the latest JAR from [Releases](../../releases).
+2. Place `pepeforge-X.Y.Z.jar` in your server's `plugins/` folder.
+3. *(Optional)* Download the resource pack from [GitHub Releases](https://github.com/mazurpiotr/pepeforge/releases) for custom item models, textures, and client-side translations.
+   * ⚠ If translations.use_client_side is enabled and players do not have the resource pack installed, custom item names and lore will appear as raw translation keys (e.g. item.pepeforge.crimson_sword.name) instead of readable text.
+   * For the best experience, distributing the resource pack automatically with a plugin such as ResourcePackManager is highly recommended.
+4. Restart your server.
 
 ## Configuration
 
