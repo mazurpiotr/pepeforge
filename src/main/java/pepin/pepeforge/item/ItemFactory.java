@@ -14,6 +14,8 @@ import pepin.pepeforge.tools.scythe.ScytheTier;
 import pepin.pepeforge.util.ItemMetaCompat;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowDefinition;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearDefinition;
+import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
+import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 import pepin.pepeforge.weapons.greatsword.GreatswordTier;
 import pepin.pepeforge.weapons.katana.KatanaDefinition;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
@@ -38,7 +40,8 @@ public final class ItemFactory {
             ItemIds.NETHERITE_GREATSWORD,
             ItemIds.IRON_SCYTHE,
             ItemIds.DIAMOND_SCYTHE,
-            ItemIds.NETHERITE_SCYTHE
+            ItemIds.NETHERITE_SCYTHE,
+            ItemIds.CRIMSON_SWORD
     );
 
     private static final Map<String, String> ITEM_ALIASES = Map.ofEntries(
@@ -54,7 +57,8 @@ public final class ItemFactory {
             Map.entry(ItemIds.NETHERITE_GREATSWORD, ItemIds.NETHERITE_GREATSWORD),
             Map.entry(ItemIds.IRON_SCYTHE, ItemIds.IRON_SCYTHE),
             Map.entry(ItemIds.DIAMOND_SCYTHE, ItemIds.DIAMOND_SCYTHE),
-            Map.entry(ItemIds.NETHERITE_SCYTHE, ItemIds.NETHERITE_SCYTHE)
+            Map.entry(ItemIds.NETHERITE_SCYTHE, ItemIds.NETHERITE_SCYTHE),
+            Map.entry(ItemIds.CRIMSON_SWORD, ItemIds.CRIMSON_SWORD)
     );
 
     private final NamespacedKey itemIdKey;
@@ -182,6 +186,35 @@ public final class ItemFactory {
         ));
     }
 
+    public ItemStack createCrimsonSword() {
+        ItemStack item = new ItemStack(CrimsonSwordDefinition.BASE_MATERIAL);
+        ItemMeta meta = item.getItemMeta();
+        String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
+        String fallbackName = lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang);
+
+        ItemMetaCompat.setItemName(meta, fallbackName);
+        if (!useClientSideTranslations()) {
+            ItemMetaCompat.setDisplayName(meta, fallbackName);
+        }
+        ItemMetaCompat.setCustomModelData(meta, CrimsonSwordDefinition.CUSTOM_MODEL_DATA);
+        ItemMetaCompat.addMainHandAttribute(
+                meta,
+                Attribute.ATTACK_DAMAGE,
+                CrimsonSwordDefinition.ITEM_ID + "_attack_damage",
+                CrimsonSwordDefinition.ATTACK_DAMAGE
+        );
+        ItemMetaCompat.addMainHandAttribute(
+                meta,
+                Attribute.ATTACK_SPEED,
+                CrimsonSwordDefinition.ITEM_ID + "_attack_speed",
+                CrimsonSwordDefinition.ATTACK_SPEED
+        );
+        meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, CrimsonSwordDefinition.ITEM_ID);
+        item.setItemMeta(meta);
+        new CrimsonSwordManager(plugin, lang).initialize(item);
+        return item;
+    }
+
     private ItemStack createItem(ItemSpec spec) {
         ItemStack item = new ItemStack(spec.baseMaterial());
         ItemMeta meta = item.getItemMeta();
@@ -195,7 +228,7 @@ public final class ItemFactory {
         if (!clientSideTranslations) {
             ItemMetaCompat.setDisplayName(meta, fallbackName);
         }
-        ItemMetaCompat.setLore(meta, fallbackLore);
+        ItemMetaCompat.setStringLore(meta, fallbackLore);
         ItemMetaCompat.setCustomModelData(meta, spec.customModelData());
         if (spec.modelKey() != null) {
             ItemMetaCompat.setItemModelIfSupported(meta, spec.modelKey());
@@ -248,6 +281,7 @@ public final class ItemFactory {
             case ItemIds.IRON_SCYTHE -> createScythe(ScytheTier.IRON);
             case ItemIds.DIAMOND_SCYTHE -> createScythe(ScytheTier.DIAMOND);
             case ItemIds.NETHERITE_SCYTHE -> createScythe(ScytheTier.NETHERITE);
+            case ItemIds.CRIMSON_SWORD -> createCrimsonSword();
             default -> null;
         };
     }
@@ -316,6 +350,10 @@ public final class ItemFactory {
         return ItemIds.KATANA.equals(getItemId(item)) && isItemEnabled(ItemIds.KATANA);
     }
 
+    public boolean isCrimsonSword(ItemStack item) {
+        return ItemIds.CRIMSON_SWORD.equals(getItemId(item)) && isItemEnabled(ItemIds.CRIMSON_SWORD);
+    }
+
     public void setKatanaParryVisual(ItemStack item, boolean active) {
         if (item == null || !isKatana(item) || !item.hasItemMeta()) {
             return;
@@ -343,17 +381,21 @@ public final class ItemFactory {
         return false;
     }
 
+    public boolean hasScythe(Inventory inventory, ScytheTier wantedTier) {
+        for (ItemStack item : inventory.getContents()) {
+            if (getScytheTier(item) == wantedTier) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ScytheTier getScytheTier(ItemStack item) {
         String itemId = getItemId(item);
         if (itemId == null || !isItemEnabled(itemId)) {
             return null;
         }
-        for (ScytheTier tier : ScytheTier.values()) {
-            if (tier.itemId().equals(itemId)) {
-                return tier;
-            }
-        }
-        return null;
+        return ScytheTier.fromItemId(itemId);
     }
 
     public String getItemId(ItemStack item) {
@@ -424,6 +466,7 @@ public final class ItemFactory {
             case ItemIds.CRESCENT_SPEAR -> lang.itemFallbackName(CrescentSpearDefinition.LANG_PATH);
             case ItemIds.CHISEL -> lang.itemFallbackName(ChiselDefinition.LANG_PATH);
             case ItemIds.KATANA -> lang.itemFallbackName(KatanaDefinition.LANG_PATH);
+            case ItemIds.CRIMSON_SWORD -> lang.itemFallbackName(CrimsonSwordDefinition.LANG_PATH);
             default -> null;
         };
     }

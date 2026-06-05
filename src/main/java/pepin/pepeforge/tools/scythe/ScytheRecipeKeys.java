@@ -2,13 +2,13 @@ package pepin.pepeforge.tools.scythe;
 
 import org.bukkit.NamespacedKey;
 
-public final class RecipeKeys {
+public final class ScytheRecipeKeys {
 
     public static final NamespacedKey IRON_SCYTHE = new NamespacedKey("pepeforge", "iron_scythe");
     public static final NamespacedKey DIAMOND_SCYTHE = new NamespacedKey("pepeforge", "diamond_scythe");
     public static final NamespacedKey NETHERITE_SCYTHE = new NamespacedKey("pepeforge", "netherite_scythe");
 
-    private RecipeKeys() {
+    private ScytheRecipeKeys() {
     }
 
     public static NamespacedKey forTier(ScytheTier tier) {

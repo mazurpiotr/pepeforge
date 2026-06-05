@@ -7,6 +7,11 @@ import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public enum ScytheTier {
     IRON(
             ItemIds.IRON_SCYTHE,
@@ -20,7 +25,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "iron_scythe"),
             CustomModelDataIds.IRON_SCYTHE,
-            0
+            1
     ),
     DIAMOND(
             ItemIds.DIAMOND_SCYTHE,
@@ -34,7 +39,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "diamond_scythe"),
             CustomModelDataIds.DIAMOND_SCYTHE,
-            1
+            2
     ),
     NETHERITE(
             ItemIds.NETHERITE_SCYTHE,
@@ -48,8 +53,12 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "netherite_scythe"),
             CustomModelDataIds.NETHERITE_SCYTHE,
-            2
+            3
     );
+
+    private static final Map<String, ScytheTier> BY_ITEM_ID = Arrays.stream(values())
+        .collect(Collectors.toUnmodifiableMap(ScytheTier::itemId, Function.identity()));
+
 
     private final String itemId;
     private final String langPath;
@@ -94,6 +103,13 @@ public enum ScytheTier {
 
     public String itemId() {
         return itemId;
+    }
+
+    public static ScytheTier fromItemId(String itemId) {
+        if (itemId == null) {
+            return null;
+        }
+        return BY_ITEM_ID.get(itemId);
     }
 
     public String langPath() {

@@ -3,13 +3,16 @@ messages:
   command:
     players_only: "&cOnly players can use this command."
     no_permission: "&cYou do not have permission to use this command."
-    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe> <player> or /pepeforge items"
+    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword> <player> or /pepeforge items"
     unknown_subcommand: "&cUnknown subcommand."
     unknown_item: "&cUnknown item: {item}"
     item_disabled: "&cThat item is currently disabled: {item}"
     player_not_found: "&cPlayer not found: {player}"
     give_success_sender: "&aGave {item} to {player}."
     give_success_target: "&aYou received {item}&a."
+    crimson_sword_only: "&cOnly Crimson Sword is supported."
+    setlevel_success: "&aCrimson Sword level set to {level}."
+    invalid_level: "&cInvalid level."
   menu:
     title: "&8Pepe Items"
     item_received: "&aItem added to your inventory."
@@ -17,6 +20,8 @@ messages:
     offhand_required: "&cThis weapon requires an empty off-hand."
   katana:
     cooldown: "&cKatana recharging... {bar} &7{seconds}s"
+  wind_blade:
+    cooldown: "&cDash recharging... {bar} &7{seconds}s"
   crescent_spear:
     charge: "&dMoon charge {bar}"
     ready: "&dMoon charge ready! &fNext strike empowered {bar}"
@@ -65,25 +70,28 @@ items:
     fallback_name: "&#BEBEBEIron Wind Blade"
     lore:
       - "&6---------------"
-      - "&eAbility: &bSwift Strike"
-      - "&3Gain Speed I for 2s after hitting."
+      - "&eAbility: &bSwift Strike / Wind Dash"
+      - "&3Gain Speed I for 10s after hitting."
+      - "&3Right-click to dash forward (5s cooldown)."
       - "&#A0AEC0Common"
       - "&6---------------"
   diamond_wind_blade:
     fallback_name: "&#33EBCBDiamond Wind Blade"
     lore:
       - "&6---------------"
-      - "&eAbility: &bSwift Strike"
+      - "&eAbility: &bSwift Strike / Wind Dash"
       - "&3Gain Speed I while holding."
+      - "&3Right-click to dash forward (5s cooldown)."
       - "&#3182CERare"
       - "&6---------------"
   netherite_wind_blade:
     fallback_name: "&8Netherite Wind Blade"
     lore:
       - "&6---------------"
-      - "&eAbility: &bSwift Strike"
+      - "&eAbility: &bSwift Strike / Wind Dash"
       - "&3Gain Speed I while holding."
-      - "&3Gain Speed II for 3s after hitting."
+      - "&3Gain Speed II for 10s after hitting."
+      - "&3Right-click to dash forward (5s cooldown)."
       - "&#805AD5Epic"
       - "&6---------------"
   iron_greatsword:
@@ -120,29 +128,45 @@ items:
     fallback_name: "&#BEBEBEIron Scythe"
     lore:
       - "&6---------------"
-      - "&eAbility: &aSweep Harvest"
-      - "&31x1 harvest of ripe crops."
-      - "&3Replants from the harvest first,"
-      - "&3then uses inventory if needed."
+      - "&eAbility: &aHarvest"
+      - "&3Harvests ripe crops in a 3x3 area."
+      - "&3Automatically replants using drops or inventory."
       - "&#A0AEC0Common"
       - "&6---------------"
   diamond_scythe:
     fallback_name: "&#33EBCBDiamond Scythe"
     lore:
       - "&6---------------"
-      - "&eAbility: &aSweep Harvest"
-      - "&33x3 harvest of ripe crops."
-      - "&3Replants from the harvest first,"
-      - "&3then uses inventory if needed."
+      - "&eAbility: &aHarvest"
+      - "&3Harvests ripe crops in a 5x5 area."
+      - "&3Automatically replants using drops or inventory."
       - "&#3182CERare"
       - "&6---------------"
   netherite_scythe:
     fallback_name: "&8Netherite Scythe"
     lore:
       - "&6---------------"
-      - "&eAbility: &aSweep Harvest"
-      - "&35x5 harvest of ripe crops."
-      - "&3Replants from the harvest first,"
-      - "&3then uses inventory if needed."
+      - "&eAbility: &aHarvest"
+      - "&3Harvests ripe crops in a 7x7 area."
+      - "&3Automatically replants using drops or inventory."
       - "&#805AD5Epic"
       - "&6---------------"
+  crimson_sword:
+    fallback_name: "&4Crimson Sword"
+    lore:
+      - "&6---------------"
+      - "&eLevel: &c{level} &7({xp}/{max_xp} XP)"
+      - "&3The weapon gains XP from dealt damage."
+      - "&3Dealt damage charges the Crimson Aura."
+      - "&7Active traits:"
+      - "{features}"
+      - "&#D69E2ELegendary"
+      - "&6---------------"
+    features:
+      edge: "&cCrimson Edge: +{percent}% damage"
+      lifesteal: "&cLifesteal: +{percent}%"
+      lifesteal_next: "&cLifesteal: +{percent}% (next level: Lv {next_level}, +{next_percent}%)"
+      lifesteal_locked: "&8Lifesteal: Unlocks at level 5"
+      aura: "&4Crimson Aura ({seconds}s): {drain} HP/s within {radius} blocks"
+      aura_next: "&4Crimson Aura ({seconds}s): {drain} HP/s within {radius} blocks (next at Lv {next_level}: {next_seconds}s, {next_drain} HP/s)"
+      aura_locked: "&8Crimson Aura: Unlocks at level 10"

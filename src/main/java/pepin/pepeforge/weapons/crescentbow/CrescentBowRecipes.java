@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.crescentbow;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
@@ -21,14 +22,18 @@ public final class CrescentBowRecipes {
     }
 
     public void registerAll() {
+
+        NamespacedKey key = CrescentBowRecipeKeys.CRESCENT_BOW;
+        NamespacedKey keyMirrored = CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED;
+
+        RecipeRegistrar.remove(plugin, key);
+        RecipeRegistrar.remove(plugin, keyMirrored);
+
         if (!itemFactory.isRecipeEnabled(CrescentBowDefinition.ITEM_ID)) {
             return;
         }
 
-        RecipeRegistrar.remove(plugin, CrescentBowRecipeKeys.CRESCENT_BOW);
-        RecipeRegistrar.remove(plugin, CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED);
-
-        ShapedRecipe recipe = new ShapedRecipe(CrescentBowRecipeKeys.CRESCENT_BOW, itemFactory.createCrescentBow());
+        ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createCrescentBow());
         /*
          * [P][A][S]
          * [P][ ][A]
@@ -38,9 +43,9 @@ public final class CrescentBowRecipes {
         recipe.setIngredient('P', CURVE_MATERIAL);
         recipe.setIngredient('A', CORE_MATERIAL);
         recipe.setIngredient('S', HANDLE_MATERIAL);
-        RecipeRegistrar.add(plugin, CrescentBowRecipeKeys.CRESCENT_BOW, recipe);
+        RecipeRegistrar.add(plugin, key, recipe);
 
-        ShapedRecipe mirroredRecipe = new ShapedRecipe(CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED, itemFactory.createCrescentBow());
+        ShapedRecipe mirroredRecipe = new ShapedRecipe(keyMirrored, itemFactory.createCrescentBow());
         /*
          * [S][A][P]
          * [A][ ][P]
@@ -50,7 +55,7 @@ public final class CrescentBowRecipes {
         mirroredRecipe.setIngredient('P', CURVE_MATERIAL);
         mirroredRecipe.setIngredient('A', CORE_MATERIAL);
         mirroredRecipe.setIngredient('S', HANDLE_MATERIAL);
-        RecipeRegistrar.add(plugin, CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED, mirroredRecipe);
+        RecipeRegistrar.add(plugin, keyMirrored, mirroredRecipe);
     }
 
     public void unregisterAll() {

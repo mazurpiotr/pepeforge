@@ -36,6 +36,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.CooldownManager;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -46,25 +47,26 @@ public final class KatanaListener implements Listener {
 
     private static final int COOLDOWN_BAR_SEGMENTS = 20;
     private static final int OFF_HAND_INVENTORY_SLOT = 40;
+    private static final String PARRY_COOLDOWN_KEY = "katana:parry";
 
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final PluginLang lang;
+    private final CooldownManager cooldownManager;
     private final NamespacedKey reflectUntilKey;
     private final Map<UUID, Long> activeParryUntil = new HashMap<>();
-    private final Map<UUID, Long> cooldownUntil = new HashMap<>();
     private final Map<UUID, BukkitTask> activeTasks = new HashMap<>();
 
-    public KatanaListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
+    public KatanaListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang, CooldownManager cooldownManager) {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.lang = lang;
+        this.cooldownManager = cooldownManager;
         this.reflectUntilKey = new NamespacedKey(plugin, "katana_reflect_until");
     }
 
     public void startStatusTask() {
         plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
-            long now = System.currentTimeMillis();
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 if (!itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
                     clearActiveParry(player);
@@ -77,9 +79,9 @@ public final class KatanaListener implements Listener {
                     continue;
                 }
 
-                long cooldownEnd = cooldownUntil.getOrDefault(player.getUniqueId(), 0L);
-                if (cooldownEnd > now) {
-                    showCooldownActionBar(player, cooldownEnd - now);
+                long remainingMillis = cooldownManager.getRemainingCooldownMillis(player, PARRY_COOLDOWN_KEY);
+                if (remainingMillis > 0L) {
+                    showCooldownActionBar(player, remainingMillis);
                 }
             }
         }, 1L, 2L);
@@ -122,9 +124,9 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        long cooldownEnd = cooldownUntil.getOrDefault(player.getUniqueId(), 0L);
-        if (cooldownEnd > now) {
-            showCooldownActionBar(player, cooldownEnd - now);
+        long remainingMillis = cooldownManager.getRemainingCooldownMillis(player, PARRY_COOLDOWN_KEY);
+        if (remainingMillis > 0L) {
+            showCooldownActionBar(player, remainingMillis);
             denyInteraction(event);
             return;
         }
@@ -236,7 +238,7 @@ public final class KatanaListener implements Listener {
             task.cancel();
         }
         activeParryUntil.remove(playerId);
-        cooldownUntil.remove(playerId);
+        cooldownManager.clearCooldown(event.getPlayer(), PARRY_COOLDOWN_KEY);
     }
 
     private void activateParry(Player player, ItemStack katana, long now) {
@@ -245,7 +247,7 @@ public final class KatanaListener implements Listener {
         long activeUntil = now + durationMillis;
 
         activeParryUntil.put(player.getUniqueId(), activeUntil);
-        cooldownUntil.put(player.getUniqueId(), now + cooldownMillis);
+        cooldownManager.setCooldown(player, PARRY_COOLDOWN_KEY, cooldownMillis);
         itemFactory.setKatanaParryVisual(katana, true);
 
         World world = player.getWorld();

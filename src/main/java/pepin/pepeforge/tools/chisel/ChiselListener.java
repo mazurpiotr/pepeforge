@@ -1,5 +1,6 @@
 package pepin.pepeforge.tools.chisel;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -11,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -103,6 +105,10 @@ public final class ChiselListener implements Listener {
             return;
         }
 
+        if (!canModifyBlock(player, block)) {
+            return;
+        }
+
         event.setUseInteractedBlock(org.bukkit.event.Event.Result.DENY);
         event.setUseItemInHand(org.bukkit.event.Event.Result.DENY);
         event.setCancelled(true);
@@ -137,6 +143,12 @@ public final class ChiselListener implements Listener {
         world.playSound(block.getLocation(), Sound.BLOCK_STONE_BREAK, 0.85f, 1.45f);
         world.playSound(block.getLocation(), Sound.BLOCK_GRINDSTONE_USE, 0.55f, 1.8f);
         world.spawnParticle(Particle.BLOCK, block.getLocation().add(0.5, 0.5, 0.5), 12, 0.2, 0.2, 0.2, 0.0, block.getBlockData());
+    }
+
+    private boolean canModifyBlock(Player player, Block block) {
+        BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
+        Bukkit.getPluginManager().callEvent(breakEvent);
+        return !breakEvent.isCancelled();
     }
 
     private void damageTool(ItemStack tool, int amount) {

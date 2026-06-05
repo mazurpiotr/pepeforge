@@ -3,7 +3,7 @@
 # PepeForge
 ![License](https://img.shields.io/github/license/mazurpiotr/pepeforge?style=for-the-badge)
 ![Version](https://img.shields.io/badge/version-1.0-blue?style=for-the-badge)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1+-brightgreen?style=for-the-badge)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11+-brightgreen?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Purpur-fuchsia?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active_Development-yellow?style=for-the-badge)
@@ -26,13 +26,16 @@ Current content includes:
 
 See [ITEMS.md](ITEMS.md) for the full item and recipe list.
 
+**All custom weapons, tools, and mechanics are designed to strictly respect standard region claims and anti-grief plugins.**
+
 ## Installation
 
-1. Download the latest JAR from [Releases](../../releases)
-2. Place `pepeforge-1.0.0.jar` in your server's `plugins/` folder
-3. (Optional) Download the resource pack from [Releases](../../releases) for custom item models, textures and client-side item translation
-   - For server-side distribution, using `ResourcePackManager` is recommended.
-4. Restart server
+1. Download the latest JAR from [Releases](../../releases).
+2. Place `pepeforge-X.Y.Z.jar` in your server's `plugins/` folder.
+3. *(Optional)* Download the resource pack from [GitHub Releases](https://github.com/mazurpiotr/pepeforge/releases) for custom item models, textures, and client-side translations.
+   * ⚠ If translations.use_client_side is enabled and players do not have the resource pack installed, custom item names and lore will appear as raw translation keys (e.g. item.pepeforge.crimson_sword.name) instead of readable text.
+   * For the best experience, distributing the resource pack automatically with a plugin such as ResourcePackManager is highly recommended.
+4. Restart your server.
 
 ## Configuration
 
@@ -44,11 +47,13 @@ Each custom item and its recipe can be configured independently.
 
 - `/pepeforge items` - Opens a menu to preview all items
 - `/pepeforge give <item> <player>` - Gives an item to a player
+- `/pepeforge setlevel <level>` - Sets the level of the Crimson Sword in your main hand (for debugging / testing)
 
 ## Permissions
 
 - `pepeforge.give` - Use `/pepeforge give` (OP by default)
 - `pepeforge.items` - Use `/pepeforge items` (OP by default)
+- `pepeforge.setlevel` - Use `/pepeforge setlevel <level>` (OP by default)
 
 ## Issues & Support
 
@@ -60,7 +65,7 @@ Suggestions, feedback and feature requests are always appreciated.
 
 ## Compatibility
 
-- Minecraft 1.21.1+
+- Minecraft 1.21.11+
 - Java 21+
 - Paper & Purpur recommended
 - Spigot supported with limited features

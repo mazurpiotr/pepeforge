@@ -4,6 +4,7 @@ public enum ItemColorPalette {
     IRON_NAME("#BEBEBE"),
     DIAMOND_NAME("#33EBCB"),
     CRESCENT_NAME("#667DB4"),
+    CRIMSON_NAME("#C53030"),
     NETHERITE_NAME("DARK_GRAY"),
     
     COMMON_RARITY("#A0AEC0"),

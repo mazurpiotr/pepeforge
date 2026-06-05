@@ -7,6 +7,8 @@ import pepin.pepeforge.gui.CustomItemsMenuListener;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.recipe.RecipeDiscoveryRefresher;
+import pepin.pepeforge.util.AuraManager;
+import pepin.pepeforge.util.CooldownManager;
 import pepin.pepeforge.tools.chisel.ChiselListener;
 import pepin.pepeforge.tools.chisel.ChiselRecipeDiscoveryListener;
 import pepin.pepeforge.tools.chisel.ChiselRecipes;
@@ -16,19 +18,21 @@ import pepin.pepeforge.tools.scythe.ScytheRecipes;
 import pepin.pepeforge.weapons.katana.KatanaListener;
 import pepin.pepeforge.weapons.katana.KatanaRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.katana.KatanaRecipes;
-import pepin.pepeforge.weapons.crescent.CrescentMoonGlow;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearListener;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearRecipes;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowListener;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowRecipes;
+import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordListener;
+import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 import pepin.pepeforge.weapons.greatsword.GreatswordListener;
 import pepin.pepeforge.weapons.greatsword.GreatswordRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.greatsword.GreatswordRecipes;
 import pepin.pepeforge.weapons.windblade.WindBladeListener;
 import pepin.pepeforge.weapons.windblade.WindBladeRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.windblade.WindBladeRecipes;
+import pepin.pepeforge.recipe.SmithingUpgradeListener;
 
 public final class PepeForgePlugin extends JavaPlugin {
 
@@ -42,6 +46,9 @@ public final class PepeForgePlugin extends JavaPlugin {
     private KatanaRecipes katanaRecipes;
     private GreatswordRecipes greatswordRecipes;
     private GreatswordListener greatswordListener;
+    private CrimsonSwordListener crimsonSwordListener;
+    private CooldownManager cooldownManager;
+    private AuraManager auraManager;
 
     @Override
     public void onEnable() {
@@ -55,6 +62,8 @@ public final class PepeForgePlugin extends JavaPlugin {
         crescentSpearRecipes = new CrescentSpearRecipes(this, itemFactory);
         katanaRecipes = new KatanaRecipes(this, itemFactory);
         greatswordRecipes = new GreatswordRecipes(this, itemFactory);
+        cooldownManager = new CooldownManager();
+        auraManager = new AuraManager(this, itemFactory);
 
         chiselRecipes.registerAll();
         scytheRecipes.registerAll();
@@ -64,7 +73,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         katanaRecipes.registerAll();
         greatswordRecipes.registerAll();
 
-        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory);
+        CrimsonSwordManager crimsonSwordManager = new CrimsonSwordManager(this, lang);
+
+        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory, crimsonSwordManager);
         PluginCommand command = getCommand("pepeforge");
         if (command != null) {
             command.setExecutor(commandExecutor);
@@ -76,9 +87,10 @@ public final class PepeForgePlugin extends JavaPlugin {
         ChiselRecipeDiscoveryListener chiselRecipeDiscoveryListener = new ChiselRecipeDiscoveryListener(this);
         getServer().getPluginManager().registerEvents(chiselRecipeDiscoveryListener, this);
         getServer().getPluginManager().registerEvents(new ScytheListener(itemFactory), this);
-        ScytheRecipeDiscoveryListener scytheRecipeDiscoveryListener = new ScytheRecipeDiscoveryListener(this);
+        ScytheRecipeDiscoveryListener scytheRecipeDiscoveryListener = new ScytheRecipeDiscoveryListener(this, itemFactory);
         getServer().getPluginManager().registerEvents(scytheRecipeDiscoveryListener, this);
-        WindBladeListener windBladeListener = new WindBladeListener(this, itemFactory);
+        auraManager.startTask();
+        WindBladeListener windBladeListener = new WindBladeListener(this, itemFactory, lang, cooldownManager, auraManager);
         windBladeListener.startHoldingTask();
         getServer().getPluginManager().registerEvents(windBladeListener, this);
         WindBladeRecipeDiscoveryListener windBladeRecipeDiscoveryListener = new WindBladeRecipeDiscoveryListener(this, itemFactory);
@@ -86,14 +98,12 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CrescentBowListener(itemFactory), this);
         CrescentBowRecipeDiscoveryListener crescentBowRecipeDiscoveryListener = new CrescentBowRecipeDiscoveryListener(this);
         getServer().getPluginManager().registerEvents(crescentBowRecipeDiscoveryListener, this);
-        CrescentMoonGlow crescentMoonGlow = new CrescentMoonGlow(this, itemFactory);
-        crescentMoonGlow.startTask();
         CrescentSpearListener crescentSpearListener = new CrescentSpearListener(this, itemFactory, lang);
         crescentSpearListener.startStatusTask();
         getServer().getPluginManager().registerEvents(crescentSpearListener, this);
         CrescentSpearRecipeDiscoveryListener crescentSpearRecipeDiscoveryListener = new CrescentSpearRecipeDiscoveryListener(this);
         getServer().getPluginManager().registerEvents(crescentSpearRecipeDiscoveryListener, this);
-        KatanaListener katanaListener = new KatanaListener(this, itemFactory, lang);
+        KatanaListener katanaListener = new KatanaListener(this, itemFactory, lang, cooldownManager);
         katanaListener.startStatusTask();
         getServer().getPluginManager().registerEvents(katanaListener, this);
         KatanaRecipeDiscoveryListener katanaRecipeDiscoveryListener = new KatanaRecipeDiscoveryListener(this);
@@ -103,6 +113,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(greatswordListener, this);
         GreatswordRecipeDiscoveryListener greatswordRecipeDiscoveryListener = new GreatswordRecipeDiscoveryListener(this, itemFactory);
         getServer().getPluginManager().registerEvents(greatswordRecipeDiscoveryListener, this);
+        crimsonSwordListener = new CrimsonSwordListener(this, itemFactory, crimsonSwordManager);
+        crimsonSwordListener.startAuraTask();
+        getServer().getPluginManager().registerEvents(crimsonSwordListener, this);
 
         RecipeDiscoveryRefresher recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
             chiselRecipeDiscoveryListener.discoverFor(player);
@@ -115,6 +128,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         });
         getServer().getPluginManager().registerEvents(recipeDiscoveryRefresher, this);
         recipeDiscoveryRefresher.refreshAllOnlinePlayers();
+
+        // Smithing upgrade listener restores custom model data for smithing recipes
+        getServer().getPluginManager().registerEvents(new SmithingUpgradeListener(itemFactory), this);
     }
 
     @Override
@@ -142,6 +158,15 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
         if (greatswordListener != null) {
             greatswordListener.clearAllPlayerState();
+        }
+        if (crimsonSwordListener != null) {
+            crimsonSwordListener.stop();
+        }
+        if (auraManager != null) {
+            auraManager.stop();
+        }
+        if (cooldownManager != null) {
+            cooldownManager.clearAll();
         }
     }
 }

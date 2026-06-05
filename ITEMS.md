@@ -10,16 +10,36 @@ Decorative utility tool for cycling supported block variants.
 |---------|---------|
 | Use | Right-click a supported block to advance one decorative variant |
 | Reverse | Sneak + right-click to cycle backward |
-| Cost | 1 durability per successful conversion |
 | Rarity | Common |
 
 **Crafting** (Shaped Recipe):
-```
- I 
- C 
- S 
-```
-Where I = Iron Ingot, C = Copper Ingot, S = Stick
+
+![Chisel](media/receipes/pepeforge_chisel.png)
+
+## 🌾 Scythe
+
+Farming tool for harvesting ripe crops and replanting them automatically.
+
+| Tier | Harvest Area | Effect |
+|------|--------------|--------|
+| **Iron Scythe** | 1×1 | Harvests ripe crops, replants from drops |
+| **Diamond Scythe** | 3×3 | Harvests ripe crops, replants from drops |
+| **Netherite Scythe** | 5×5 | Harvests ripe crops, replants from drops |
+
+**Supported Crops**:
+- Wheat
+- Carrots
+- Potatoes
+- Beetroots
+- Nether Wart
+
+Replant order: Uses harvested seeds first, then inventory fallback.
+
+**Crafting** (Shaped Recipe):
+
+![Scythe](media/receipes/pepeforge_scythe.gif)
+
+Netherite upgrade uses Smithing Table with Diamond Greatsword + Netherite Ingot.
 
 ## ⚔️ Wind Blade
 
@@ -31,13 +51,13 @@ Elemental melee weapons with speed effects.
 | **Diamond Wind Blade** | 6 | Speed I while holding |
 | **Netherite Wind Blade** | 7 | Speed I while holding + Speed II for 3s on hit |
 
+| Feature | Details |
+|---------|---------|
+| Dash | Right-click to activate a dash ability (5-second cooldown). Available on all tiers. |
+
 **Crafting** (Shaped Recipe):
-```
- M 
- M 
- B 
-```
-Where M = tier material (Iron/Diamond Ingot) and B = Breeze Rod.
+
+![Wind Blade](media/receipes/pepeforge_wind_blade.gif)
 
 Netherite upgrade uses Smithing Table with Diamond Wind Blade + Netherite Ingot.
 
@@ -62,7 +82,7 @@ Two-handed rhythm weapons for fixed reach, widening area cuts, and space control
 
 **Crafting** (Shaped Recipe):
 
-![Greatsword](media/pepeforge_greatsword.gif)
+![Greatsword](media/receipes/pepeforge_greatsword.gif)
 
 Netherite upgrade uses Smithing Table with Diamond Greatsword + Netherite Ingot.
 
@@ -74,18 +94,14 @@ Moon-themed ranged weapon that fires a three-arrow volley.
 |---------|---------|
 | Arrows | Fires 3 arrows in crescent spread (center + 2 sides) |
 | Ammo | Consumes 1 arrow per volley |
-| Visual | Subtly shimmers under moonlight |
 | Day | Deals 1 less damage during the day |
 | Moonlight | Deals 2 bonus damage at night under open sky |
+| Visual | Subtly shimmers under moonlight |
 | Rarity | Epic |
 
 **Crafting** (Shaped Recipe):
-```
- PSA
- P S
- PSA
-```
-Where P = Phantom Membrane, S = Stick, A = Amethyst Shard
+
+![Crescent Bow](media/receipes/pepeforge_crescent_bow.png)
 
 ## 🔱 Crescent Spear
 
@@ -101,12 +117,8 @@ Moon-themed melee weapon with an armed follow-up burst.
 | Rarity | Epic |
 
 **Crafting** (Shaped Recipe):
-```
- A 
- S 
- S 
-```
-Where A = Amethyst Shard, S = Stick
+
+![Crescent Spear](media/receipes/pepeforge_crescent_spear.png)
 
 ## 🗡️ Katana
 
@@ -121,34 +133,32 @@ Two-handed parry weapon built around short defensive timing windows.
 
 **Crafting** (Shaped Recipe):
 
-![Katana](media/pepeforge_katana.png)
+![Katana](media/receipes/pepeforge_katana.png)
 
-## 🌾 Scythe
+## 🩸 Crimson Sword
 
-Farming tool for harvesting ripe crops and replanting them automatically.
+A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
 
-| Tier | Harvest Area | Effect |
-|------|--------------|--------|
-| **Iron Scythe** | 1×1 | Harvests ripe crops, replants from drops |
-| **Diamond Scythe** | 3×3 | Harvests ripe crops, replants from drops |
-| **Netherite Scythe** | 5×5 | Harvests ripe crops, replants from drops |
+| Property | Details |
+|----------|---------|
+| **Rarity** | Legendary |
+| **Acquisition** | Boss Drop / Quest Reward |
+| **Level Cap** | 30 |
+| **Experience Source** | Damage Dealt |
+| **Passive Scaling** | +1% Damage per weapon level (up to +30% at level 30) |
 
-**Crafting** (Shaped Recipe):
-```
-MMM
- S 
-S  
-```
-Where M = tier material (Iron/Diamond/Netherite Ingot), S = Stick
+**Progression**:
 
-**Supported Crops**:
-- Wheat
-- Carrots
-- Potatoes
-- Beetroots
-- Nether Wart
+| Level | Effect |
+|-------|--------|
+| **5** | Lifesteal: 3% of damage dealt. |
+| **10** | Crimson Aura (10s): Drains 1 HP/s from entities within 2.5 blocks. |
+| **15** | Lifesteal: 6% of damage dealt. |
+| **20** | Crimson Aura (20s): Drains 2 HP/s from entities within 2.5 blocks. |
+| **25** | Lifesteal: 10% of damage dealt. |
+| **30** | Crimson Aura (30s): Drains 3 HP/s from entities within 2.5 blocks. |
 
-Replant order: Uses harvested seeds first, then inventory fallback.
+*Subjected for changes*
 
 ## Give Names
 
@@ -167,3 +177,4 @@ Available internal item names for `/pepeforge give`:
 - `iron_scythe`
 - `diamond_scythe`
 - `netherite_scythe`
+- `crimson_sword`

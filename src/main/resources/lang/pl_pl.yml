@@ -3,13 +3,16 @@ messages:
   command:
     players_only: "&cTylko gracze mogą użyć tej komendy."
     no_permission: "&cNie masz uprawnień do użycia tej komendy."
-    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe> <player> lub /pepeforge items"
+    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword> <player> lub /pepeforge items"
     unknown_subcommand: "&cNieznana podkomenda."
     unknown_item: "&cNieznany przedmiot: {item}"
     item_disabled: "&cTen przedmiot jest obecnie wyłączony: {item}"
     player_not_found: "&cNie znaleziono gracza: {player}"
     give_success_sender: "&aPrzekazano {item} graczowi {player}."
     give_success_target: "&aOtrzymano {item}&a."
+    crimson_sword_only: "&cTylko Karmazynowy Miecz."
+    setlevel_success: "&aUstawiono poziom Karmazynowego Miecza na {level}."
+    invalid_level: "&cNieprawidłowy poziom."
   menu:
     title: "&8Przedmioty Pepe"
     item_received: "&aPrzedmiot dodany do ekwipunku."
@@ -17,6 +20,8 @@ messages:
     offhand_required: "&cTa broń wymaga pustej drugiej ręki."
   katana:
     cooldown: "&cKatana ładuje się... {bar} &7{seconds}s"
+  wind_blade:
+    cooldown: "&cZryw odnawia się... {bar} &7{seconds}s"
   crescent_spear:
     charge: "&dŁadunek księżyca {bar}"
     ready: "&dŁadunek księżyca gotowy! &fNastępne trafienie wzmocnione {bar}"
@@ -48,7 +53,7 @@ items:
       - "&6---------------"
       - "&eUmiejętność: &bRzeźbienie"
       - "&3Prawy przycisk zmienia dekoracyjne warianty bloków."
-      - "&3Shift + prawy przycisk obraca wstecz."
+      - "&3Shift + prawy przycisk przełącza warianty wstecz."
       - "&#A0AEC0Pospolita"
       - "&6---------------"
   katana:
@@ -56,8 +61,8 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &bParowanie"
-      - "&3Prawy przycisk otwiera krótkie okno parry."
-      - "&3Blokuje melee i odbija projectile."
+      - "&3Prawy przycisk otwiera krótkie okno parowania."
+      - "&3Blokuje ataki i odbija pociski."
       - "&7Dwuręczna"
       - "&#3182CERzadka"
       - "&6---------------"
@@ -65,25 +70,28 @@ items:
     fallback_name: "&#BEBEBEŻelazne Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eUmiejętność: &bSzybkie Cięcie"
-      - "&3Daje Speed I na 2s po trafieniu."
+      - "&eUmiejętność: &bSzybkie Cięcie / Zryw Wiatru"
+      - "&3Daje Speed I na 10s po trafieniu."
+      - "&3Prawy przycisk wykonuje zryw (5s odnowienia)."
       - "&#A0AEC0Pospolita"
       - "&6---------------"
   diamond_wind_blade:
     fallback_name: "&#33EBCBDiamentowe Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eUmiejętność: &bSzybkie Cięcie"
+      - "&eUmiejętność: &bSzybkie Cięcie / Zryw Wiatru"
       - "&3Daje Speed I podczas trzymania."
+      - "&3Prawy przycisk wykonuje zryw (5s odnowienia)."
       - "&#3182CERzadka"
       - "&6---------------"
   netherite_wind_blade:
     fallback_name: "&8Netherytowe Ostrze Wiatru"
     lore:
       - "&6---------------"
-      - "&eUmiejętność: &bSzybkie Cięcie"
+      - "&eUmiejętność: &bSzybkie Cięcie / Zryw Wiatru"
       - "&3Daje Speed I podczas trzymania."
-      - "&3Daje Speed II na 3s po trafieniu."
+      - "&3Daje Speed II na 10s po trafieniu."
+      - "&3Prawy przycisk wykonuje zryw (5s odnowienia)."
       - "&#805AD5Epicka"
       - "&6---------------"
   iron_greatsword:
@@ -91,9 +99,9 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &6Rytmiczne Cięcie"
-      - "&3Kliki w rytmie wyprowadzają cięcia obszarowe."
+      - "&3Ataki wykonywane w rytmie wyprowadzają cięcia obszarowe."
       - "&3Rytm poszerza łuk ataku."
-      - "&7Dwuręczny"
+      - "&7Dwuręczna"
       - "&#A0AEC0Pospolita"
       - "&6---------------"
   diamond_greatsword:
@@ -101,9 +109,9 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &6Rytmiczne Cięcie"
-      - "&3Kliki w rytmie wyprowadzają cięcia obszarowe."
+      - "&3Ataki wykonywane w rytmie wyprowadzają cięcia obszarowe."
       - "&3Rytm poszerza łuk ataku."
-      - "&7Dwuręczny"
+      - "&7Dwuręczna"
       - "&#3182CERzadka"
       - "&6---------------"
   netherite_greatsword:
@@ -111,9 +119,9 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &6Rytmiczne Cięcie"
-      - "&3Kliki w rytmie wyprowadzają cięcia obszarowe."
+      - "&3Ataki wykonywane w rytmie wyprowadzają cięcia obszarowe."
       - "&3Rytm poszerza łuk ataku."
-      - "&7Dwuręczny"
+      - "&7Dwuręczna"
       - "&#805AD5Epicka"
       - "&6---------------"
   iron_scythe:
@@ -121,7 +129,7 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &aŻniwa"
-      - "&3Zbiera dojrzałe plony z jednego pola."
+      - "&3Zbiera dojrzałe plony w obszarze 3x3."
       - "&3Automatycznie przesadza z dropu lub ekwipunku."
       - "&#A0AEC0Pospolita"
       - "&6---------------"
@@ -130,7 +138,7 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &aŻniwa"
-      - "&3Zbiera dojrzałe plony w obszarze 3x3."
+      - "&3Zbiera dojrzałe plony w obszarze 5x5."
       - "&3Automatycznie przesadza z dropu lub ekwipunku."
       - "&#3182CERzadka"
       - "&6---------------"
@@ -139,7 +147,26 @@ items:
     lore:
       - "&6---------------"
       - "&eUmiejętność: &aŻniwa"
-      - "&3Zbiera dojrzałe plony w obszarze 5x5."
+      - "&3Zbiera dojrzałe plony w obszarze 7x7."
       - "&3Automatycznie przesadza z dropu lub ekwipunku."
       - "&#805AD5Epicka"
       - "&6---------------"
+  crimson_sword:
+    fallback_name: "&4Karmazynowy Miecz"
+    lore:
+      - "&6---------------"
+      - "&ePoziom: &c{level} &7({xp}/{max_xp} XP)"
+      - "&3Broń zdobywa XP za zadawane obrażenia."
+      - "&3Zadawane obrażenia ładują Karmazynową Aurę."
+      - "&7Aktywne cechy:"
+      - "{features}"
+      - "&#D69E2ELegendarna"
+      - "&6---------------"
+    features:
+      edge: "&cKarmazynowe Ostrze: +{percent}% obrażeń"
+      lifesteal: "&cKradzież życia: +{percent}%"
+      lifesteal_next: "&cKradzież życia: +{percent}% (nast. poziom: Lv {next_level}: +{next_percent}%)"
+      lifesteal_locked: "&8Kradzież życia: Odblokowuje się na 5 poziomie"
+      aura: "&4Karmazynowa Aura ({seconds}s): {drain} HP/s w promieniu {radius} bloków"
+      aura_next: "&4Karmazynowa Aura ({seconds}s): {drain} HP/s w promieniu {radius} bloków (nast. poziom: Lv {next_level}: {next_seconds}s, {next_drain} HP/s)"
+      aura_locked: "&8Karmazynowa Aura: Odblokowuje się na 10 poziomie"

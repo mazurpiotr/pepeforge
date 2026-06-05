@@ -2,9 +2,10 @@ name: 'PepeForge'
 version: '${project.version}'
 main: pepin.pepeforge.PepeForgePlugin
 api-version: '1.21'
+folia-supported: true
 authors:
   - Pepin
-description: Custom items plugin for PepeForge.
+description: Adds custom weapons, tools and gameplay mechanics to Minecraft servers.
 
 commands:
   pepeforge:

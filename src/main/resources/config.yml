@@ -3,8 +3,10 @@ language: en_us
 
 # Translation settings
 translations:
-  # Use client-side item name/lore translations from the resource pack.
   # This requires Paper/Folia/Purpur item text data components.
+  # Use client-side item name/lore translations from the resource pack.
+  # Without the resource pack, players will see raw translation keys
+  # instead of localized item names and lore.
   # Spigot automatically falls back to server-side text from lang/*.yml.
   use_client_side: true
   # Server language if client-side translation is disabled or unsupported.
@@ -51,5 +53,8 @@ items:
     enabled: true
     recipe_enabled: true
   netherite_scythe:
+    enabled: true
+    recipe_enabled: true
+  crimson_sword:
     enabled: true
     recipe_enabled: true

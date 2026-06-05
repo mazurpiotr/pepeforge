@@ -27,18 +27,18 @@ public final class GreatswordRecipes {
     }
 
     public void unregisterAll() {
-        RecipeRegistrar.remove(plugin, GreatswordRecipeKeys.IRON_GREATSWORD);
-        RecipeRegistrar.remove(plugin, GreatswordRecipeKeys.DIAMOND_GREATSWORD);
-        RecipeRegistrar.remove(plugin, GreatswordRecipeKeys.NETHERITE_GREATSWORD);
+        for (GreatswordTier tier : GreatswordTier.values()) {
+            RecipeRegistrar.remove(plugin, GreatswordRecipeKeys.forTier(tier));
+        }
     }
 
     private void registerShaped(GreatswordTier tier) {
+        NamespacedKey key = GreatswordRecipeKeys.forTier(tier);
+        RecipeRegistrar.remove(plugin, key);
+
         if (!itemFactory.isRecipeEnabled(tier.itemId())) {
             return;
         }
-
-        NamespacedKey key = GreatswordRecipeKeys.forTier(tier);
-        RecipeRegistrar.remove(plugin, key);
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createGreatsword(tier));
         /*
@@ -48,7 +48,7 @@ public final class GreatswordRecipes {
          */
         recipe.shape(" M ", "MMM", " S ");
         recipe.setIngredient('M', tier.bladeMaterial());
-        recipe.setIngredient('S', Material.STICK);
+        recipe.setIngredient('S', tier.handleMaterial());
         RecipeRegistrar.add(plugin, key, recipe);
     }
 
