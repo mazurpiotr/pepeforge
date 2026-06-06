@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.greatsword;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
@@ -22,6 +23,7 @@ public enum GreatswordTier {
             Material.IRON_SWORD,
             Material.IRON_INGOT,
             Material.STICK,
+            new NamespacedKey("pepeforge", "iron_greatsword"),
             CustomModelDataIds.IRON_GREATSWORD,
             6.0D,
             1.52D
@@ -36,6 +38,7 @@ public enum GreatswordTier {
             Material.DIAMOND_SWORD,
             Material.DIAMOND,
             Material.STICK,
+            new NamespacedKey("pepeforge", "diamond_greatsword"),
             CustomModelDataIds.DIAMOND_GREATSWORD,
             7.0D,
             1.52D
@@ -50,6 +53,7 @@ public enum GreatswordTier {
             Material.NETHERITE_SWORD,
             Material.NETHERITE_INGOT,
             Material.STICK,
+            new NamespacedKey("pepeforge", "netherite_greatsword"),
             CustomModelDataIds.NETHERITE_GREATSWORD,
             8.0D,
             1.52D
@@ -67,6 +71,7 @@ public enum GreatswordTier {
     private final Material baseMaterial;
     private final Material bladeMaterial;
     private final Material handleMaterial;
+    private final NamespacedKey modelKey;
     private final int customModelData;
     private final double attackDamage;
     private final double attackSpeed;
@@ -81,6 +86,7 @@ public enum GreatswordTier {
             Material baseMaterial,
             Material bladeMaterial,
             Material handleMaterial,
+            NamespacedKey modelKey,
             int customModelData,
             double attackDamage,
             double attackSpeed
@@ -94,6 +100,7 @@ public enum GreatswordTier {
         this.baseMaterial = baseMaterial;
         this.bladeMaterial = bladeMaterial;
         this.handleMaterial = handleMaterial;
+        this.modelKey = modelKey;
         this.customModelData = customModelData;
         this.attackDamage = attackDamage;
         this.attackSpeed = attackSpeed;
@@ -140,6 +147,10 @@ public enum GreatswordTier {
 
     public Material handleMaterial() {
         return handleMaterial;
+    }
+
+    public NamespacedKey modelKey() {
+        return modelKey;
     }
 
     public int customModelData() {

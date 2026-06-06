@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.windblade;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
@@ -22,6 +23,7 @@ public enum WindBladeTier {
             Material.IRON_SWORD,
             Material.IRON_INGOT,
             Material.BREEZE_ROD,
+            new NamespacedKey("pepeforge", "iron_wind_blade"),
             CustomModelDataIds.IRON_WIND_BLADE,
             5.0,
             2.1,
@@ -39,6 +41,7 @@ public enum WindBladeTier {
             Material.DIAMOND_SWORD,
             Material.DIAMOND,
             Material.BREEZE_ROD,
+            new NamespacedKey("pepeforge", "diamond_wind_blade"),
             CustomModelDataIds.DIAMOND_WIND_BLADE,
             6.0,
             2.2,
@@ -56,6 +59,7 @@ public enum WindBladeTier {
             Material.NETHERITE_SWORD,
             Material.NETHERITE_INGOT,
             Material.BREEZE_ROD,
+            new NamespacedKey("pepeforge", "netherite_wind_blade"),
             CustomModelDataIds.NETHERITE_WIND_BLADE,
             7.0,
             2.2,
@@ -76,6 +80,7 @@ public enum WindBladeTier {
     private final Material baseMaterial;
     private final Material bladeMaterial;
     private final Material handleMaterial;
+    private final NamespacedKey modelKey;
     private final int customModelData;
     private final double attackDamage;
     private final double attackSpeed;
@@ -93,6 +98,7 @@ public enum WindBladeTier {
             Material baseMaterial,
             Material bladeMaterial,
             Material handleMaterial,
+            NamespacedKey modelKey,
             int customModelData,
             double attackDamage,
             double attackSpeed,
@@ -109,6 +115,7 @@ public enum WindBladeTier {
         this.baseMaterial = baseMaterial;
         this.bladeMaterial = bladeMaterial;
         this.handleMaterial = handleMaterial;
+        this.modelKey = modelKey;
         this.customModelData = customModelData;
         this.attackDamage = attackDamage;
         this.attackSpeed = attackSpeed;
@@ -158,6 +165,10 @@ public enum WindBladeTier {
 
     public Material handleMaterial() {
         return handleMaterial;
+    }
+
+    public NamespacedKey modelKey() {
+        return modelKey;
     }
 
     public int customModelData() {

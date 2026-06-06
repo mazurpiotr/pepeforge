@@ -81,7 +81,7 @@ public final class ItemFactory {
                 tier.rarity(),
                 tier.nameColor(),
                 tier.customModelData(),
-                null,
+                tier.modelKey(),
                 List.of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", tier.attackDamage()),
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", tier.attackSpeed())
@@ -99,7 +99,7 @@ public final class ItemFactory {
                 tier.rarity(),
                 tier.nameColor(),
                 tier.customModelData(),
-                null,
+                tier.modelKey(),
                 List.of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", tier.attackDamage()),
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", tier.attackSpeed())
@@ -117,7 +117,7 @@ public final class ItemFactory {
                 CrescentBowDefinition.RARITY,
                 CrescentBowDefinition.NAME_COLOR,
                 CrescentBowDefinition.CUSTOM_MODEL_DATA,
-                null,
+                CrescentBowDefinition.MODEL_KEY,
                 List.of()
         ));
     }
@@ -132,7 +132,7 @@ public final class ItemFactory {
                 CrescentSpearDefinition.RARITY,
                 CrescentSpearDefinition.NAME_COLOR,
                 CrescentSpearDefinition.CUSTOM_MODEL_DATA,
-                null,
+                CrescentSpearDefinition.MODEL_KEY,
                 List.of()
         ));
     }
@@ -147,7 +147,7 @@ public final class ItemFactory {
                 ChiselDefinition.RARITY,
                 ChiselDefinition.NAME_COLOR,
                 ChiselDefinition.CUSTOM_MODEL_DATA,
-                null,
+                ChiselDefinition.MODEL_KEY,
                 List.of()
         ));
     }
@@ -162,7 +162,7 @@ public final class ItemFactory {
                 KatanaDefinition.RARITY,
                 KatanaDefinition.NAME_COLOR,
                 KatanaDefinition.CUSTOM_MODEL_DATA,
-                null,
+                KatanaDefinition.MODEL_KEY,
                 List.of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", KatanaDefinition.ATTACK_DAMAGE),
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", KatanaDefinition.ATTACK_SPEED),
@@ -360,6 +360,7 @@ public final class ItemFactory {
         }
         ItemMeta meta = item.getItemMeta();
         ItemMetaCompat.setCustomModelData(meta, active ? KatanaDefinition.PARRY_MODEL_DATA : KatanaDefinition.CUSTOM_MODEL_DATA);
+        ItemMetaCompat.setItemModelIfSupported(meta, active ? KatanaDefinition.PARRY_MODEL_KEY : KatanaDefinition.MODEL_KEY);
         item.setItemMeta(meta);
     }
 

@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.katana;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
@@ -16,11 +17,13 @@ public final class KatanaDefinition {
     public static final ItemRarity RARITY = ItemRarity.RARE;
 
     public static final Material BASE_MATERIAL = Material.IRON_SWORD;
+    public static final NamespacedKey MODEL_KEY = new NamespacedKey("pepeforge", "katana");
     public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.KATANA;
     /*
      * This temporary parry visual uses a second flat item model.
      * Later we can replace it with a dedicated Blockbench pose if we want a stronger animation.
      */
+    public static final NamespacedKey PARRY_MODEL_KEY = new NamespacedKey("pepeforge", "katana_parry");
     public static final int PARRY_MODEL_DATA = CustomModelDataIds.KATANA_PARRY;
 
     public static final double ATTACK_DAMAGE = 5.0;

@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.crescentspear;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
@@ -16,6 +17,7 @@ public final class CrescentSpearDefinition {
     public static final ItemRarity RARITY = ItemRarity.EPIC;
 
     public static final Material BASE_MATERIAL = Material.DIAMOND_SPEAR;
+    public static final NamespacedKey MODEL_KEY = new NamespacedKey("pepeforge", "crescent_spear");
     public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.CRESCENT_SPEAR;
 
     public static final int CHARGE_MAX = 100;

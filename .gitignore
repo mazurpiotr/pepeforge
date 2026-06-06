@@ -1,4 +1,7 @@
 target/
 .m2/
-pepeforge-resourcepack.zip
+PepeForge-ResourcePack-Classic.zip
+PepeForge-ResourcePack-Classic.zip.sha1
+PepeForge-ResourcePack-Modern.zip
+PepeForge-ResourcePack-Modern.zip.sha1
 scripts/

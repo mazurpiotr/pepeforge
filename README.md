@@ -32,10 +32,53 @@ See [ITEMS.md](ITEMS.md) for the full item and recipe list.
 
 1. Download the latest JAR from [Releases](../../releases).
 2. Place `pepeforge-X.Y.Z.jar` in your server's `plugins/` folder.
-3. *(Optional)* Download the resource pack from [GitHub Releases](https://github.com/mazurpiotr/pepeforge/releases) for custom item models, textures, and client-side translations.
-   * ⚠ If translations.use_client_side is enabled and players do not have the resource pack installed, custom item names and lore will appear as raw translation keys (e.g. item.pepeforge.crimson_sword.name) instead of readable text.
-   * For the best experience, distributing the resource pack automatically with a plugin such as ResourcePackManager is highly recommended.
+3. Download and configure your Resource Pack (see **Resource Pack Installation** below).
 4. Restart your server.
+
+## Resource Pack Installation
+
+PepeForge utilizes a **hybrid visual routing system**, providing two distinct resource packs to maximize compatibility and take advantage of modern Minecraft features. You can download the resource packs from [GitHub Releases](https://github.com/mazurpiotr/pepeforge/releases).
+
+### Choosing Your Resource Pack
+
+**Classic Pack (`PepeForge-ResourcePack-Classic.zip`)**
+- **Target Platform:** Spigot / CraftBukkit.
+- **Routing:** Uses `CustomModelData`.
+- **Description:** The traditional method for custom item models. Essential for full backward compatibility on older server software or specific setups.
+
+**Modern Pack (`PepeForge-ResourcePack-Modern.zip`)**
+- **Target Platform:** Paper / Folia (1.21.11+).
+- **Routing:** Uses the new `item_model` component.
+- **Description:** Recommended for modern servers. It does not overwrite vanilla models, ensuring cleaner compatibility with other plugins and resource packs.
+
+### Recommended Configuration (Paper)
+If you are running Paper or Folia 1.21.11+, we strongly recommend using the **Modern Pack**. This leverages the newer `item_model` API, offering native visual handling without conflicting with vanilla Minecraft resources.
+
+*⚠ If `translations.use_client_side` is enabled and players do not have the resource pack installed, custom item names and lore will appear as raw translation keys (e.g. `item.pepeforge.crimson_sword.name`) instead of readable text.*
+
+*For the best experience, distributing the resource pack automatically with a plugin such as **ResourcePackManager** or **ForceResourcePack** is highly recommended.*
+
+## Migration Guide
+
+Upgrading from an older version of PepeForge to the new hybrid system is seamless.
+
+- **Existing Items:** All of your previously generated custom items will continue to function without any issues.
+- **Identity Preservation:** The plugin retains the internal `item_id` to logically identify custom items.
+- **Visual Fallbacks:** `CustomModelData` is still written to all items as a fallback. This guarantees that items created in older versions or moved between Spigot and Paper servers will still render correctly using the Classic pack.
+
+## FAQ
+
+**Q: Which Resource Pack should I choose?**
+A: Use the **Modern Pack** if you are running Paper/Folia 1.21.11+. Use the **Classic Pack** if you are on standard Spigot or CraftBukkit.
+
+**Q: Can I use the Modern Pack on Spigot?**
+A: No, standard Spigot does not natively support the new `item_model` data component in the same way Paper does. You should use the Classic Pack.
+
+**Q: Will my existing items stop working?**
+A: Not at all! Existing items will preserve their functionality and visuals because the plugin maintains both `item_id` and `CustomModelData` on the backend.
+
+**Q: Does the Modern Pack conflict with other Resource Packs?**
+A: No. The Modern Pack takes advantage of the `item_model` component, which adds new custom items without overriding existing vanilla Minecraft items or models, drastically reducing conflicts.
 
 ## Configuration
 
