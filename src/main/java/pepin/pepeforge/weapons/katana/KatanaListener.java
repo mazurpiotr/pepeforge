@@ -65,8 +65,10 @@ public final class KatanaListener implements Listener {
         this.reflectUntilKey = new NamespacedKey(plugin, "katana_reflect_until");
     }
 
+    private BukkitTask statusTask;
+
     public void startStatusTask() {
-        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        statusTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 if (!itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
                     clearActiveParry(player);
@@ -85,6 +87,18 @@ public final class KatanaListener implements Listener {
                 }
             }
         }, 1L, 2L);
+    }
+
+    public void stop() {
+        if (statusTask != null) {
+            statusTask.cancel();
+            statusTask = null;
+        }
+        for (BukkitTask task : activeTasks.values()) {
+            task.cancel();
+        }
+        activeTasks.clear();
+        activeParryUntil.clear();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

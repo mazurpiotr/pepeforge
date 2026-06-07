@@ -23,6 +23,7 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.AuraManager;
 import pepin.pepeforge.util.CooldownManager;
+import pepin.pepeforge.weapons.windblade.WindAuraEffect;
 
 import java.util.Locale;
 
@@ -63,8 +64,10 @@ public final class WindBladeListener implements Listener {
         this.auraManager = auraManager;
     }
 
+    private org.bukkit.scheduler.BukkitTask holdingTask;
+
     public void startHoldingTask() {
-        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        holdingTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 ItemStack held = player.getInventory().getItemInMainHand();
                 WindBladeTier tier = itemFactory.getWindBladeTier(held);
@@ -74,6 +77,13 @@ public final class WindBladeListener implements Listener {
                 applySpeedEffectIfBetter(player, HOLDING_SPEED_EFFECT);
             }
         }, 1L, 20L);
+    }
+
+    public void stop() {
+        if (holdingTask != null) {
+            holdingTask.cancel();
+            holdingTask = null;
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -173,7 +183,7 @@ public final class WindBladeListener implements Listener {
             }
         }
         player.addPotionEffect(candidate);
-        auraManager.activateWindAura(player, candidate.getDuration());
+        auraManager.addOrExtendActiveAura(player, new WindAuraEffect(itemFactory), candidate.getDuration());
     }
 
     private void denyInteraction(PlayerInteractEvent event) {

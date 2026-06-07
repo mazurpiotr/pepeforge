@@ -50,8 +50,10 @@ public final class CrescentSpearListener implements Listener {
         this.lang = lang;
     }
 
+    private org.bukkit.scheduler.BukkitTask statusTask;
+
     public void startStatusTask() {
-        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        statusTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 UUID playerId = player.getUniqueId();
                 int currentCharge = charge.getOrDefault(playerId, 0);
@@ -82,6 +84,13 @@ public final class CrescentSpearListener implements Listener {
                 }
             }
         }, 1L, CrescentSpearDefinition.STATUS_INTERVAL_TICKS);
+    }
+
+    public void stop() {
+        if (statusTask != null) {
+            statusTask.cancel();
+            statusTask = null;
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
