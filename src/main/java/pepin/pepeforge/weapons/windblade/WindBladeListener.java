@@ -23,7 +23,6 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.AuraManager;
 import pepin.pepeforge.util.CooldownManager;
-import pepin.pepeforge.weapons.windblade.WindAuraEffect;
 
 import java.util.Locale;
 

@@ -102,12 +102,11 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
 
         List<String> bootMessage = new ArrayList<>();
-        bootMessage.add("  ____                 _____                     ");
-        bootMessage.add(" |  _ \\ ___ _ __   ___|  ___|__  _ __ __ _  ___ ");
-        bootMessage.add(" | |_) / _ \\ '_ \\ / _ \\ |_ / _ \\| '__/ _` |/ _ \\");
-        bootMessage.add(" |  __/  __/ |_) |  __/  _| (_) | | | (_| |  __/");
-        bootMessage.add(" |_|   \\___| .__/ \\___|_|  \\___/|_|  \\__, |\\___|");
-        bootMessage.add("           |_|                       |___/      ");
+        bootMessage.add(" ");
+        bootMessage.add("▄▖      ▌    ▄▖        ");
+        bootMessage.add("▙▌█▌▛▌█▌ ▛▘  ▙▖▛▌▛▘▛▌█▌");
+        bootMessage.add("▌ ▙▖▙▌▙▖ ▄▌  ▌ ▙▌▌ ▙▌▙▖");
+        bootMessage.add("    ▌              ▄▌  ");
         bootMessage.add(" ");
         bootMessage.add(" Version: " + version);
         bootMessage.addAll(formattedItemLines);
