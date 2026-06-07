@@ -36,6 +36,9 @@ import pepin.pepeforge.weapons.windblade.WindBladeRecipeDiscoveryListener;
 import pepin.pepeforge.weapons.windblade.WindBladeRecipes;
 import pepin.pepeforge.recipe.SmithingUpgradeListener;
 import org.bstats.bukkit.Metrics;
+import org.bukkit.configuration.ConfigurationSection;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class PepeForgePlugin extends JavaPlugin {
 
@@ -59,6 +62,60 @@ public final class PepeForgePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        
+        String version = getDescription().getVersion();
+        
+        List<String> loadedItems = new ArrayList<>();
+        ConfigurationSection itemsSection = getConfig().getConfigurationSection("items");
+        if (itemsSection != null) {
+            for (String key : itemsSection.getKeys(false)) {
+                if (itemsSection.getBoolean(key + ".enabled", true)) {
+                    String[] words = key.split("_");
+                    StringBuilder formattedKey = new StringBuilder();
+                    for (String word : words) {
+                        if (!word.isEmpty()) {
+                            formattedKey.append(Character.toUpperCase(word.charAt(0)))
+                                        .append(word.substring(1))
+                                        .append(" ");
+                        }
+                    }
+                    loadedItems.add(formattedKey.toString().trim());
+                }
+            }
+        }
+        
+        List<String> formattedItemLines = new ArrayList<>();
+        StringBuilder currentLine = new StringBuilder(" Loaded Tools & Weapons: ");
+        for (int i = 0; i < loadedItems.size(); i++) {
+            String item = loadedItems.get(i);
+            if (currentLine.length() + item.length() > 70) {
+                formattedItemLines.add(currentLine.toString());
+                currentLine = new StringBuilder("                         "); // padding
+            }
+            currentLine.append(item);
+            if (i < loadedItems.size() - 1) {
+                currentLine.append(", ");
+            }
+        }
+        if (currentLine.length() > 0) {
+            formattedItemLines.add(currentLine.toString());
+        }
+
+        List<String> bootMessage = new ArrayList<>();
+        bootMessage.add("  ____                 _____                     ");
+        bootMessage.add(" |  _ \\ ___ _ __   ___|  ___|__  _ __ __ _  ___ ");
+        bootMessage.add(" | |_) / _ \\ '_ \\ / _ \\ |_ / _ \\| '__/ _` |/ _ \\");
+        bootMessage.add(" |  __/  __/ |_) |  __/  _| (_) | | | (_| |  __/");
+        bootMessage.add(" |_|   \\___| .__/ \\___|_|  \\___/|_|  \\__, |\\___|");
+        bootMessage.add("           |_|                       |___/      ");
+        bootMessage.add(" ");
+        bootMessage.add(" Version: " + version);
+        bootMessage.addAll(formattedItemLines);
+        bootMessage.add(" ");
+
+        for (String line : bootMessage) {
+            getLogger().info(line);
+        }
         lang = new PluginLang(this);
         itemFactory = new ItemFactory(this, lang);
         chiselRecipes = new ChiselRecipes(this, itemFactory);
