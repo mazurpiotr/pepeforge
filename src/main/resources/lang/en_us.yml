@@ -170,3 +170,12 @@ items:
       aura: "&4Crimson Aura ({seconds}s): {drain} HP/s within {radius} blocks"
       aura_next: "&4Crimson Aura ({seconds}s): {drain} HP/s within {radius} blocks (next at Lv {next_level}: {next_seconds}s, {next_drain} HP/s)"
       aura_locked: "&8Crimson Aura: Unlocks at level 10"
+  solar_shield:
+    fallback_name: "&#667DB4Solar Shield"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &6Solar Retaliation"
+      - "&3Charges passively in sunlight."
+      - "&3Blocking consumes a charge to ignite attackers."
+      - "&#D69E2ELegendary"
+      - "&6---------------"

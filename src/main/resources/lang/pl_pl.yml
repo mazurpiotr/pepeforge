@@ -170,3 +170,12 @@ items:
       aura: "&4Karmazynowa Aura ({seconds}s): {drain} HP/s w promieniu {radius} bloków"
       aura_next: "&4Karmazynowa Aura ({seconds}s): {drain} HP/s w promieniu {radius} bloków (nast. poziom: Lv {next_level}: {next_seconds}s, {next_drain} HP/s)"
       aura_locked: "&8Karmazynowa Aura: Odblokowuje się na 10 poziomie"
+  solar_shield:
+    fallback_name: "&#667DB4Słoneczna Tarcza"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &6Słoneczny Odwet"
+      - "&3Ładuje się pasywnie w słońcu."
+      - "&3Blokowanie zużywa ładunek i podpala atakującego."
+      - "&#D69E2ELegendarna"
+      - "&6---------------"

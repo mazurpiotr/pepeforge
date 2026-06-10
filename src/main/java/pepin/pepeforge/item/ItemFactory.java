@@ -18,6 +18,7 @@ import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 import pepin.pepeforge.weapons.greatsword.GreatswordTier;
 import pepin.pepeforge.weapons.katana.KatanaDefinition;
+import pepin.pepeforge.weapons.solarshield.SolarShieldDefinition;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
 
 import java.util.ArrayList;
@@ -41,7 +42,8 @@ public final class ItemFactory {
             ItemIds.IRON_SCYTHE,
             ItemIds.DIAMOND_SCYTHE,
             ItemIds.NETHERITE_SCYTHE,
-            ItemIds.CRIMSON_SWORD
+            ItemIds.CRIMSON_SWORD,
+            ItemIds.SOLAR_SHIELD
     );
 
     private static final Map<String, String> ITEM_ALIASES = Map.ofEntries(
@@ -58,7 +60,8 @@ public final class ItemFactory {
             Map.entry(ItemIds.IRON_SCYTHE, ItemIds.IRON_SCYTHE),
             Map.entry(ItemIds.DIAMOND_SCYTHE, ItemIds.DIAMOND_SCYTHE),
             Map.entry(ItemIds.NETHERITE_SCYTHE, ItemIds.NETHERITE_SCYTHE),
-            Map.entry(ItemIds.CRIMSON_SWORD, ItemIds.CRIMSON_SWORD)
+            Map.entry(ItemIds.CRIMSON_SWORD, ItemIds.CRIMSON_SWORD),
+            Map.entry(ItemIds.SOLAR_SHIELD, ItemIds.SOLAR_SHIELD)
     );
 
     private final NamespacedKey itemIdKey;
@@ -197,6 +200,7 @@ public final class ItemFactory {
             ItemMetaCompat.setDisplayName(meta, fallbackName);
         }
         ItemMetaCompat.setCustomModelData(meta, CrimsonSwordDefinition.CUSTOM_MODEL_DATA);
+        ItemMetaCompat.setItemModelIfSupported(meta, CrimsonSwordDefinition.MODEL_KEY);
         ItemMetaCompat.addMainHandAttribute(
                 meta,
                 Attribute.ATTACK_DAMAGE,
@@ -213,6 +217,54 @@ public final class ItemFactory {
         item.setItemMeta(meta);
         new CrimsonSwordManager(plugin, lang).initialize(item);
         return item;
+    }
+
+    public ItemStack createSolarShield() {
+        ItemStack item = createItem(new ItemSpec(
+                SolarShieldDefinition.ITEM_ID,
+                SolarShieldDefinition.BASE_MATERIAL,
+                SolarShieldDefinition.LANG_PATH,
+                SolarShieldDefinition.TRANSLATION_KEY_BASE,
+                SolarShieldDefinition.LORE_LINE_COUNT,
+                SolarShieldDefinition.RARITY,
+                SolarShieldDefinition.NAME_COLOR,
+                SolarShieldDefinition.CUSTOM_MODEL_DATA_0,
+                SolarShieldDefinition.MODEL_KEY_0,
+                List.of()
+        ));
+        ItemMeta meta = item.getItemMeta();
+        NamespacedKey chargesKey = new NamespacedKey(plugin, SolarShieldDefinition.CHARGES_KEY_STRING);
+        meta.getPersistentDataContainer().set(chargesKey, PersistentDataType.INTEGER, 0);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public void updateSolarShieldVisuals(ItemStack item, int charges) {
+        if (item == null || !isSolarShield(item) || !item.hasItemMeta()) {
+            return;
+        }
+        int clamped = Math.max(0, Math.min(SolarShieldDefinition.MAX_CHARGES, charges));
+        ItemMeta meta = item.getItemMeta();
+        NamespacedKey chargesKey = new NamespacedKey(plugin, SolarShieldDefinition.CHARGES_KEY_STRING);
+        meta.getPersistentDataContainer().set(chargesKey, PersistentDataType.INTEGER, clamped);
+
+        int customModelData = switch (clamped) {
+            case 1 -> SolarShieldDefinition.CUSTOM_MODEL_DATA_1;
+            case 2 -> SolarShieldDefinition.CUSTOM_MODEL_DATA_2;
+            case 3 -> SolarShieldDefinition.CUSTOM_MODEL_DATA_3;
+            default -> SolarShieldDefinition.CUSTOM_MODEL_DATA_0;
+        };
+
+        NamespacedKey modelKey = switch (clamped) {
+            case 1 -> SolarShieldDefinition.MODEL_KEY_1;
+            case 2 -> SolarShieldDefinition.MODEL_KEY_2;
+            case 3 -> SolarShieldDefinition.MODEL_KEY_3;
+            default -> SolarShieldDefinition.MODEL_KEY_0;
+        };
+
+        ItemMetaCompat.setCustomModelData(meta, customModelData);
+        ItemMetaCompat.setItemModelIfSupported(meta, modelKey);
+        item.setItemMeta(meta);
     }
 
     private ItemStack createItem(ItemSpec spec) {
@@ -246,7 +298,7 @@ public final class ItemFactory {
         item.setItemMeta(meta);
 
         if (clientSideTranslations) {
-            ItemMetaCompat.applyTranslatableItemTextDataIfSupported(
+            pepin.pepeforge.util.PaperDataComponentAdapter.applyTranslatableItemTextData(
                     item,
                     spec.translationKeyBase() + ".name",
                     spec.nameColor().colorName(),
@@ -259,7 +311,7 @@ public final class ItemFactory {
 
     private boolean useClientSideTranslations() {
         return plugin.getConfig().getBoolean("translations.use_client_side", true)
-                && ItemMetaCompat.supportsItemTextDataComponents();
+                && pepin.pepeforge.util.PaperDataComponentAdapter.isPaper();
     }
 
     public ItemStack createByName(String name) {
@@ -282,6 +334,7 @@ public final class ItemFactory {
             case ItemIds.DIAMOND_SCYTHE -> createScythe(ScytheTier.DIAMOND);
             case ItemIds.NETHERITE_SCYTHE -> createScythe(ScytheTier.NETHERITE);
             case ItemIds.CRIMSON_SWORD -> createCrimsonSword();
+            case ItemIds.SOLAR_SHIELD -> createSolarShield();
             default -> null;
         };
     }
@@ -352,6 +405,10 @@ public final class ItemFactory {
 
     public boolean isCrimsonSword(ItemStack item) {
         return ItemIds.CRIMSON_SWORD.equals(getItemId(item)) && isItemEnabled(ItemIds.CRIMSON_SWORD);
+    }
+
+    public boolean isSolarShield(ItemStack item) {
+        return ItemIds.SOLAR_SHIELD.equals(getItemId(item)) && isItemEnabled(ItemIds.SOLAR_SHIELD);
     }
 
     public void setKatanaParryVisual(ItemStack item, boolean active) {
@@ -468,6 +525,7 @@ public final class ItemFactory {
             case ItemIds.CHISEL -> lang.itemFallbackName(ChiselDefinition.LANG_PATH);
             case ItemIds.KATANA -> lang.itemFallbackName(KatanaDefinition.LANG_PATH);
             case ItemIds.CRIMSON_SWORD -> lang.itemFallbackName(CrimsonSwordDefinition.LANG_PATH);
+            case ItemIds.SOLAR_SHIELD -> lang.itemFallbackName(SolarShieldDefinition.LANG_PATH);
             default -> null;
         };
     }

@@ -1,6 +1,10 @@
 # Language for plugin messages (commands, menus, errors)
 language: en_us
 
+# Enable or disable sending anonymous statistics to bStats.
+metrics:
+  enabled: true
+
 # Translation settings
 translations:
   # This requires Paper/Folia/Purpur item text data components.

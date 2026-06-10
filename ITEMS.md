@@ -135,6 +135,25 @@ Two-handed parry weapon built around short defensive timing windows.
 
 ![Katana](media/receipes/pepeforge_katana.png)
 
+## ☀️ Solar Shield
+
+A legendary sun-blessed shield that charges passively during the day.
+
+| Feature | Details |
+|---------|---------|
+| Passive Charging | Automatically gains charges (up to 3) while held under direct sunlight. |
+| Retaliation | While blocking, getting hit consumes 1 charge to ignite the attacker for 4s and blind them for 3s. |
+| Discharge | Slowly loses charges when held in darkness, and instantly resets to 0 when unequipped. |
+| Rarity | Legendary |
+
+**Crafting** (Shaped Recipe):
+
+| | | |
+|---|---|---|
+| Gold Ingot | Iron Ingot | Gold Ingot |
+| Iron Ingot | Echo Shard | Iron Ingot |
+| Gold Ingot | Iron Ingot | Gold Ingot |
+
 ## 🩸 Crimson Sword
 
 A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
@@ -178,3 +197,4 @@ Available internal item names for `/pepeforge give`:
 - `diamond_scythe`
 - `netherite_scythe`
 - `crimson_sword`
+- `solar_shield`

@@ -109,5 +109,12 @@
   "item.pepeforge.crimson_sword.feature.lifesteal_locked": "Kradzież życia: Odblokowuje się na poziomie 5",
   "item.pepeforge.crimson_sword.feature.aura": "Karmazynowa Aura (%ss): %s HP/s w promieniu %s bloków",
   "item.pepeforge.crimson_sword.feature.aura_next": "Karmazynowa Aura (%ss): %s HP/s w promieniu %s bloków (nast. poziom: Lv %s, %ss, %s HP/s)",
-  "item.pepeforge.crimson_sword.feature.aura_locked": "Karmazynowa Aura: Odblokowuje się na poziomie 10"
+  "item.pepeforge.crimson_sword.feature.aura_locked": "Karmazynowa Aura: Odblokowuje się na poziomie 10",
+  "item.pepeforge.solar_shield.name": "Słoneczna Tarcza",
+  "item.pepeforge.solar_shield.lore.1": "§6---------------",
+  "item.pepeforge.solar_shield.lore.2": "§eUmiejętność: §6Słoneczny Odwet",
+  "item.pepeforge.solar_shield.lore.3": "§3Ładuje się pasywnie w słońcu.",
+  "item.pepeforge.solar_shield.lore.4": "§3Blokowanie zużywa ładunek i podpala atakującego.",
+  "item.pepeforge.solar_shield.lore.5": "Legendarna",
+  "item.pepeforge.solar_shield.lore.6": "§6---------------"
 }

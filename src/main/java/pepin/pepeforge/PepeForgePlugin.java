@@ -14,7 +14,11 @@ import pepin.pepeforge.weapons.crescent.CrescentAuraEffect;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 import pepin.pepeforge.recipe.SmithingUpgradeListener;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.AdvancedPie;
+import org.bstats.charts.SimplePie;
 import org.bukkit.configuration.ConfigurationSection;
+import pepin.pepeforge.stats.StatisticsListener;
+import pepin.pepeforge.stats.StatisticsManager;
 
 import pepin.pepeforge.module.ItemModule;
 import pepin.pepeforge.tools.chisel.ChiselModule;
@@ -24,6 +28,7 @@ import pepin.pepeforge.weapons.crescentspear.CrescentSpearModule;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordModule;
 import pepin.pepeforge.weapons.greatsword.GreatswordModule;
 import pepin.pepeforge.weapons.katana.KatanaModule;
+import pepin.pepeforge.weapons.solarshield.SolarShieldModule;
 import pepin.pepeforge.weapons.windblade.WindBladeModule;
 
 import java.util.ArrayList;
@@ -36,6 +41,7 @@ public final class PepeForgePlugin extends JavaPlugin {
     private CooldownManager cooldownManager;
     private AuraManager auraManager;
     private CrimsonSwordManager crimsonSwordManager;
+    private StatisticsManager statsManager;
     
     private final List<ItemModule> modules = new ArrayList<>();
 
@@ -98,6 +104,13 @@ public final class PepeForgePlugin extends JavaPlugin {
         
         lang = new PluginLang(this);
         itemFactory = new ItemFactory(this, lang);
+        statsManager = new StatisticsManager(this);
+        getServer().getPluginManager().registerEvents(new StatisticsListener(statsManager, itemFactory), this);
+
+        boolean migrationEnabled = getConfig().getBoolean("migration.enabled", true);
+        pepin.pepeforge.item.ItemMigrator itemMigrator = new pepin.pepeforge.item.ItemMigrator(this, itemFactory, migrationEnabled);
+        getServer().getPluginManager().registerEvents(new pepin.pepeforge.item.ItemMigrationListener(itemMigrator), this);
+        
         cooldownManager = new CooldownManager();
         auraManager = new AuraManager(this);
         auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
@@ -108,7 +121,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         
         registerModules();
 
-        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory, crimsonSwordManager);
+        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory, crimsonSwordManager, statsManager, itemMigrator);
         PluginCommand command = getCommand("pepeforge");
         if (command != null) {
             command.setExecutor(commandExecutor);
@@ -129,8 +142,22 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new SmithingUpgradeListener(itemFactory), this);
 
         // bStats
-        int pluginId = 31861;
-        Metrics metrics = new Metrics(this, pluginId);
+        if (getConfig().getBoolean("metrics.enabled", true)) {
+            int pluginId = 31861;
+            Metrics metrics = new Metrics(this, pluginId);
+            
+            metrics.addCustomChart(new AdvancedPie("most_crafted_weapons", () -> statsManager.getCraftedCounts()));
+            metrics.addCustomChart(new AdvancedPie("most_given_weapons", () -> statsManager.getGivenCounts()));
+            metrics.addCustomChart(new AdvancedPie("enabled_weapons", () -> {
+                java.util.Map<String, Integer> map = new java.util.HashMap<>();
+                for (String itemId : itemFactory.knownGiveNames()) {
+                    map.put(itemId, 1);
+                }
+                return map;
+            }));
+            metrics.addCustomChart(new SimplePie("server_language", () -> getConfig().getString("translations.server_language", "en_us")));
+            metrics.addCustomChart(new SimplePie("use_client_side_translations", () -> String.valueOf(getConfig().getBoolean("translations.use_client_side", true))));
+        }
     }
     
     private void registerModules() {
@@ -142,6 +169,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         modules.add(new KatanaModule(this, itemFactory, lang, cooldownManager));
         modules.add(new GreatswordModule(this, itemFactory, lang));
         modules.add(new CrimsonSwordModule(this, itemFactory, crimsonSwordManager, auraManager));
+        modules.add(new SolarShieldModule(this, itemFactory));
 
         for (ItemModule module : modules) {
             module.onEnable();
@@ -158,6 +186,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
         if (cooldownManager != null) {
             cooldownManager.clearAll();
+        }
+        if (statsManager != null) {
+            statsManager.forceSave();
         }
         HandlerList.unregisterAll(this);
     }

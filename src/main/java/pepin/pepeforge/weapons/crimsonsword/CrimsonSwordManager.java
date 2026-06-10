@@ -415,7 +415,7 @@ public final class CrimsonSwordManager {
 
     private boolean useClientSideTranslations() {
         return plugin.getConfig().getBoolean("translations.use_client_side", true)
-                && ItemMetaCompat.supportsItemTextDataComponents();
+                && pepin.pepeforge.util.PaperDataComponentAdapter.isPaper();
     }
 
     private String formatPercent(double value) {
