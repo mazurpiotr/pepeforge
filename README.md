@@ -1,11 +1,11 @@
 <div align="center">
    
-# PepeForge
+# Pepe's Forge
 ![License](https://img.shields.io/github/license/mazurpiotr/pepeforge?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-1.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.2-blue?style=for-the-badge)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11+-brightgreen?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge)
-![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Purpur-fuchsia?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Purpur%20%7C%20Spigot-fuchsia?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active_Development-yellow?style=for-the-badge)
 
 A Spigot/Paper plugin adding custom weapons and tools to Minecraft servers.
@@ -15,15 +15,15 @@ A Spigot/Paper plugin adding custom weapons and tools to Minecraft servers.
 
 ## Features
 
-PepeForge adds custom weapons, tools and gameplay mechanics to Minecraft servers.
+Pepe's Forge adds custom weapons, tools and gameplay mechanics to Minecraft servers.
 
 Current content includes:
-- Greatswords
-- Wind-themed weapons
-- Crescent-themed weapons
-- Chisel and scythes
-- Legendary Crimson Sword and Solar Shield
-- custom models and textures via resource pack
+- Greatswords and Katana (two-handed rhythm & parry weapons)
+- Wind-themed weapons (high-mobility gear with dash abilities)
+- Crescent-themed weapons (moonlight-powered bow and spear)
+- Chisel and scythes (specialized building & AoE farming tools)
+- Legendary Crimson Sword and Solar Shield (combat progression & sun energy defense)
+- Custom models and textures via modern/classic resource packs
 
 See [ITEMS.md](ITEMS.md) for the full item and recipe list.
 
@@ -38,48 +38,35 @@ See [ITEMS.md](ITEMS.md) for the full item and recipe list.
 
 ## Resource Pack Installation
 
-PepeForge utilizes a **hybrid visual routing system**, providing two distinct resource packs to maximize compatibility and take advantage of modern Minecraft features. You can download the resource packs from [GitHub Releases](https://github.com/mazurpiotr/pepeforge/releases).
+Since 1.2.0 Pepe's Forge uses exclusively the modern `item_model` system for visual routing, which is much cleaner and more efficient than the old system. It works natively on **Paper/Purpur** (Recommended) and **Spigot/CraftBukkit** environments for Minecraft 1.21.11+. You can download the resource pack from [GitHub Releases](https://github.com/mazurpiotr/pepeforge/releases).
 
-### Choosing Your Resource Pack
-
-**Classic Pack (`PepeForge-ResourcePack-Classic.zip`)**
-- **Target Platform:** Spigot / CraftBukkit.
-- **Routing:** Uses `CustomModelData`.
-- **Description:** The traditional method for custom item models. Essential for full backward compatibility on older server software or specific setups.
-
-**Modern Pack (`PepeForge-ResourcePack-Modern.zip`)**
-- **Target Platform:** Paper / Folia (1.21.11+).
-- **Routing:** Uses the new `item_model` component.
-- **Description:** Recommended for modern servers. It does not overwrite vanilla models, ensuring cleaner compatibility with other plugins and resource packs.
-
-### Recommended Configuration (Paper)
-If you are running Paper or Folia 1.21.11+, we strongly recommend using the **Modern Pack**. This leverages the newer `item_model` API, offering native visual handling without conflicting with vanilla Minecraft resources.
-
-*⚠ If `translations.use_client_side` is enabled and players do not have the resource pack installed, custom item names and lore will appear as raw translation keys (e.g. `item.pepeforge.crimson_sword.name`) instead of readable text.*
+*⚠ Note for Paper users: By default, Pepe's Forge uses client-side translations (`translations.use_client_side` = true), which **requires** players to have the resource pack loaded. Otherwise, custom item names and lore will appear as raw translation keys (e.g., `item.pepeforge.crimson_sword.name`).*
 
 *For the best experience, distributing the resource pack automatically with a plugin such as **ResourcePackManager** or **ForceResourcePack** is highly recommended.*
 
-## Migration Guide
+## Migration Guide (From 1.0 or 1.1)
 
-Upgrading from an older version of PepeForge to the new hybrid system is seamless.
+<details>
+<summary><b>Click to expand migration details</b></summary>
 
-- **Existing Items:** All of your previously generated custom items will continue to function without any issues.
+Upgrading from an older version of Pepe's Forge to the new `item_model` system is fully backward-compatible.
+
+- **Existing Items:** All of your previously generated custom items will continue to function without any issues thanks to the built-in lazy migrator script.
 - **Identity Preservation:** The plugin retains the internal `item_id` to logically identify custom items.
-- **Visual Fallbacks:** `CustomModelData` is still written to all items as a fallback. This guarantees that items created in older versions or moved between Spigot and Paper servers will still render correctly using the Classic pack.
+- **Seamless Upgrade:** Simply drop the new `.jar` into your plugins folder and distribute the updated Resource Pack.
+
+</details>
 
 ## FAQ
 
-**Q: Which Resource Pack should I choose?**
-A: Use the **Modern Pack** if you are running Paper/Folia 1.21.11+. Use the **Classic Pack** if you are on standard Spigot or CraftBukkit.
+**Q: Does the Resource Pack work on Spigot?**
+A: Yes! Starting with PepeForge 1.2.0, the Resource Pack works flawlessly across all 1.21.11+ server software, taking full advantage of the `item_model` component.
 
-**Q: Can I use the Modern Pack on Spigot?**
-A: No, standard Spigot does not natively support the new `item_model` data component in the same way Paper does. You should use the Classic Pack.
+**Q: Will my existing items stop working after updating from an older version?**
+A: Not at all! The backend preserves the logical `item_id` and actively modernizes old items on the fly, so all your old items will remain functional and visually intact.
 
-**Q: Will my existing items stop working?**
-A: Not at all! Existing items will preserve their functionality and visuals because the plugin maintains both `item_id` and `CustomModelData` on the backend.
-
-**Q: Does the Modern Pack conflict with other Resource Packs?**
-A: No. The Modern Pack takes advantage of the `item_model` component, which adds new custom items without overriding existing vanilla Minecraft items or models, drastically reducing conflicts.
+**Q: Does the Resource Pack conflict with other custom texture packs?**
+A: Because our pack exclusively uses modern `item_model` routing, it completely avoids overwriting vanilla items (like shears or swords). This vastly improves compatibility with other custom packs!
 
 ## Configuration
 
@@ -89,7 +76,7 @@ Each custom item and its recipe can be configured independently.
 
 ### Statistics (bStats)
 
-PepeForge uses [bStats](https://bstats.org/) to collect anonymous usage data, such as the popularity of specific weapons and configuration settings.
+Pepe's Forge uses [bStats](https://bstats.org/) to collect anonymous usage data, such as the popularity of specific weapons and configuration settings.
 This helps guide the future development of the plugin. You can opt-out at any time by setting `metrics.enabled: false` in `config.yml`.
 
 ## Commands
@@ -116,10 +103,9 @@ Suggestions, feedback and feature requests are always appreciated.
 
 - Minecraft 1.21.11+
 - Java 21+
-- Paper & Purpur recommended
-- Spigot supported with limited features
+- Paper, Purpur, and Spigot supported
 
-> Paper/Purpur provide the best experience and full feature support.
+> Paper/Purpur provide the best experience due to native client-side translation capabilities.
 
 ## License
 

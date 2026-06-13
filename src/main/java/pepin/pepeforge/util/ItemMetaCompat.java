@@ -7,7 +7,6 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 
-import net.kyori.adventure.text.Component;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -20,50 +19,40 @@ public final class ItemMetaCompat {
     private ItemMetaCompat() {
     }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static void setDisplayName(ItemMeta meta, String name) {
         meta.setDisplayName(name);
     }
 
-    public static void setDisplayName(ItemMeta meta, Component name) {
-        meta.displayName(name);
-    }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static void setItemName(ItemMeta meta, String name) {
         meta.setItemName(name);
     }
 
-    public static void setItemName(ItemMeta meta, Component name) {
-        meta.itemName(name);
-    }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static String getDisplayName(ItemMeta meta) {
         return meta.getDisplayName();
     }
 
-    public static Component getDisplayNameComponent(ItemMeta meta) {
-        return meta.displayName();
-    }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static String getItemName(ItemMeta meta) {
         return meta.getItemName();
     }
 
-    public static Component getItemNameComponent(ItemMeta meta) {
-        return meta.itemName();
-    }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static void setStringLore(ItemMeta meta, List<String> lore) {
         meta.setLore(lore);
     }
 
-    public static void setLore(ItemMeta meta, List<Component> lore) {
-        meta.lore(lore);
-    }
 
     public static void setCustomModelData(ItemMeta meta, int value) {
         CustomModelDataComponent component = meta.getCustomModelDataComponent();

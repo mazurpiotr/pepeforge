@@ -1,6 +1,6 @@
-# PepeForge Items
+# Pepe's Forge Items
 
-Detailed item and recipe reference for the current PepeForge item set.
+Detailed item and recipe reference for the current Pepe's Forge item set.
 
 ## Table of Contents
 - [Chisel](#-chisel)

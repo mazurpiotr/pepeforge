@@ -88,7 +88,7 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (args.length != 2) {
-                sender.sendMessage(net.kyori.adventure.text.Component.text("Usage: /pepeforge migration <on|pause|disable>").color(net.kyori.adventure.text.format.NamedTextColor.RED));
+                sender.sendMessage(org.bukkit.ChatColor.RED + "Usage: /pepeforge migration <on|pause|disable>");
                 return true;
             }
             String action = args[1].toLowerCase(java.util.Locale.ROOT);
@@ -98,17 +98,17 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
                     itemMigrator.setActive(true);
                     plugin.getConfig().set("migration.enabled", true);
                     plugin.saveConfig();
-                    sender.sendMessage(net.kyori.adventure.text.Component.text("Lazy Item Migration enabled completely.").color(net.kyori.adventure.text.format.NamedTextColor.GREEN));
+                    sender.sendMessage(org.bukkit.ChatColor.GREEN + "Lazy Item Migration enabled completely.");
                 } else if ("pause".equals(action)) {
                     itemMigrator.setActive(false);
-                    sender.sendMessage(net.kyori.adventure.text.Component.text("Lazy Item Migration paused until restart.").color(net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+                    sender.sendMessage(org.bukkit.ChatColor.YELLOW + "Lazy Item Migration paused until restart.");
                 } else if ("disable".equals(action) || "off".equals(action)) {
                     itemMigrator.setActive(false);
                     plugin.getConfig().set("migration.enabled", false);
                     plugin.saveConfig();
-                    sender.sendMessage(net.kyori.adventure.text.Component.text("Lazy Item Migration disabled completely.").color(net.kyori.adventure.text.format.NamedTextColor.RED));
+                    sender.sendMessage(org.bukkit.ChatColor.RED + "Lazy Item Migration disabled completely.");
                 } else {
-                    sender.sendMessage(net.kyori.adventure.text.Component.text("Invalid state. Use on, pause, or disable.").color(net.kyori.adventure.text.format.NamedTextColor.RED));
+                    sender.sendMessage(org.bukkit.ChatColor.RED + "Invalid state. Use on, pause, or disable.");
                 }
             }
             return true;

@@ -15,14 +15,6 @@ public final class PaperDataComponentAdapter {
     private PaperDataComponentAdapter() {
     }
 
-    public static boolean isPaper() {
-        try {
-            Class.forName("io.papermc.paper.datacomponent.DataComponentTypes");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
 
     public static void applyTranslatableItemTextData(ItemStack item, String nameTranslationKey, String nameColorName, List<String> loreTranslationKeys, List<String> loreColorNames) {
         Component nameComponent = createTranslatableComponent(nameTranslationKey, nameColorName);
@@ -45,6 +37,15 @@ public final class PaperDataComponentAdapter {
         }
 
         item.setData(DataComponentTypes.LORE, ItemLore.lore(loreComponents));
+    }
+
+    public static void applyRawComponents(ItemStack item, Component name, List<Component> lore) {
+        if (name != null) {
+            item.setData(DataComponentTypes.ITEM_NAME, name);
+        }
+        if (lore != null) {
+            item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+        }
     }
 
     private static Component createTranslatableComponent(String key, String colorName) {

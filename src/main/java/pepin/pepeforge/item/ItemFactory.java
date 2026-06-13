@@ -11,7 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.tools.chisel.ChiselDefinition;
 import pepin.pepeforge.tools.scythe.ScytheTier;
-import pepin.pepeforge.util.ItemMetaCompat;
+import pepin.pepeforge.util.ItemMetaManager;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowDefinition;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
@@ -195,19 +195,19 @@ public final class ItemFactory {
         String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
         String fallbackName = lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang);
 
-        ItemMetaCompat.setItemName(meta, fallbackName);
+        ItemMetaManager.setItemName(meta, fallbackName);
         if (!useClientSideTranslations()) {
-            ItemMetaCompat.setDisplayName(meta, fallbackName);
+            ItemMetaManager.setDisplayName(meta, fallbackName);
         }
-        ItemMetaCompat.setCustomModelData(meta, CrimsonSwordDefinition.CUSTOM_MODEL_DATA);
-        ItemMetaCompat.setItemModelIfSupported(meta, CrimsonSwordDefinition.MODEL_KEY);
-        ItemMetaCompat.addMainHandAttribute(
+        ItemMetaManager.setCustomModelData(meta, CrimsonSwordDefinition.CUSTOM_MODEL_DATA);
+        ItemMetaManager.setItemModelIfSupported(meta, CrimsonSwordDefinition.MODEL_KEY);
+        ItemMetaManager.addMainHandAttribute(
                 meta,
                 Attribute.ATTACK_DAMAGE,
                 CrimsonSwordDefinition.ITEM_ID + "_attack_damage",
                 CrimsonSwordDefinition.ATTACK_DAMAGE
         );
-        ItemMetaCompat.addMainHandAttribute(
+        ItemMetaManager.addMainHandAttribute(
                 meta,
                 Attribute.ATTACK_SPEED,
                 CrimsonSwordDefinition.ITEM_ID + "_attack_speed",
@@ -262,8 +262,8 @@ public final class ItemFactory {
             default -> SolarShieldDefinition.MODEL_KEY_0;
         };
 
-        ItemMetaCompat.setCustomModelData(meta, customModelData);
-        ItemMetaCompat.setItemModelIfSupported(meta, modelKey);
+        ItemMetaManager.setCustomModelData(meta, customModelData);
+        ItemMetaManager.setItemModelIfSupported(meta, modelKey);
         item.setItemMeta(meta);
     }
 
@@ -276,17 +276,17 @@ public final class ItemFactory {
         String fallbackName = lang.getItemNameForLang(spec.langPath(), serverLang);
         List<String> fallbackLore = trimLore(lang.getItemLoreForLang(spec.langPath(), serverLang), spec.loreLineCount());
 
-        ItemMetaCompat.setItemName(meta, fallbackName);
+        ItemMetaManager.setItemName(meta, fallbackName);
         if (!clientSideTranslations) {
-            ItemMetaCompat.setDisplayName(meta, fallbackName);
+            ItemMetaManager.setDisplayName(meta, fallbackName);
         }
-        ItemMetaCompat.setStringLore(meta, fallbackLore);
-        ItemMetaCompat.setCustomModelData(meta, spec.customModelData());
+        ItemMetaManager.setStringLore(meta, fallbackLore);
+        ItemMetaManager.setCustomModelData(meta, spec.customModelData());
         if (spec.modelKey() != null) {
-            ItemMetaCompat.setItemModelIfSupported(meta, spec.modelKey());
+            ItemMetaManager.setItemModelIfSupported(meta, spec.modelKey());
         }
         for (ItemAttributeSpec attribute : spec.attributes()) {
-            ItemMetaCompat.addMainHandAttribute(
+            ItemMetaManager.addMainHandAttribute(
                     meta,
                     attribute.attribute(),
                     spec.itemId() + "_" + attribute.idSuffix(),
@@ -311,7 +311,7 @@ public final class ItemFactory {
 
     private boolean useClientSideTranslations() {
         return plugin.getConfig().getBoolean("translations.use_client_side", true)
-                && pepin.pepeforge.util.PaperDataComponentAdapter.isPaper();
+                && pepin.pepeforge.util.ServerEnv.isPaper();
     }
 
     public ItemStack createByName(String name) {
@@ -416,8 +416,8 @@ public final class ItemFactory {
             return;
         }
         ItemMeta meta = item.getItemMeta();
-        ItemMetaCompat.setCustomModelData(meta, active ? KatanaDefinition.PARRY_MODEL_DATA : KatanaDefinition.CUSTOM_MODEL_DATA);
-        ItemMetaCompat.setItemModelIfSupported(meta, active ? KatanaDefinition.PARRY_MODEL_KEY : KatanaDefinition.MODEL_KEY);
+        ItemMetaManager.setCustomModelData(meta, active ? KatanaDefinition.PARRY_MODEL_DATA : KatanaDefinition.CUSTOM_MODEL_DATA);
+        ItemMetaManager.setItemModelIfSupported(meta, active ? KatanaDefinition.PARRY_MODEL_KEY : KatanaDefinition.MODEL_KEY);
         item.setItemMeta(meta);
     }
 

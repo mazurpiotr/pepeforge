@@ -4,7 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import pepin.pepeforge.util.ItemMetaCompat;
+import pepin.pepeforge.util.ItemMetaManager;
 import pepin.pepeforge.weapons.solarshield.SolarShieldDefinition;
 
 import java.util.HashMap;
@@ -59,7 +59,7 @@ public class ItemMigrator {
 
         NamespacedKey defaultModel = defaultModelKeys.get(itemId);
         if (defaultModel != null) {
-            ItemMetaCompat.setItemModelIfSupported(oldMeta, defaultModel);
+            ItemMetaManager.setItemModelIfSupported(oldMeta, defaultModel);
             item.setItemMeta(oldMeta);
 
             // Re-apply any dynamic visuals that might depend on NBT state (e.g. Solar Shield charges)
