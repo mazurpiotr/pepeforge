@@ -137,12 +137,12 @@ Two-handed parry weapon built around short defensive timing windows.
 
 ## ☀️ Solar Shield
 
-A legendary sun-blessed shield that charges passively during the day.
+A legendary sun-blessed shield that charges passively during the day. *Ancient Cities were not always shrouded in darkness...*
 
 | Feature | Details |
 |---------|---------|
 | Passive Charging | Automatically gains charges (up to 3) while held under direct sunlight. |
-| Retaliation | While blocking, getting hit consumes 1 charge to ignite the attacker for 4s and blind them for 3s. |
+| Retaliation | While blocking, getting hit consumes 1 charge to ignite attackers and trigger a blinding flashbang effect for 2s. |
 | Discharge | Slowly loses charges when held in darkness, and instantly resets to 0 when unequipped. |
 | Rarity | Legendary |
 

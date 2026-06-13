@@ -22,6 +22,10 @@ messages:
     cooldown: "&cKatana recharging... {bar} &7{seconds}s"
   wind_blade:
     cooldown: "&cDash recharging... {bar} &7{seconds}s"
+  solar_shield:
+    charge: "&e☀ Solar charge {bar} &6[{charges}/3]"
+    ready: "&6☀ Solar charge ready! {bar} &6[3/3]"
+    discharging: "&8☽ Discharging {bar} &6[{charges}/3]"
   crescent_spear:
     charge: "&dMoon charge {bar}"
     ready: "&dMoon charge ready! &fNext strike empowered {bar}"
@@ -174,8 +178,9 @@ items:
     fallback_name: "&#667DB4Solar Shield"
     lore:
       - "&6---------------"
+      - "&8&oAncient Cities were not always shrouded in darkness..."
       - "&eAbility: &6Solar Retaliation"
       - "&3Charges passively in sunlight."
-      - "&3Blocking consumes a charge to ignite attackers."
+      - "&3Blocking consumes a charge to ignite attackers and trigger a flashbang."
       - "&#D69E2ELegendary"
       - "&6---------------"

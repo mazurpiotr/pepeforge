@@ -115,9 +115,10 @@
   "item.pepeforge.crimson_sword.feature.aura_locked": "Crimson Aura: Unlocks at level 10",
   "item.pepeforge.solar_shield.name": "Solar Shield",
   "item.pepeforge.solar_shield.lore.1": "§6---------------",
-  "item.pepeforge.solar_shield.lore.2": "§eAbility: §6Solar Retaliation",
-  "item.pepeforge.solar_shield.lore.3": "§3Charges passively in sunlight.",
-  "item.pepeforge.solar_shield.lore.4": "§3Blocking consumes a charge to ignite attackers.",
-  "item.pepeforge.solar_shield.lore.5": "Legendary",
-  "item.pepeforge.solar_shield.lore.6": "§6---------------"
+  "item.pepeforge.solar_shield.lore.2": "§8§oAncient Cities were not always shrouded in darkness...",
+  "item.pepeforge.solar_shield.lore.3": "§eAbility: §6Solar Retaliation",
+  "item.pepeforge.solar_shield.lore.4": "§3Charges passively in sunlight.",
+  "item.pepeforge.solar_shield.lore.5": "§3Blocking consumes a charge to ignite attackers and trigger a flashbang.",
+  "item.pepeforge.solar_shield.lore.6": "Legendary",
+  "item.pepeforge.solar_shield.lore.7": "§6---------------"
 }

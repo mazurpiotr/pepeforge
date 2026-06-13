@@ -22,7 +22,8 @@ Current content includes:
 - Wind-themed weapons
 - Crescent-themed weapons
 - Chisel and scythes
-- Optional custom models and textures via resource pack
+- Legendary Crimson Sword and Solar Shield
+- custom models and textures via resource pack
 
 See [ITEMS.md](ITEMS.md) for the full item and recipe list.
 
@@ -85,6 +86,11 @@ A: No. The Modern Pack takes advantage of the `item_model` component, which adds
 Edit `plugins/PepeForge/config.yml` to enable or disable custom items, recipes and localization options.
 
 Each custom item and its recipe can be configured independently.
+
+### Statistics (bStats)
+
+PepeForge uses [bStats](https://bstats.org/) to collect anonymous usage data, such as the popularity of specific weapons and configuration settings.
+This helps guide the future development of the plugin. You can opt-out at any time by setting `metrics.enabled: false` in `config.yml`.
 
 ## Commands
 

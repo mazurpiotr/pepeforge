@@ -21,7 +21,11 @@ messages:
   katana:
     cooldown: "&cKatana ładuje się... {bar} &7{seconds}s"
   wind_blade:
-    cooldown: "&cZryw odnawia się... {bar} &7{seconds}s"
+    cooldown: "&cOdnowienie zrywu... {bar} &7{seconds}s"
+  solar_shield:
+    charge: "&e☀ Słoneczny ładunek {bar} &6[{charges}/3]"
+    ready: "&6☀ Słoneczny ładunek pełny! {bar} &6[3/3]"
+    discharging: "&8☽ Rozładowywanie {bar} &6[{charges}/3]"
   crescent_spear:
     charge: "&dŁadunek księżyca {bar}"
     ready: "&dŁadunek księżyca gotowy! &fNastępne trafienie wzmocnione {bar}"
@@ -174,8 +178,9 @@ items:
     fallback_name: "&#667DB4Słoneczna Tarcza"
     lore:
       - "&6---------------"
+      - "&8&oStarożytne Miasta nie zawsze spowijał mrok..."
       - "&eUmiejętność: &6Słoneczny Odwet"
       - "&3Ładuje się pasywnie w słońcu."
-      - "&3Blokowanie zużywa ładunek i podpala atakującego."
+      - "&3Blokowanie zużywa ładunek, wyzwalając błysk i podpalając atakującego."
       - "&#D69E2ELegendarna"
       - "&6---------------"
