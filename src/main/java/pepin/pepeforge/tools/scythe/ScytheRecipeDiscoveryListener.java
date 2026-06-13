@@ -36,15 +36,13 @@ public final class ScytheRecipeDiscoveryListener implements Listener {
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
 
-        if (inventory.contains(Material.IRON_INGOT) && inventory.contains(Material.STICK)) {
+        if (inventory.contains(Material.IRON_INGOT)) {
             player.discoverRecipe(ScytheRecipeKeys.IRON_SCYTHE);
         }
-        if (inventory.contains(Material.DIAMOND) && inventory.contains(Material.STICK)) {
+        if (inventory.contains(Material.DIAMOND)) {
             player.discoverRecipe(ScytheRecipeKeys.DIAMOND_SCYTHE);
         }
-        if (inventory.contains(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE)
-                && inventory.contains(Material.NETHERITE_INGOT)
-                && itemFactory.hasScythe(inventory, ScytheTier.DIAMOND)) {
+        if (inventory.contains(Material.NETHERITE_INGOT)) {
             player.discoverRecipe(ScytheRecipeKeys.NETHERITE_SCYTHE);
         }
     }

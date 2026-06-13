@@ -34,6 +34,7 @@ public final class CrescentBowRecipes {
         }
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createCrescentBow());
+        recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [P][A][S]
          * [P][ ][A]
@@ -46,6 +47,7 @@ public final class CrescentBowRecipes {
         RecipeRegistrar.add(plugin, key, recipe);
 
         ShapedRecipe mirroredRecipe = new ShapedRecipe(keyMirrored, itemFactory.createCrescentBow());
+        mirroredRecipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [S][A][P]
          * [A][ ][P]

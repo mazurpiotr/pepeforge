@@ -41,6 +41,7 @@ public final class GreatswordRecipes {
         }
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createGreatsword(tier));
+        recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [ ][M][ ]
          * [M][M][M]

@@ -32,8 +32,7 @@ public final class CrescentSpearRecipeDiscoveryListener implements Listener {
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        if (inventory.contains(Material.AMETHYST_SHARD)
-                && inventory.contains(Material.STICK)) {
+        if (inventory.contains(Material.AMETHYST_SHARD)) {
             player.discoverRecipe(CrescentSpearRecipeKeys.CRESCENT_SPEAR);
         }
     }

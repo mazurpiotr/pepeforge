@@ -36,15 +36,11 @@ public final class WindBladeRecipeDiscoveryListener implements Listener {
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
 
-        if (inventory.contains(Material.IRON_INGOT) && inventory.contains(Material.BREEZE_ROD)) {
+        if (inventory.contains(Material.BREEZE_ROD)) {
             player.discoverRecipe(WindBladeRecipeKeys.IRON_WIND_BLADE);
-        }
-        if (inventory.contains(Material.DIAMOND) && inventory.contains(Material.BREEZE_ROD)) {
             player.discoverRecipe(WindBladeRecipeKeys.DIAMOND_WIND_BLADE);
         }
-        if (inventory.contains(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE)
-                && inventory.contains(Material.NETHERITE_INGOT)
-                && itemFactory.hasWindBlade(inventory, WindBladeTier.DIAMOND)) {
+        if (inventory.contains(Material.NETHERITE_INGOT)) {
             player.discoverRecipe(WindBladeRecipeKeys.NETHERITE_WIND_BLADE);
         }
     }

@@ -1,4 +1,4 @@
-package pepin.pepeforge.weapons.greatsword;
+package pepin.pepeforge.weapons.solarshield;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -8,16 +8,13 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
-import pepin.pepeforge.item.ItemFactory;
 
-public final class GreatswordRecipeDiscoveryListener implements Listener {
+public final class SolarShieldRecipeDiscoveryListener implements Listener {
 
     private final JavaPlugin plugin;
-    private final ItemFactory itemFactory;
 
-    public GreatswordRecipeDiscoveryListener(JavaPlugin plugin, ItemFactory itemFactory) {
+    public SolarShieldRecipeDiscoveryListener(JavaPlugin plugin) {
         this.plugin = plugin;
-        this.itemFactory = itemFactory;
     }
 
     @EventHandler
@@ -35,15 +32,8 @@ public final class GreatswordRecipeDiscoveryListener implements Listener {
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-
-        if (inventory.contains(Material.IRON_INGOT)) {
-            player.discoverRecipe(GreatswordRecipeKeys.IRON_GREATSWORD);
-        }
-        if (inventory.contains(Material.DIAMOND)) {
-            player.discoverRecipe(GreatswordRecipeKeys.DIAMOND_GREATSWORD);
-        }
-        if (inventory.contains(Material.NETHERITE_INGOT)) {
-            player.discoverRecipe(GreatswordRecipeKeys.NETHERITE_GREATSWORD);
+        if (inventory.contains(Material.ECHO_SHARD)) {
+            player.discoverRecipe(new org.bukkit.NamespacedKey(plugin, "solar_shield"));
         }
     }
 }

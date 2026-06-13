@@ -27,6 +27,7 @@ public final class SolarShieldRecipes {
         }
 
         ShapedRecipe recipe = new ShapedRecipe(KEY, itemFactory.createSolarShield());
+        recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [G][I][G]
          * [I][E][I]

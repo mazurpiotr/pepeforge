@@ -3,19 +3,26 @@ package pepin.pepeforge.weapons.solarshield;
 import org.bukkit.entity.Player;
 import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.module.ItemModule;
+import pepin.pepeforge.util.ui.BossBarManager;
 
 public class SolarShieldModule implements ItemModule {
 
     private final PepeForgePlugin plugin;
     private final ItemFactory itemFactory;
+    private final PluginLang lang;
+    private final BossBarManager bossBarManager;
 
     private SolarShieldRecipes recipes;
     private SolarShieldListener listener;
+    private SolarShieldRecipeDiscoveryListener discoveryListener;
 
-    public SolarShieldModule(PepeForgePlugin plugin, ItemFactory itemFactory) {
+    public SolarShieldModule(PepeForgePlugin plugin, ItemFactory itemFactory, PluginLang lang, BossBarManager bossBarManager) {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
+        this.lang = lang;
+        this.bossBarManager = bossBarManager;
     }
 
     @Override
@@ -23,9 +30,12 @@ public class SolarShieldModule implements ItemModule {
         this.recipes = new SolarShieldRecipes(plugin, itemFactory);
         this.recipes.registerAll();
 
-        this.listener = new SolarShieldListener(plugin, itemFactory);
+        this.listener = new SolarShieldListener(plugin, itemFactory, lang, bossBarManager);
         this.listener.startStatusTask();
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
+        
+        this.discoveryListener = new SolarShieldRecipeDiscoveryListener(plugin);
+        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
     }
 
     @Override
@@ -40,6 +50,8 @@ public class SolarShieldModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        // Not specifically handling discovery events in this file, handled via global discovery mechanism
+        if (this.discoveryListener != null) {
+            this.discoveryListener.discoverFor(player);
+        }
     }
 }

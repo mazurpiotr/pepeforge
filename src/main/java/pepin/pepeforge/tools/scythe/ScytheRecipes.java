@@ -41,6 +41,7 @@ public final class ScytheRecipes {
         }
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createScythe(tier));
+        recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [B][B][B]
          * [ ][S][ ]

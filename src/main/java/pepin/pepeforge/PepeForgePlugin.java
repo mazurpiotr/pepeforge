@@ -42,6 +42,7 @@ public final class PepeForgePlugin extends JavaPlugin {
     private AuraManager auraManager;
     private CrimsonSwordManager crimsonSwordManager;
     private StatisticsManager statsManager;
+    private pepin.pepeforge.util.ui.BossBarManager bossBarManager;
     
     private final List<ItemModule> modules = new ArrayList<>();
 
@@ -112,6 +113,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new pepin.pepeforge.item.ItemMigrationListener(itemMigrator), this);
         
         cooldownManager = new CooldownManager();
+        bossBarManager = new pepin.pepeforge.util.ui.BossBarManager(this);
         auraManager = new AuraManager(this);
         auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
         
@@ -155,7 +157,7 @@ public final class PepeForgePlugin extends JavaPlugin {
                 }
                 return map;
             }));
-            metrics.addCustomChart(new SimplePie("server_language", () -> getConfig().getString("translations.server_language", "en_us")));
+            metrics.addCustomChart(new SimplePie("plugin_language", () -> getConfig().getString("translations.server_language", "en_us")));
             metrics.addCustomChart(new SimplePie("use_client_side_translations", () -> String.valueOf(getConfig().getBoolean("translations.use_client_side", true))));
         }
     }
@@ -169,7 +171,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         modules.add(new KatanaModule(this, itemFactory, lang, cooldownManager));
         modules.add(new GreatswordModule(this, itemFactory, lang));
         modules.add(new CrimsonSwordModule(this, itemFactory, crimsonSwordManager, auraManager));
-        modules.add(new SolarShieldModule(this, itemFactory));
+        modules.add(new SolarShieldModule(this, itemFactory, lang, bossBarManager));
 
         for (ItemModule module : modules) {
             module.onEnable();
@@ -186,6 +188,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
         if (cooldownManager != null) {
             cooldownManager.clearAll();
+        }
+        if (bossBarManager != null) {
+            bossBarManager.clearAll();
         }
         if (statsManager != null) {
             statsManager.forceSave();

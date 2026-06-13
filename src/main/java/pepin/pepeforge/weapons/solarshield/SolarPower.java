@@ -8,8 +8,8 @@ public final class SolarPower {
     private SolarPower() {
     }
 
-    public static boolean isSunlit(Player player) {
-        World world = player.getWorld();
+    public static boolean isSunlit(org.bukkit.Location location) {
+        World world = location.getWorld();
         if (world.getEnvironment() != World.Environment.NORMAL) {
             return false;
         }
@@ -24,6 +24,10 @@ public final class SolarPower {
             return false;
         }
 
-        return player.getLocation().getBlock().getLightFromSky() == 15;
+        return location.getBlock().getLightFromSky() == 15;
+    }
+
+    public static boolean isSunlit(Player player) {
+        return isSunlit(player.getLocation());
     }
 }

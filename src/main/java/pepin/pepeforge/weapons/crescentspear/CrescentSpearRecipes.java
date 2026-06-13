@@ -31,6 +31,7 @@ public final class CrescentSpearRecipes {
         }
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createCrescentSpear());
+        recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [ ][A][ ]
          * [ ][S][ ]

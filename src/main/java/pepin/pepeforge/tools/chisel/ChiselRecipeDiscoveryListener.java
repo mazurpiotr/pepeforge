@@ -31,9 +31,7 @@ public final class ChiselRecipeDiscoveryListener implements Listener {
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        if (inventory.contains(ChiselDefinition.TOP_MATERIAL)
-                && inventory.contains(ChiselDefinition.CORE_MATERIAL)
-                && inventory.contains(ChiselDefinition.HANDLE_MATERIAL)) {
+        if (inventory.contains(org.bukkit.Material.IRON_INGOT) || inventory.contains(org.bukkit.Material.COPPER_INGOT)) {
             player.discoverRecipe(ChiselRecipeKeys.CHISEL);
         }
     }

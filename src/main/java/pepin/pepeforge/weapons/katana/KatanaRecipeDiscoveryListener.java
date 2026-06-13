@@ -33,7 +33,7 @@ public final class KatanaRecipeDiscoveryListener implements Listener {
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        if (inventory.contains(Material.IRON_INGOT) && inventory.contains(Material.STICK)) {
+        if (inventory.contains(Material.IRON_INGOT)) {
             player.discoverRecipe(KatanaRecipeKeys.KATANA);
         }
     }

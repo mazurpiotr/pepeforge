@@ -32,6 +32,7 @@ public final class ChiselRecipes {
         }
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createChisel());
+        recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [ ][I][ ]
          * [ ][C][ ]
