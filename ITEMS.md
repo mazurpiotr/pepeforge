@@ -148,11 +148,7 @@ A legendary sun-blessed shield that charges passively during the day. *Ancient C
 
 **Crafting** (Shaped Recipe):
 
-| | | |
-|---|---|---|
-| Gold Ingot | Iron Ingot | Gold Ingot |
-| Iron Ingot | Echo Shard | Iron Ingot |
-| Gold Ingot | Iron Ingot | Gold Ingot |
+![Solar Shield](media/receipes/pepeforge_solar_shield.png)
 
 ## 🩸 Crimson Sword
 
