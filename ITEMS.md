@@ -2,6 +2,18 @@
 
 Detailed item and recipe reference for the current PepeForge item set.
 
+## Table of Contents
+- [Chisel](#-chisel)
+- [Scythe](#-scythe)
+- [Wind Blade](#️-wind-blade)
+- [Greatsword](#️-greatsword)
+- [Crescent Bow](#-crescent-bow)
+- [Crescent Spear](#-crescent-spear)
+- [Katana](#️-katana)
+- [Solar Shield](#️-solar-shield)
+- [Crimson Sword](#-crimson-sword)
+- [Give Names](#give-names)
+
 ## 🪚 Chisel
 
 Decorative utility tool for cycling supported block variants.
