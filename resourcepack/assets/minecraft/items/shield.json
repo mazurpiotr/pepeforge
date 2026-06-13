@@ -9,7 +9,7 @@
         "type": "minecraft:special",
         "model": {
           "type": "minecraft:model",
-          "model": "minecraft:item/shield"
+          "model": "minecraft:solar_shield/shield"
         },
         "base": "minecraft:entity/shield_base"
       },
@@ -17,7 +17,7 @@
         "type": "minecraft:special",
         "model": {
           "type": "minecraft:model",
-          "model": "minecraft:item/shield_blocking"
+          "model": "minecraft:solar_shield/shield_blocking"
         },
         "base": "minecraft:entity/shield_base"
       }
@@ -26,29 +26,61 @@
       {
         "threshold": 311000,
         "model": {
-          "type": "minecraft:model",
-          "model": "pepeforge:solar_shield/solar_shield_0"
+          "type": "minecraft:condition",
+          "property": "minecraft:using_item",
+          "on_false": {
+            "type": "minecraft:model",
+            "model": "pepeforge:solar_shield/solar_shield_0"
+          },
+          "on_true": {
+            "type": "minecraft:model",
+            "model": "pepeforge:solar_shield/solar_shield_blocking_0"
+          }
         }
       },
       {
         "threshold": 311001,
         "model": {
-          "type": "minecraft:model",
-          "model": "pepeforge:solar_shield/solar_shield_1"
+          "type": "minecraft:condition",
+          "property": "minecraft:using_item",
+          "on_false": {
+            "type": "minecraft:model",
+            "model": "pepeforge:solar_shield/solar_shield_1"
+          },
+          "on_true": {
+            "type": "minecraft:model",
+            "model": "pepeforge:solar_shield/solar_shield_blocking_1"
+          }
         }
       },
       {
         "threshold": 311002,
         "model": {
-          "type": "minecraft:model",
-          "model": "pepeforge:solar_shield/solar_shield_2"
+          "type": "minecraft:condition",
+          "property": "minecraft:using_item",
+          "on_false": {
+            "type": "minecraft:model",
+            "model": "pepeforge:solar_shield/solar_shield_2"
+          },
+          "on_true": {
+            "type": "minecraft:model",
+            "model": "pepeforge:solar_shield/solar_shield_blocking_2"
+          }
         }
       },
       {
         "threshold": 311003,
         "model": {
-          "type": "minecraft:model",
-          "model": "pepeforge:solar_shield/solar_shield_3"
+          "type": "minecraft:condition",
+          "property": "minecraft:using_item",
+          "on_false": {
+            "type": "minecraft:model",
+            "model": "pepeforge:solar_shield/solar_shield_3"
+          },
+          "on_true": {
+            "type": "minecraft:model",
+            "model": "pepeforge:solar_shield/solar_shield_blocking_3"
+          }
         }
       }
     ]
