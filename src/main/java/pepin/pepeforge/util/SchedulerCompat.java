@@ -112,14 +112,14 @@ public final class SchedulerCompat {
     }
 
     public static ScheduledTaskCompat runTimerForEntity(
-        Player player,
+        org.bukkit.entity.Entity entity,
         JavaPlugin plugin,
         Runnable runnable,
         long delayTicks,
         long periodTicks
     ) {
         if (FOLIA) {
-            var task = player.getScheduler().runAtFixedRate(
+            var task = entity.getScheduler().runAtFixedRate(
                     plugin,
                     scheduledTask -> runnable.run(),
                     null,
