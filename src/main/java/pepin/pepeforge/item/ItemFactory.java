@@ -67,11 +67,13 @@ public final class ItemFactory {
     private final NamespacedKey itemIdKey;
     private final JavaPlugin plugin;
     private final PluginLang lang;
+    private final CrimsonSwordManager crimsonSwordManager;
 
-    public ItemFactory(JavaPlugin plugin, PluginLang lang) {
+    public ItemFactory(JavaPlugin plugin, PluginLang lang, CrimsonSwordManager crimsonSwordManager) {
         this.itemIdKey = new NamespacedKey(plugin, "item_id");
         this.plugin = plugin;
         this.lang = lang;
+        this.crimsonSwordManager = crimsonSwordManager;
     }
 
     public ItemStack createWindBlade(WindBladeTier tier) {
@@ -215,7 +217,7 @@ public final class ItemFactory {
         );
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, CrimsonSwordDefinition.ITEM_ID);
         item.setItemMeta(meta);
-        new CrimsonSwordManager(plugin, lang).initialize(item);
+        crimsonSwordManager.initialize(item);
         return item;
     }
 

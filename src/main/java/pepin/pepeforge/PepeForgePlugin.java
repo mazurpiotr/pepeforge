@@ -104,7 +104,8 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
         
         lang = new PluginLang(this);
-        itemFactory = new ItemFactory(this, lang);
+        crimsonSwordManager = new CrimsonSwordManager(this, lang);
+        itemFactory = new ItemFactory(this, lang, crimsonSwordManager);
         statsManager = new StatisticsManager(this);
         getServer().getPluginManager().registerEvents(new StatisticsListener(statsManager, itemFactory), this);
 
@@ -116,8 +117,6 @@ public final class PepeForgePlugin extends JavaPlugin {
         bossBarManager = new pepin.pepeforge.util.ui.BossBarManager(this);
         auraManager = new AuraManager(this);
         auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
-        
-        crimsonSwordManager = new CrimsonSwordManager(this, lang);
 
         auraManager.startTask();
         
