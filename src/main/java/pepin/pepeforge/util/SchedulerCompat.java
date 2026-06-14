@@ -49,10 +49,11 @@ public final class SchedulerCompat {
             long delayTicks
     ) {
         if (REGIONIZED) {
+            long foliaDelay = Math.max(1L, delayTicks);
             Bukkit.getGlobalRegionScheduler().runDelayed(
                     plugin,
                     task -> runnable.run(),
-                    delayTicks
+                    foliaDelay
             );
         } else {
             Bukkit.getScheduler().runTaskLater(
@@ -70,10 +71,11 @@ public final class SchedulerCompat {
         long periodTicks
     ) {
         if (REGIONIZED) {
+            long foliaDelay = Math.max(1L, delayTicks);
             var task = Bukkit.getGlobalRegionScheduler().runAtFixedRate(
                     plugin,
                     scheduledTask -> runnable.run(),
-                    delayTicks,
+                    foliaDelay,
                     periodTicks
             );
 
@@ -117,11 +119,12 @@ public final class SchedulerCompat {
         long periodTicks
     ) {
         if (REGIONIZED) {
+            long foliaDelay = Math.max(1L, delayTicks);
             var task = entity.getScheduler().runAtFixedRate(
                     plugin,
                     scheduledTask -> runnable.run(),
                     null,
-                    delayTicks,
+                    foliaDelay,
                     periodTicks
             );
             // If player logs out, the task will be cancelled by Folia, so we return a no-op cancel function in that case
@@ -145,11 +148,12 @@ public final class SchedulerCompat {
             long delayTicks
     ) {
         if (isRegionized()) {
+            long foliaDelay = Math.max(1L, delayTicks);
             var task = player.getScheduler().runDelayed(
                     plugin,
                     taskRef -> runnable.run(),
                     null,
-                    delayTicks
+                    foliaDelay
             );
             return task != null ? task::cancel : () -> {};
         }
