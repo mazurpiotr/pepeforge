@@ -42,6 +42,7 @@ import java.util.UUID;
 public final class SolarShieldListener implements Listener {
 
     private static final int CHARGE_BAR_SEGMENTS = 20;
+    private static final int OFF_HAND_INVENTORY_SLOT = 40;
 
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
@@ -93,7 +94,7 @@ public final class SolarShieldListener implements Listener {
                 // Slowly discharge ALL other solar shields in inventory when not equipped
                 if (doPassiveDischarge) {
                     for (int i = 0; i < inv.getSize(); i++) {
-                        if (i == inv.getHeldItemSlot() || i == 40) { // 40 is offhand slot
+                        if (i == inv.getHeldItemSlot() || i == OFF_HAND_INVENTORY_SLOT) {
                             continue;
                         }
                         ItemStack item = inv.getItem(i);
