@@ -20,6 +20,9 @@ translations:
 # enabled: hard on/off switch for the item itself
 # recipe_enabled: controls crafting separately and must be set explicitly
 items:
+  solar_shield:
+    enabled: true
+    recipe_enabled: true
   crescent_bow:
     enabled: true
     recipe_enabled: true
