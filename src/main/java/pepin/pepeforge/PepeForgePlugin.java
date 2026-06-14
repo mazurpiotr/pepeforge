@@ -112,7 +112,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         pepin.pepeforge.item.ItemMigrator itemMigrator = new pepin.pepeforge.item.ItemMigrator(this, itemFactory, migrationEnabled);
         getServer().getPluginManager().registerEvents(new pepin.pepeforge.item.ItemMigrationListener(itemMigrator), this);
         
-        cooldownManager = new CooldownManager();
+        cooldownManager = new CooldownManager(this);
         bossBarManager = new pepin.pepeforge.util.ui.BossBarManager(this);
         auraManager = new AuraManager(this);
         auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
