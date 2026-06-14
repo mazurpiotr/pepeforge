@@ -66,7 +66,7 @@ public final class CrimsonAuraEffect implements TimedAuraEffect {
     }
 
     private void drainCrimsonAura(Player player) {
-        double drainAmount = auraDrainAmount(level);
+        double drainAmount = listener.getManager().auraDrainAmount(level);
         double totalDrained = 0.0D;
         Location base = player.getLocation();
         double radius = CrimsonSwordDefinition.AURA_RADIUS;
@@ -93,28 +93,10 @@ public final class CrimsonAuraEffect implements TimedAuraEffect {
             listener.setAuraDraining(playerId, false);
         }
 
-        heal(player, totalDrained);
+        listener.getManager().heal(player, totalDrained);
     }
 
-    private double auraDrainAmount(int level) {
-        if (level >= 30) {
-            return CrimsonSwordDefinition.LEVEL_30_AURA_DRAIN;
-        }
-        if (level >= 20) {
-            return CrimsonSwordDefinition.LEVEL_20_AURA_DRAIN;
-        }
-        return CrimsonSwordDefinition.LEVEL_10_AURA_DRAIN;
-    }
 
-    private void heal(Player player, double amount) {
-        if (amount <= 0.0D || player.isDead()) {
-            return;
-        }
-
-        AttributeInstance maxHealthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
-        double maxHealth = maxHealthAttribute == null ? 20.0D : maxHealthAttribute.getValue();
-        player.setHealth(Math.min(maxHealth, player.getHealth() + amount));
-    }
 
     private void playCrimsonAura(Player player) {
         Location base = player.getLocation();

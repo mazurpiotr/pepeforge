@@ -317,6 +317,16 @@ public final class CrimsonSwordManager {
         return String.format(Locale.US, "%.0f", value);
     }
 
+    public void heal(Player player, double amount) {
+        if (amount <= 0.0D || player.isDead()) {
+            return;
+        }
+
+        org.bukkit.attribute.AttributeInstance maxHealthAttribute = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        double maxHealth = maxHealthAttribute == null ? 20.0D : maxHealthAttribute.getValue();
+        player.setHealth(Math.min(maxHealth, player.getHealth() + amount));
+    }
+
     private ItemMeta getMeta(ItemStack item) {
         if (item == null || !item.hasItemMeta()) {
             return null;

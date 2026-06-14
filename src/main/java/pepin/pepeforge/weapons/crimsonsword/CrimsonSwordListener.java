@@ -34,6 +34,10 @@ public final class CrimsonSwordListener implements Listener {
         this.auraManager = auraManager;
     }
 
+    public CrimsonSwordManager getManager() {
+        return manager;
+    }
+
     public void stop() {
         auraDamageProgress.clear();
         auraDrainingPlayers.clear();
@@ -78,8 +82,8 @@ public final class CrimsonSwordListener implements Listener {
         double effectiveDamage = Math.min(finalDamage, target.getHealth());
         
         // This is handled in CrimsonAuraEffect for drain, but lifesteal on hit is here
-        if (lifesteal(level) > 0.0D) {
-            heal(player, effectiveDamage * lifesteal(level));
+        if (manager.lifesteal(level) > 0.0D) {
+            manager.heal(player, effectiveDamage * manager.lifesteal(level));
         }
 
         manager.addXp(player, weapon, effectiveDamage);
@@ -125,7 +129,7 @@ public final class CrimsonSwordListener implements Listener {
     }
 
     private void activateAura(Player player, int level) {
-        int durationTicks = auraDurationTicks(level);
+        int durationTicks = manager.auraDurationTicks(level);
         auraManager.addOrExtendActiveAura(player, new CrimsonAuraEffect(this, level, durationTicks, player.getTicksLived()), durationTicks);
         player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.ENTITY_WITHER_SKELETON_HURT, 0.45f, 0.55f);
     }
@@ -134,38 +138,7 @@ public final class CrimsonSwordListener implements Listener {
         return Math.min(level, CrimsonSwordDefinition.MAX_LEVEL) * CrimsonSwordDefinition.DAMAGE_BONUS_PER_LEVEL;
     }
 
-    private double lifesteal(int level) {
-        if (level >= 25) {
-            return CrimsonSwordDefinition.LEVEL_25_LIFESTEAL;
-        }
-        if (level >= 15) {
-            return CrimsonSwordDefinition.LEVEL_15_LIFESTEAL;
-        }
-        if (level >= 5) {
-            return CrimsonSwordDefinition.LEVEL_5_LIFESTEAL;
-        }
-        return 0.0D;
-    }
 
-    private int auraDurationTicks(int level) {
-        if (level >= 30) {
-            return CrimsonSwordDefinition.LEVEL_30_AURA_TICKS;
-        }
-        if (level >= 20) {
-            return CrimsonSwordDefinition.LEVEL_20_AURA_TICKS;
-        }
-        return CrimsonSwordDefinition.LEVEL_10_AURA_TICKS;
-    }
-
-    private void heal(Player player, double amount) {
-        if (amount <= 0.0D || player.isDead()) {
-            return;
-        }
-
-        org.bukkit.attribute.AttributeInstance maxHealthAttribute = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
-        double maxHealth = maxHealthAttribute == null ? 20.0D : maxHealthAttribute.getValue();
-        player.setHealth(Math.min(maxHealth, player.getHealth() + amount));
-    }
 
     private void playLegacyBurst(LivingEntity victim) {
         org.bukkit.Location location = victim.getLocation().add(0.0D, 1.0D, 0.0D);
