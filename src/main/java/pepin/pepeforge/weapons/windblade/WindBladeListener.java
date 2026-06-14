@@ -1,6 +1,8 @@
 package pepin.pepeforge.weapons.windblade;
 
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -23,6 +25,8 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.AuraManager;
 import pepin.pepeforge.util.CooldownManager;
+import pepin.pepeforge.util.ScheduledTaskCompat;
+import pepin.pepeforge.util.SchedulerCompat;
 
 import java.util.Locale;
 
@@ -63,17 +67,31 @@ public final class WindBladeListener implements Listener {
         this.auraManager = auraManager;
     }
 
+    private ScheduledTaskCompat holdingTask;
+
     public void startHoldingTask() {
-        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        holdingTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
-                ItemStack held = player.getInventory().getItemInMainHand();
-                WindBladeTier tier = itemFactory.getWindBladeTier(held);
-                if (tier == null || !tier.grantsHoldingSpeed()) {
-                    continue;
-                }
-                applySpeedEffectIfBetter(player, HOLDING_SPEED_EFFECT);
+                SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    if (!player.isOnline()) {
+                        return;
+                    }
+                    ItemStack held = player.getInventory().getItemInMainHand();
+                    WindBladeTier tier = itemFactory.getWindBladeTier(held);
+                    if (tier == null || !tier.grantsHoldingSpeed()) {
+                        return;
+                    }
+                    applySpeedEffectIfBetter(player, HOLDING_SPEED_EFFECT);
+                });
             }
         }, 1L, 20L);
+    }
+
+    public void stop() {
+        if (holdingTask != null) {
+            holdingTask.cancel();
+            holdingTask = null;
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -173,7 +191,7 @@ public final class WindBladeListener implements Listener {
             }
         }
         player.addPotionEffect(candidate);
-        auraManager.activateWindAura(player, candidate.getDuration());
+        auraManager.addOrExtendActiveAura(player, new WindAuraEffect(itemFactory), candidate.getDuration());
     }
 
     private void denyInteraction(PlayerInteractEvent event) {
@@ -193,9 +211,8 @@ public final class WindBladeListener implements Listener {
     }
 
     private void showActionBar(Player player, String message) {
-        player.sendActionBar(
-            LegacyComponentSerializer.legacyAmpersand().deserialize(message)
-        );
+        String coloredMessage = ChatColor.translateAlternateColorCodes('&', message);
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(coloredMessage));
     }
 
     private String buildProgressBar(double progress) {

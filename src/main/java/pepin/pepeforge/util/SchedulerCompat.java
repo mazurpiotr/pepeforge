@@ -6,33 +6,31 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SchedulerCompat {
 
-    private static final boolean FOLIA;
+    private static final boolean REGIONIZED;
 
     static {
-        boolean folia;
-
+        boolean regionized;
         try {
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
-            folia = true;
+            regionized = true;
         } catch (ClassNotFoundException ignored) {
-            folia = false;
+            regionized = false;
         }
-
-        FOLIA = folia;
+        REGIONIZED = regionized;
     }
 
     private SchedulerCompat() {
     }
 
-    public static boolean isFolia() {
-        return FOLIA;
+    public static boolean isRegionized() {
+        return REGIONIZED;
     }
 
     public static void run(
             JavaPlugin plugin,
             Runnable runnable
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
             Bukkit.getGlobalRegionScheduler().execute(
                     plugin,
                     runnable
@@ -50,11 +48,12 @@ public final class SchedulerCompat {
             Runnable runnable,
             long delayTicks
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
+            long foliaDelay = Math.max(1L, delayTicks);
             Bukkit.getGlobalRegionScheduler().runDelayed(
                     plugin,
                     task -> runnable.run(),
-                    delayTicks
+                    foliaDelay
             );
         } else {
             Bukkit.getScheduler().runTaskLater(
@@ -71,11 +70,12 @@ public final class SchedulerCompat {
         long delayTicks,
         long periodTicks
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
+            long foliaDelay = Math.max(1L, delayTicks);
             var task = Bukkit.getGlobalRegionScheduler().runAtFixedRate(
                     plugin,
                     scheduledTask -> runnable.run(),
-                    delayTicks,
+                    foliaDelay,
                     periodTicks
             );
 
@@ -97,7 +97,7 @@ public final class SchedulerCompat {
             JavaPlugin plugin,
             Runnable runnable
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
             player.getScheduler().run(
                     plugin,
                     task -> runnable.run(),
@@ -112,18 +112,19 @@ public final class SchedulerCompat {
     }
 
     public static ScheduledTaskCompat runTimerForEntity(
-        Player player,
+        org.bukkit.entity.Entity entity,
         JavaPlugin plugin,
         Runnable runnable,
         long delayTicks,
         long periodTicks
     ) {
-        if (FOLIA) {
-            var task = player.getScheduler().runAtFixedRate(
+        if (REGIONIZED) {
+            long foliaDelay = Math.max(1L, delayTicks);
+            var task = entity.getScheduler().runAtFixedRate(
                     plugin,
                     scheduledTask -> runnable.run(),
                     null,
-                    delayTicks,
+                    foliaDelay,
                     periodTicks
             );
             // If player logs out, the task will be cancelled by Folia, so we return a no-op cancel function in that case
@@ -137,6 +138,31 @@ public final class SchedulerCompat {
                 periodTicks
         );
 
+        return task::cancel;
+    }
+
+    public static ScheduledTaskCompat runLaterForPlayer(
+            Player player,
+            JavaPlugin plugin,
+            Runnable runnable,
+            long delayTicks
+    ) {
+        if (isRegionized()) {
+            long foliaDelay = Math.max(1L, delayTicks);
+            var task = player.getScheduler().runDelayed(
+                    plugin,
+                    taskRef -> runnable.run(),
+                    null,
+                    foliaDelay
+            );
+            return task != null ? task::cancel : () -> {};
+        }
+
+        var task = Bukkit.getScheduler().runTaskLater(
+                plugin,
+                runnable,
+                delayTicks
+        );
         return task::cancel;
     }
 }

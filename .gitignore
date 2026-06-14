@@ -1,4 +1,6 @@
 target/
 .m2/
-pepeforge-resourcepack.zip
 scripts/
+.jqwik-database
+PepeForge-ResourcePack.zip
+PepeForge-ResourcePack.zip.sha1

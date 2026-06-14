@@ -1,6 +1,18 @@
-# PepeForge Items
+# Pepe's Forge Items
 
-Detailed item and recipe reference for the current PepeForge item set.
+Detailed item and recipe reference for the current Pepe's Forge item set.
+
+## Table of Contents
+- [Chisel](#-chisel)
+- [Scythe](#-scythe)
+- [Wind Blade](#️-wind-blade)
+- [Greatsword](#️-greatsword)
+- [Crescent Bow](#-crescent-bow)
+- [Crescent Spear](#-crescent-spear)
+- [Katana](#️-katana)
+- [Solar Shield](#️-solar-shield)
+- [Crimson Sword](#-crimson-sword)
+- [Give Names](#give-names)
 
 ## 🪚 Chisel
 
@@ -135,6 +147,21 @@ Two-handed parry weapon built around short defensive timing windows.
 
 ![Katana](media/receipes/pepeforge_katana.png)
 
+## ☀️ Solar Shield
+
+A legendary sun-blessed shield that charges passively during the day. *Ancient Cities were not always shrouded in darkness...*
+
+| Feature | Details |
+|---------|---------|
+| Passive Charging | Automatically gains charges (up to 3) while held under direct sunlight. |
+| Retaliation | While blocking, getting hit consumes 1 charge to ignite attackers and trigger a blinding flashbang effect for 2s. |
+| Discharge | Slowly loses charges when held in darkness, and instantly resets to 0 when unequipped. |
+| Rarity | Legendary |
+
+**Crafting** (Shaped Recipe):
+
+![Solar Shield](media/receipes/pepeforge_solar_shield.png)
+
 ## 🩸 Crimson Sword
 
 A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
@@ -178,3 +205,4 @@ Available internal item names for `/pepeforge give`:
 - `diamond_scythe`
 - `netherite_scythe`
 - `crimson_sword`
+- `solar_shield`

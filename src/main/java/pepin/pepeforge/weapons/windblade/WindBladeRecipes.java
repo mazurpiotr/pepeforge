@@ -41,6 +41,7 @@ public final class WindBladeRecipes {
         }
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createWindBlade(tier));
+        recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [ ][M][ ]
          * [ ][M][ ]

@@ -33,6 +33,7 @@ public final class KatanaRecipes {
         }
 
         ShapedRecipe recipe = new ShapedRecipe(key, itemFactory.createKatana());
+        recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [ ][ ][I]
          * [ ][I][ ]
@@ -44,6 +45,7 @@ public final class KatanaRecipes {
         RecipeRegistrar.add(plugin, key, recipe);
 
         ShapedRecipe mirroredRecipe = new ShapedRecipe(keyMirrored, itemFactory.createKatana());
+        mirroredRecipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
         /*
          * [I][ ][ ]
          * [ ][I][ ]

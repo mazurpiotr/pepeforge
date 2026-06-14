@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.crimsonsword;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
@@ -16,6 +17,7 @@ public final class CrimsonSwordDefinition {
     public static final ItemRarity RARITY = ItemRarity.LEGENDARY;
 
     public static final Material BASE_MATERIAL = Material.DIAMOND_SWORD;
+    public static final NamespacedKey MODEL_KEY = new NamespacedKey("pepeforge", "crimson_sword");
     public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.CRIMSON_SWORD;
     public static final double ATTACK_DAMAGE = 7.0D;
     public static final double ATTACK_SPEED = 1.6D;

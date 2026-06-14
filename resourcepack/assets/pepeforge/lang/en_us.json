@@ -112,5 +112,13 @@
   "item.pepeforge.crimson_sword.feature.lifesteal_locked": "Lifesteal: Unlocks at level 5",
   "item.pepeforge.crimson_sword.feature.aura": "Crimson Aura (%ss): %s HP/s within %s blocks",
   "item.pepeforge.crimson_sword.feature.aura_next": "Crimson Aura (%ss): %s HP/s within %s blocks (next at Lv %s: %ss, %s HP/s)",
-  "item.pepeforge.crimson_sword.feature.aura_locked": "Crimson Aura: Unlocks at level 10"
-  }
+  "item.pepeforge.crimson_sword.feature.aura_locked": "Crimson Aura: Unlocks at level 10",
+  "item.pepeforge.solar_shield.name": "Solar Shield",
+  "item.pepeforge.solar_shield.lore.1": "§6---------------",
+  "item.pepeforge.solar_shield.lore.2": "§8§oAncient Cities were not always shrouded in darkness...",
+  "item.pepeforge.solar_shield.lore.3": "§eAbility: §6Solar Retaliation",
+  "item.pepeforge.solar_shield.lore.4": "§3Charges passively in sunlight.",
+  "item.pepeforge.solar_shield.lore.5": "§3Blocking consumes a charge to ignite attackers and trigger a flashbang.",
+  "item.pepeforge.solar_shield.lore.6": "Legendary",
+  "item.pepeforge.solar_shield.lore.7": "§6---------------"
+}

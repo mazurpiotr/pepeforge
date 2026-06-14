@@ -4,16 +4,12 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.EquipmentSlotGroup;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 
-import net.kyori.adventure.text.Component;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -23,51 +19,40 @@ public final class ItemMetaCompat {
     private ItemMetaCompat() {
     }
 
-    
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static void setDisplayName(ItemMeta meta, String name) {
         meta.setDisplayName(name);
     }
 
-    public static void setDisplayName(ItemMeta meta, Component name) {
-        meta.displayName(name);
-    }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static void setItemName(ItemMeta meta, String name) {
         meta.setItemName(name);
     }
 
-    public static void setItemName(ItemMeta meta, Component name) {
-        meta.itemName(name);
-    }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static String getDisplayName(ItemMeta meta) {
         return meta.getDisplayName();
     }
 
-    public static Component getDisplayNameComponent(ItemMeta meta) {
-        return meta.displayName();
-    }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static String getItemName(ItemMeta meta) {
         return meta.getItemName();
     }
 
-    public static Component getItemNameComponent(ItemMeta meta) {
-        return meta.itemName();
-    }
 
+    @Deprecated
     @SuppressWarnings("deprecation")
     public static void setStringLore(ItemMeta meta, List<String> lore) {
         meta.setLore(lore);
     }
 
-    public static void setLore(ItemMeta meta, List<Component> lore) {
-        meta.lore(lore);
-    }
 
     public static void setCustomModelData(ItemMeta meta, int value) {
         CustomModelDataComponent component = meta.getCustomModelDataComponent();
@@ -83,18 +68,11 @@ public final class ItemMetaCompat {
     }
 
     public static String readItemModel(ItemMeta meta) {
-        try {
-            Method hasItemModel = meta.getClass().getMethod("hasItemModel");
-            boolean present = (boolean) hasItemModel.invoke(meta);
-            if (!present) {
-                return "-";
-            }
-            Method getItemModel = meta.getClass().getMethod("getItemModel");
-            Object value = getItemModel.invoke(meta);
-            return value == null ? "-" : value.toString();
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-            return "unsupported-by-runtime";
+        if (!meta.hasItemModel()) {
+            return "-";
         }
+        NamespacedKey key = meta.getItemModel();
+        return key == null ? "-" : key.toString();
     }
 
     public static void addMainHandAttribute(ItemMeta meta, Attribute attribute, String name, double amount) {
@@ -105,49 +83,7 @@ public final class ItemMetaCompat {
     }
 
     public static void setItemModelIfSupported(ItemMeta meta, NamespacedKey itemModelKey) {
-        try {
-            Method method = meta.getClass().getMethod("setItemModel", NamespacedKey.class);
-            method.invoke(meta, itemModelKey);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-        }
-    }
-
-    public static void setTranslatableDisplayNameIfSupported(ItemMeta meta, String key, String colorName) {
-        Object component = createTranslatableComponent(key, colorName);
-        if (component == null) {
-            return;
-        }
-        invokeComponentMethod(meta, "displayName", component);
-    }
-
-    public static void setTranslatableItemNameIfSupported(ItemMeta meta, String key, String colorName) {
-        Object component = createTranslatableComponent(key, colorName);
-        if (component == null) {
-            return;
-        }
-        invokeComponentMethod(meta, "itemName", component);
-    }
-
-    public static void setTranslatableLoreIfSupported(ItemMeta meta, List<String> keys, List<String> colorNames) {
-        if (keys.isEmpty()) {
-            return;
-        }
-        List<Object> components = new ArrayList<>();
-        for (int i = 0; i < keys.size(); i++) {
-            String key = keys.get(i);
-            String colorName = colorNames != null && i < colorNames.size() ? colorNames.get(i) : null;
-            Object component = createTranslatableComponent(key, colorName);
-            if (component == null) {
-                return;
-            }
-            components.add(component);
-        }
-
-        try {
-            Method method = meta.getClass().getMethod("lore", List.class);
-            method.invoke(meta, components);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-        }
+        meta.setItemModel(itemModelKey);
     }
 
     private static AttributeModifier createMainHandAttributeModifier(String name, double amount) {
@@ -192,98 +128,5 @@ public final class ItemMetaCompat {
 
     private static String normalizeKey(String name) {
         return name.toLowerCase(Locale.ROOT).replace(' ', '_');
-    }
-
-    private static void invokeComponentMethod(ItemMeta meta, String methodName, Object component) {
-        try {
-            Class<?> componentClass = Class.forName("net.kyori.adventure.text.Component");
-            Method method = meta.getClass().getMethod(methodName, componentClass);
-            method.invoke(meta, component);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-        }
-    }
-
-    public static void applyTranslatableItemTextDataIfSupported(ItemStack item, String nameTranslationKey, String nameColorName, List<String> loreTranslationKeys, List<String> loreColorNames) {
-        Object nameComponent = createTranslatableComponent(nameTranslationKey, nameColorName);
-        if (nameComponent != null) {
-            setItemStackDataComponent(item, "ITEM_NAME", nameComponent);
-        }
-
-        if (loreTranslationKeys == null || loreTranslationKeys.isEmpty()) {
-            return;
-        }
-
-        List<Object> loreComponents = new ArrayList<>();
-        for (int i = 0; i < loreTranslationKeys.size(); i++) {
-            String translationKey = loreTranslationKeys.get(i);
-            String colorName = loreColorNames != null && i < loreColorNames.size() ? loreColorNames.get(i) : null;
-            Object component = createTranslatableComponent(translationKey, colorName);
-            if (component == null) {
-                return;
-            }
-            loreComponents.add(component);
-        }
-
-        try {
-            Class<?> itemLoreClass = Class.forName("io.papermc.paper.datacomponent.item.ItemLore");
-            Method loreFactory = itemLoreClass.getMethod("lore", List.class);
-            Object loreValue = loreFactory.invoke(null, loreComponents);
-            setItemStackDataComponent(item, "LORE", loreValue);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-        }
-    }
-
-    public static boolean supportsItemTextDataComponents() {
-        try {
-            Class<?> dataComponentTypesClass = Class.forName("io.papermc.paper.datacomponent.DataComponentTypes");
-            dataComponentTypesClass.getField("ITEM_NAME");
-            Class<?> valuedTypeClass = Class.forName("io.papermc.paper.datacomponent.DataComponentType$Valued");
-            ItemStack.class.getMethod("setData", valuedTypeClass, Object.class);
-            return true;
-        } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException ignored) {
-            return false;
-        }
-    }
-
-    private static Object createTranslatableComponent(String key, String colorName) {
-        try {
-            Class<?> componentClass = Class.forName("net.kyori.adventure.text.Component");
-            Method translatableMethod = componentClass.getMethod("translatable", String.class);
-            Object component = translatableMethod.invoke(null, key);
-            if (colorName == null || colorName.isBlank()) {
-                return component;
-            }
-
-            Class<?> textColorClass = Class.forName("net.kyori.adventure.text.format.TextColor");
-            Object color;
-            if (colorName.startsWith("#")) {
-                Method fromHexString = textColorClass.getMethod("fromHexString", String.class);
-                color = fromHexString.invoke(null, colorName);
-                if (color == null) {
-                    return component;
-                }
-            } else {
-                Class<?> namedTextColorClass = Class.forName("net.kyori.adventure.text.format.NamedTextColor");
-                color = namedTextColorClass.getField(colorName).get(null);
-            }
-            Method colorMethod = component.getClass().getMethod("color", textColorClass);
-            return colorMethod.invoke(component, color);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-            return null;
-        } catch (NoSuchFieldException ignored) {
-            return null;
-        }
-    }
-
-    private static void setItemStackDataComponent(ItemStack item, String fieldName, Object value) {
-        try {
-            Class<?> dataComponentTypesClass = Class.forName("io.papermc.paper.datacomponent.DataComponentTypes");
-            Object type = dataComponentTypesClass.getField(fieldName).get(null);
-            Class<?> valuedTypeClass = Class.forName("io.papermc.paper.datacomponent.DataComponentType$Valued");
-            Method setData = item.getClass().getMethod("setData", valuedTypeClass, Object.class);
-            setData.invoke(item, type, value);
-        } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException
-                 | IllegalAccessException | InvocationTargetException ignored) {
-        }
     }
 }

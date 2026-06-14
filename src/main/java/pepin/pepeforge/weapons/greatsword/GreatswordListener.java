@@ -35,6 +35,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.ScheduledTaskCompat;
+import pepin.pepeforge.util.SchedulerCompat;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public final class GreatswordListener implements Listener {
 
@@ -85,6 +88,7 @@ public final class GreatswordListener implements Listener {
     private final Map<UUID, Long> rhythmCueTicks = new HashMap<>();
     private final Set<UUID> rhythmBarShown = new HashSet<>();
     private final Set<UUID> cleavingPlayers = new HashSet<>();
+    private boolean transientModifierLogged = false;
 
     public GreatswordListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
         this.plugin = plugin;
@@ -93,8 +97,10 @@ public final class GreatswordListener implements Listener {
         this.reachModifierKey = new NamespacedKey(plugin, "greatsword_reach_bonus");
     }
 
+    private ScheduledTaskCompat statusTask;
+
     public void startStatusTask() {
-        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
                 if (tier == null) {
@@ -128,6 +134,14 @@ public final class GreatswordListener implements Listener {
                 }
             }
         }, 1L, STATUS_INTERVAL_TICKS);
+    }
+
+    public void stop() {
+        if (statusTask != null) {
+            statusTask.cancel();
+            statusTask = null;
+        }
+        clearAllPlayerState();
     }
 
     public void clearAllPlayerState() {
@@ -512,7 +526,16 @@ public final class GreatswordListener implements Listener {
             return;
         }
 
-        removeReachModifier(attribute);
+        for (AttributeModifier mod : attribute.getModifiers()) {
+            if (reachModifierKey.equals(mod.getKey())) {
+                if (Double.compare(mod.getAmount(), amount) == 0) {
+                    return;
+                } else {
+                    attribute.removeModifier(mod);
+                }
+            }
+        }
+
         addReachModifier(attribute, new AttributeModifier(
                 reachModifierKey,
                 amount,
@@ -525,7 +548,11 @@ public final class GreatswordListener implements Listener {
         try {
             Method method = attribute.getClass().getMethod("addTransientModifier", AttributeModifier.class);
             method.invoke(attribute, modifier);
-        } catch (ReflectiveOperationException | SecurityException ignored) {
+        } catch (ReflectiveOperationException | SecurityException e) {
+            if (!transientModifierLogged) {
+                plugin.getLogger().log(Level.WARNING, "Failed to use addTransientModifier for Greatsword reach (likely not on Paper). Falling back to standard addModifier. This warning is printed only once.", e);
+                transientModifierLogged = true;
+            }
             attribute.addModifier(modifier);
         }
     }

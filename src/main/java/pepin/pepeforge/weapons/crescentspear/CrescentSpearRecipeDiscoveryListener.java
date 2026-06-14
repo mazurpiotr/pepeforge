@@ -27,13 +27,12 @@ public final class CrescentSpearRecipeDiscoveryListener implements Listener {
         if (!(event.getEntity() instanceof Player player)) {
             return;
         }
-        plugin.getServer().getScheduler().runTask(plugin, () -> discoverFor(player));
+        pepin.pepeforge.util.SchedulerCompat.runForPlayer(player, plugin, () -> discoverFor(player));
     }
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        if (inventory.contains(Material.AMETHYST_SHARD)
-                && inventory.contains(Material.STICK)) {
+        if (inventory.contains(Material.AMETHYST_SHARD)) {
             player.discoverRecipe(CrescentSpearRecipeKeys.CRESCENT_SPEAR);
         }
     }

@@ -1,6 +1,7 @@
 package pepin.pepeforge.tools.chisel;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
@@ -16,6 +17,7 @@ public final class ChiselDefinition {
     public static final ItemRarity RARITY = ItemRarity.COMMON;
 
     public static final Material BASE_MATERIAL = Material.SHEARS;
+    public static final NamespacedKey MODEL_KEY = new NamespacedKey("pepeforge", "chisel");
     public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.CHISEL;
     public static final int DURABILITY_COST = 1;
 

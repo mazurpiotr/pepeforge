@@ -26,14 +26,12 @@ public final class ChiselRecipeDiscoveryListener implements Listener {
         if (!(event.getEntity() instanceof Player player)) {
             return;
         }
-        plugin.getServer().getScheduler().runTask(plugin, () -> discoverFor(player));
+        pepin.pepeforge.util.SchedulerCompat.runForPlayer(player, plugin, () -> discoverFor(player));
     }
 
     public void discoverFor(Player player) {
         Inventory inventory = player.getInventory();
-        if (inventory.contains(ChiselDefinition.TOP_MATERIAL)
-                && inventory.contains(ChiselDefinition.CORE_MATERIAL)
-                && inventory.contains(ChiselDefinition.HANDLE_MATERIAL)) {
+        if (inventory.contains(org.bukkit.Material.IRON_INGOT) || inventory.contains(org.bukkit.Material.COPPER_INGOT)) {
             player.discoverRecipe(ChiselRecipeKeys.CHISEL);
         }
     }
