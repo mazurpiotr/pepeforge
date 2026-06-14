@@ -115,15 +115,13 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        if (event.getHand() == EquipmentSlot.OFF_HAND) {
-            denyInteraction(event);
-            return;
-        }
-
         if (!hasEmptyOffHand(player)) {
             // Katana stays equipable with an occupied off-hand, but its custom
             // mechanics are disabled until the player goes back to a valid 2H state.
-            showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+            return;
+        }
+
+        if (event.getHand() == EquipmentSlot.OFF_HAND) {
             denyInteraction(event);
             return;
         }
