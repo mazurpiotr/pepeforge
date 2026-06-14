@@ -418,7 +418,11 @@ public final class ItemFactory {
             return;
         }
         ItemMeta meta = item.getItemMeta();
-        ItemMetaManager.setCustomModelData(meta, active ? KatanaDefinition.PARRY_MODEL_DATA : KatanaDefinition.CUSTOM_MODEL_DATA);
+        int targetData = active ? KatanaDefinition.PARRY_MODEL_DATA : KatanaDefinition.CUSTOM_MODEL_DATA;
+        if (meta.hasCustomModelData() && meta.getCustomModelData() == targetData) {
+            return;
+        }
+        ItemMetaManager.setCustomModelData(meta, targetData);
         ItemMetaManager.setItemModelIfSupported(meta, active ? KatanaDefinition.PARRY_MODEL_KEY : KatanaDefinition.MODEL_KEY);
         item.setItemMeta(meta);
     }

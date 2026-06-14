@@ -408,11 +408,16 @@ public final class KatanaListener implements Listener {
     }
 
     private void clearActiveParry(Player player, ItemStack katana) {
+        UUID playerId = player.getUniqueId();
+        if (!activeParryUntil.containsKey(playerId) && !activeTasks.containsKey(playerId)) {
+            return;
+        }
+
         if (itemFactory.isKatana(katana)) {
             itemFactory.setKatanaParryVisual(katana, false);
         }
-        activeParryUntil.remove(player.getUniqueId());
-        ScheduledTaskCompat activeTask = activeTasks.remove(player.getUniqueId());
+        activeParryUntil.remove(playerId);
+        ScheduledTaskCompat activeTask = activeTasks.remove(playerId);
         if (activeTask != null) {
             activeTask.cancel();
         }
