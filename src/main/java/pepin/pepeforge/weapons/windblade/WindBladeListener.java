@@ -25,6 +25,8 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.AuraManager;
 import pepin.pepeforge.util.CooldownManager;
+import pepin.pepeforge.util.ScheduledTaskCompat;
+import pepin.pepeforge.util.SchedulerCompat;
 
 import java.util.Locale;
 
@@ -65,17 +67,22 @@ public final class WindBladeListener implements Listener {
         this.auraManager = auraManager;
     }
 
-    private org.bukkit.scheduler.BukkitTask holdingTask;
+    private ScheduledTaskCompat holdingTask;
 
     public void startHoldingTask() {
-        holdingTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        holdingTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
-                ItemStack held = player.getInventory().getItemInMainHand();
-                WindBladeTier tier = itemFactory.getWindBladeTier(held);
-                if (tier == null || !tier.grantsHoldingSpeed()) {
-                    continue;
-                }
-                applySpeedEffectIfBetter(player, HOLDING_SPEED_EFFECT);
+                SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    if (!player.isOnline()) {
+                        return;
+                    }
+                    ItemStack held = player.getInventory().getItemInMainHand();
+                    WindBladeTier tier = itemFactory.getWindBladeTier(held);
+                    if (tier == null || !tier.grantsHoldingSpeed()) {
+                        return;
+                    }
+                    applySpeedEffectIfBetter(player, HOLDING_SPEED_EFFECT);
+                });
             }
         }, 1L, 20L);
     }

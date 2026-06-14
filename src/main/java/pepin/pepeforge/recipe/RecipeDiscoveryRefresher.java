@@ -12,7 +12,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
+import pepin.pepeforge.util.ScheduledTaskCompat;
+import pepin.pepeforge.util.SchedulerCompat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ public final class RecipeDiscoveryRefresher implements Listener {
 
     private final JavaPlugin plugin;
     private final Consumer<Player> discoverer;
-    private final Map<UUID, BukkitTask> pendingTasks = new HashMap<>();
+    private final Map<UUID, ScheduledTaskCompat> pendingTasks = new HashMap<>();
 
     public RecipeDiscoveryRefresher(JavaPlugin plugin, Consumer<Player> discoverer) {
         this.plugin = plugin;
@@ -38,7 +39,7 @@ public final class RecipeDiscoveryRefresher implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        BukkitTask task = pendingTasks.remove(event.getPlayer().getUniqueId());
+        ScheduledTaskCompat task = pendingTasks.remove(event.getPlayer().getUniqueId());
         if (task != null) {
             task.cancel();
         }
@@ -91,18 +92,18 @@ public final class RecipeDiscoveryRefresher implements Listener {
 
     private void refreshSoon(Player player) {
         UUID playerId = player.getUniqueId();
-        BukkitTask previousTask = pendingTasks.remove(playerId);
+        ScheduledTaskCompat previousTask = pendingTasks.remove(playerId);
         if (previousTask != null) {
             previousTask.cancel();
         }
-        pendingTasks.put(playerId, plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+        pendingTasks.put(playerId, SchedulerCompat.runLaterForPlayer(player, plugin, () -> {
             pendingTasks.remove(playerId);
             refresh(player);
         }, 1L));
     }
 
     private void refreshLater(Player player, long delayTicks) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> refresh(player), delayTicks);
+        SchedulerCompat.runLaterForPlayer(player, plugin, () -> refresh(player), delayTicks);
     }
 
     private void refresh(Player player) {

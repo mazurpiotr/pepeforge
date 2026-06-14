@@ -21,6 +21,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.ScheduledTaskCompat;
+import pepin.pepeforge.util.SchedulerCompat;
 import pepin.pepeforge.weapons.crescent.CrescentMoonPower;
 
 import java.util.HashMap;
@@ -50,38 +52,43 @@ public final class CrescentSpearListener implements Listener {
         this.lang = lang;
     }
 
-    private org.bukkit.scheduler.BukkitTask statusTask;
+    private ScheduledTaskCompat statusTask;
 
     public void startStatusTask() {
-        statusTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
-                UUID playerId = player.getUniqueId();
-                int currentCharge = charge.getOrDefault(playerId, 0);
-                boolean armed = armedPlayers.contains(playerId);
-                boolean holdingSpear = itemFactory.isCrescentSpear(player.getInventory().getItemInMainHand());
-                if (holdingSpear) {
-                    if (armed) {
-                        showReadyActionBar(player);
-                    } else if (currentCharge > 0) {
-                        showChargeActionBar(player, currentCharge);
+                SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    if (!player.isOnline()) {
+                        return;
                     }
-                }
-
-                if (currentCharge > 0 && !armed) {
-                    long currentTick = player.getWorld().getGameTime();
-                    long lastGainTick = lastChargeGainTick.getOrDefault(playerId, Long.MIN_VALUE);
-                    if (currentTick - lastGainTick < CrescentSpearDefinition.CHARGE_DECAY_DELAY_TICKS) {
-                        continue;
+                    UUID playerId = player.getUniqueId();
+                    int currentCharge = charge.getOrDefault(playerId, 0);
+                    boolean armed = armedPlayers.contains(playerId);
+                    boolean holdingSpear = itemFactory.isCrescentSpear(player.getInventory().getItemInMainHand());
+                    if (holdingSpear) {
+                        if (armed) {
+                            showReadyActionBar(player);
+                        } else if (currentCharge > 0) {
+                            showChargeActionBar(player, currentCharge);
+                        }
                     }
 
-                    int decayedCharge = Math.max(0, currentCharge - CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL);
-                    if (decayedCharge == 0) {
-                        charge.remove(playerId);
-                        lastChargeGainTick.remove(playerId);
-                    } else {
-                        charge.put(playerId, decayedCharge);
+                    if (currentCharge > 0 && !armed) {
+                        long currentTick = player.getWorld().getGameTime();
+                        long lastGainTick = lastChargeGainTick.getOrDefault(playerId, Long.MIN_VALUE);
+                        if (currentTick - lastGainTick < CrescentSpearDefinition.CHARGE_DECAY_DELAY_TICKS) {
+                            return;
+                        }
+
+                        int decayedCharge = Math.max(0, currentCharge - CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL);
+                        if (decayedCharge == 0) {
+                            charge.remove(playerId);
+                            lastChargeGainTick.remove(playerId);
+                        } else {
+                            charge.put(playerId, decayedCharge);
+                        }
                     }
-                }
+                });
             }
         }, 1L, CrescentSpearDefinition.STATUS_INTERVAL_TICKS);
     }
@@ -174,7 +181,7 @@ public final class CrescentSpearListener implements Listener {
 
         double hitDamage = resolveActiveHitDamage(player);
         for (int i = 0; i < CrescentSpearDefinition.ACTIVE_HIT_COUNT; i++) {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            SchedulerCompat.runLaterForPlayer(player, plugin, () -> {
                 if (!player.isOnline()) {
                     return;
                 }

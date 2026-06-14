@@ -28,7 +28,7 @@ public final class CrescentBowRecipeDiscoveryListener implements Listener {
         if (!(event.getEntity() instanceof Player player)) {
             return;
         }
-        plugin.getServer().getScheduler().runTask(plugin, () -> discoverFor(player));
+        pepin.pepeforge.util.SchedulerCompat.runForPlayer(player, plugin, () -> discoverFor(player));
     }
 
     public void discoverFor(Player player) {

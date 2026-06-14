@@ -6,8 +6,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SchedulerCompat {
 
-    private static final boolean REGIONIZED = SchedulerCompat.class.getClassLoader()
-            .getResource("io/papermc/paper/threadedregions/RegionizedServer.class") != null;
+    private static final boolean REGIONIZED;
+
+    static {
+        boolean regionized;
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            regionized = true;
+        } catch (ClassNotFoundException ignored) {
+            regionized = false;
+        }
+        REGIONIZED = regionized;
+    }
 
     private SchedulerCompat() {
     }
@@ -125,6 +135,30 @@ public final class SchedulerCompat {
                 periodTicks
         );
 
+        return task::cancel;
+    }
+
+    public static ScheduledTaskCompat runLaterForPlayer(
+            Player player,
+            JavaPlugin plugin,
+            Runnable runnable,
+            long delayTicks
+    ) {
+        if (isRegionized()) {
+            var task = player.getScheduler().runDelayed(
+                    plugin,
+                    taskRef -> runnable.run(),
+                    null,
+                    delayTicks
+            );
+            return task != null ? task::cancel : () -> {};
+        }
+
+        var task = Bukkit.getScheduler().runTaskLater(
+                plugin,
+                runnable,
+                delayTicks
+        );
         return task::cancel;
     }
 }
