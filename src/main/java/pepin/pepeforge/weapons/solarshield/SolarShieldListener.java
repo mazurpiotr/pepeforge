@@ -137,6 +137,11 @@ public final class SolarShieldListener implements Listener {
                                 updateBossBar(player, progress, charges, true);
                             }
                         } else {
+                            if (progress < SolarShieldDefinition.OVERCHARGE_BUFFER) {
+                                progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                                progress = Math.min(progress, SolarShieldDefinition.OVERCHARGE_BUFFER);
+                                activeProgress.put(playerId, progress);
+                            }
                             showReadyBossBar(player);
                         }
                     } else {
@@ -211,6 +216,12 @@ public final class SolarShieldListener implements Listener {
                             itemEntity.getWorld().spawnParticle(Particle.WAX_ON, itemEntity.getLocation().add(0, 0.5, 0), 5, 0.2, 0.2, 0.2, 0.05);
                         }
                         droppedShieldProgress.put(entityId, progress);
+                    } else {
+                        if (progress < SolarShieldDefinition.OVERCHARGE_BUFFER) {
+                            progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                            progress = Math.min(progress, SolarShieldDefinition.OVERCHARGE_BUFFER);
+                            droppedShieldProgress.put(entityId, progress);
+                        }
                     }
                 } else {
                     if (charges > 0 || progress > 0.0) {
@@ -293,9 +304,12 @@ public final class SolarShieldListener implements Listener {
             } else {
                 player.getInventory().setItemInOffHand(activeShield);
             }
-            
             attacker.setFireTicks(80);
             
+            if (attacker instanceof org.bukkit.entity.Mob mob) {
+                mob.setTarget(null);
+                mob.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SLOWNESS, 40, 1));
+            }
             //player.getWorld().spawnParticle(Particle.EXPLOSION, player.getLocation().add(0, 1, 0), 1);
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1.0f, 1.2f);
             

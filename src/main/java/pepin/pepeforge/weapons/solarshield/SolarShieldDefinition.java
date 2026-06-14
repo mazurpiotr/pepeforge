@@ -33,6 +33,7 @@ public final class SolarShieldDefinition {
     public static final int MAX_CHARGES = 3;
     public static final int CHARGE_TICKS = 300; // 15 seconds (1 tick = 50ms)
     public static final int DISCHARGE_TICKS = 400; // 20 seconds
+    public static final double OVERCHARGE_BUFFER = 0.20; // 20% extra buffer to prevent flickering
 
     private SolarShieldDefinition() {
     }
