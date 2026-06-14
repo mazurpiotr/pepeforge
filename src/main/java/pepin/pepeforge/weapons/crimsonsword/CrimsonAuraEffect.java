@@ -48,6 +48,10 @@ public final class CrimsonAuraEffect implements TimedAuraEffect {
 
     @Override
     public void tick(Player player) {
+        if (player.isDead() || player.getGameMode() == org.bukkit.GameMode.SPECTATOR) {
+            return;
+        }
+
         if (!listener.isHoldingCrimsonSword(player)) {
             return;
         }
