@@ -107,10 +107,6 @@ public final class CrimsonSwordListener implements Listener {
             return;
         }
 
-        // playLegacyBurst logic has been moved to CrimsonAuraEffect, but wait, 
-        // the burst is played on kill. Let's keep it here or re-add it.
-        // Actually I removed playLegacyBurst from here and didn't put it in CrimsonAuraEffect because it's kill effect, not aura effect.
-        // Let's re-add it here.
         playLegacyBurst(event.getEntity());
     }
 
@@ -137,8 +133,6 @@ public final class CrimsonSwordListener implements Listener {
     private double damageBonus(int level) {
         return Math.min(level, CrimsonSwordDefinition.MAX_LEVEL) * CrimsonSwordDefinition.DAMAGE_BONUS_PER_LEVEL;
     }
-
-
 
     private void playLegacyBurst(LivingEntity victim) {
         org.bukkit.Location location = victim.getLocation().add(0.0D, 1.0D, 0.0D);
