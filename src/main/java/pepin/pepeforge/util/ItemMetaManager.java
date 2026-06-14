@@ -12,7 +12,7 @@ public final class ItemMetaManager {
     }
 
     public static void setDisplayName(ItemMeta meta, String name) {
-        if (ServerEnv.isPaper()) {
+        if (ServerEnv.hasDataComponentApi()) {
             PaperItemMetaAdapter.setDisplayName(meta, name);
         } else {
             ItemMetaCompat.setDisplayName(meta, name);
@@ -20,7 +20,7 @@ public final class ItemMetaManager {
     }
 
     public static void setItemName(ItemMeta meta, String name) {
-        if (ServerEnv.isPaper()) {
+        if (ServerEnv.hasDataComponentApi()) {
             PaperItemMetaAdapter.setItemName(meta, name);
         } else {
             ItemMetaCompat.setItemName(meta, name);
@@ -28,7 +28,7 @@ public final class ItemMetaManager {
     }
 
     public static String getDisplayName(ItemMeta meta) {
-        if (ServerEnv.isPaper()) {
+        if (ServerEnv.hasDataComponentApi()) {
             return PaperItemMetaAdapter.getDisplayName(meta);
         } else {
             return ItemMetaCompat.getDisplayName(meta);
@@ -36,7 +36,7 @@ public final class ItemMetaManager {
     }
 
     public static String getItemName(ItemMeta meta) {
-        if (ServerEnv.isPaper()) {
+        if (ServerEnv.hasDataComponentApi()) {
             return PaperItemMetaAdapter.getItemName(meta);
         } else {
             return ItemMetaCompat.getItemName(meta);
@@ -44,7 +44,7 @@ public final class ItemMetaManager {
     }
 
     public static void setStringLore(ItemMeta meta, List<String> lore) {
-        if (ServerEnv.isPaper()) {
+        if (ServerEnv.hasDataComponentApi()) {
             PaperItemMetaAdapter.setLore(meta, lore);
         } else {
             ItemMetaCompat.setStringLore(meta, lore);

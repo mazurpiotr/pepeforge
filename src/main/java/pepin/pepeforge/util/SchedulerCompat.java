@@ -6,33 +6,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SchedulerCompat {
 
-    private static final boolean FOLIA;
-
-    static {
-        boolean folia;
-
-        try {
-            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
-            folia = true;
-        } catch (ClassNotFoundException ignored) {
-            folia = false;
-        }
-
-        FOLIA = folia;
-    }
+    private static final boolean REGIONIZED = SchedulerCompat.class.getClassLoader()
+            .getResource("io/papermc/paper/threadedregions/RegionizedServer.class") != null;
 
     private SchedulerCompat() {
     }
 
-    public static boolean isFolia() {
-        return FOLIA;
+    public static boolean isRegionized() {
+        return REGIONIZED;
     }
 
     public static void run(
             JavaPlugin plugin,
             Runnable runnable
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
             Bukkit.getGlobalRegionScheduler().execute(
                     plugin,
                     runnable
@@ -50,7 +38,7 @@ public final class SchedulerCompat {
             Runnable runnable,
             long delayTicks
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
             Bukkit.getGlobalRegionScheduler().runDelayed(
                     plugin,
                     task -> runnable.run(),
@@ -71,7 +59,7 @@ public final class SchedulerCompat {
         long delayTicks,
         long periodTicks
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
             var task = Bukkit.getGlobalRegionScheduler().runAtFixedRate(
                     plugin,
                     scheduledTask -> runnable.run(),
@@ -97,7 +85,7 @@ public final class SchedulerCompat {
             JavaPlugin plugin,
             Runnable runnable
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
             player.getScheduler().run(
                     plugin,
                     task -> runnable.run(),
@@ -118,7 +106,7 @@ public final class SchedulerCompat {
         long delayTicks,
         long periodTicks
     ) {
-        if (FOLIA) {
+        if (REGIONIZED) {
             var task = entity.getScheduler().runAtFixedRate(
                     plugin,
                     scheduledTask -> runnable.run(),

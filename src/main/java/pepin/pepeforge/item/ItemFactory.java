@@ -311,7 +311,7 @@ public final class ItemFactory {
 
     private boolean useClientSideTranslations() {
         return plugin.getConfig().getBoolean("translations.use_client_side", true)
-                && pepin.pepeforge.util.ServerEnv.isPaper();
+                && pepin.pepeforge.util.ServerEnv.hasDataComponentApi();
     }
 
     public ItemStack createByName(String name) {

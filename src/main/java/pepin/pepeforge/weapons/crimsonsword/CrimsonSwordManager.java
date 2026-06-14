@@ -303,7 +303,7 @@ public final class CrimsonSwordManager {
 
     private boolean useClientSideTranslations() {
         return plugin.getConfig().getBoolean("translations.use_client_side", true)
-                && pepin.pepeforge.util.ServerEnv.isPaper();
+                && pepin.pepeforge.util.ServerEnv.hasDataComponentApi();
     }
 
     public String formatPercent(double value) {
