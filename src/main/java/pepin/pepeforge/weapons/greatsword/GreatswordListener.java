@@ -35,6 +35,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.ScheduledTaskCompat;
+import pepin.pepeforge.util.SchedulerCompat;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -95,10 +97,10 @@ public final class GreatswordListener implements Listener {
         this.reachModifierKey = new NamespacedKey(plugin, "greatsword_reach_bonus");
     }
 
-    private org.bukkit.scheduler.BukkitTask statusTask;
+    private ScheduledTaskCompat statusTask;
 
     public void startStatusTask() {
-        statusTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
                 if (tier == null) {

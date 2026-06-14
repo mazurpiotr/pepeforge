@@ -1,7 +1,6 @@
 target/
 .m2/
-PepeForge-ResourcePack-Classic.zip
-PepeForge-ResourcePack-Classic.zip.sha1
-PepeForge-ResourcePack-Modern.zip
-PepeForge-ResourcePack-Modern.zip.sha1
+PepeForge-ResourcePack.zip
+PepeForge-ResourcePack.zip.sha1
 scripts/
+.jqwik-database

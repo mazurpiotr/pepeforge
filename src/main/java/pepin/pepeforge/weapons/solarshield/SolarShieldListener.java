@@ -30,9 +30,10 @@ import java.util.Iterator;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitTask;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.SchedulerCompat;
+import pepin.pepeforge.util.ScheduledTaskCompat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +53,7 @@ public final class SolarShieldListener implements Listener {
     private final Set<Item> droppedShields = new HashSet<>();
     private final Map<UUID, Double> droppedShieldProgress = new HashMap<>();
     
-    private BukkitTask statusTask;
+    private ScheduledTaskCompat statusTask;
     private final pepin.pepeforge.util.ui.BossBarManager bossBarManager;
 
     public SolarShieldListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang, pepin.pepeforge.util.ui.BossBarManager bossBarManager) {
@@ -64,7 +65,7 @@ public final class SolarShieldListener implements Listener {
 
     public void startStatusTask() {
         // Run every 2 ticks for smooth UI
-        statusTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 UUID playerId = player.getUniqueId();
                 
@@ -298,7 +299,7 @@ public final class SolarShieldListener implements Listener {
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1.0f, 1.2f);
             
             class FlashbangRunnable implements Runnable {
-                pepin.pepeforge.util.ScheduledTaskCompat taskRef;
+                ScheduledTaskCompat taskRef;
                 int ticksElapsed = 0;
 
                 @Override
@@ -320,7 +321,7 @@ public final class SolarShieldListener implements Listener {
                 }
             }
             FlashbangRunnable runner = new FlashbangRunnable();
-            runner.taskRef = pepin.pepeforge.util.SchedulerCompat.runTimerForEntity(attacker, plugin, runner, 1L, 2L);
+            runner.taskRef = SchedulerCompat.runTimerForEntity(attacker, plugin, runner, 1L, 2L);
         }
     }
 

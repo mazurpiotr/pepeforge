@@ -32,11 +32,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.CooldownManager;
+import pepin.pepeforge.util.ScheduledTaskCompat;
+import pepin.pepeforge.util.SchedulerCompat;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -55,7 +56,7 @@ public final class KatanaListener implements Listener {
     private final CooldownManager cooldownManager;
     private final NamespacedKey reflectUntilKey;
     private final Map<UUID, Long> activeParryUntil = new HashMap<>();
-    private final Map<UUID, BukkitTask> activeTasks = new HashMap<>();
+    private final Map<UUID, ScheduledTaskCompat> activeTasks = new HashMap<>();
 
     public KatanaListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang, CooldownManager cooldownManager) {
         this.plugin = plugin;
@@ -65,10 +66,10 @@ public final class KatanaListener implements Listener {
         this.reflectUntilKey = new NamespacedKey(plugin, "katana_reflect_until");
     }
 
-    private BukkitTask statusTask;
+    private ScheduledTaskCompat statusTask;
 
     public void startStatusTask() {
-        statusTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 if (!itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
                     clearActiveParry(player);
@@ -94,7 +95,7 @@ public final class KatanaListener implements Listener {
             statusTask.cancel();
             statusTask = null;
         }
-        for (BukkitTask task : activeTasks.values()) {
+        for (ScheduledTaskCompat task : activeTasks.values()) {
             task.cancel();
         }
         activeTasks.clear();
@@ -151,11 +152,12 @@ public final class KatanaListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onItemHeld(PlayerItemHeldEvent event) {
-        PlayerInventory inventory = event.getPlayer().getInventory();
+        Player player = event.getPlayer();
+        PlayerInventory inventory = player.getInventory();
         ItemStack newMainHandItem = inventory.getItem(event.getNewSlot());
-        if (itemFactory.isKatana(newMainHandItem) && !hasEmptyOffHand(event.getPlayer())) {
-            plugin.getServer().getScheduler().runTask(plugin, () ->
-                    showActionBar(event.getPlayer(), lang.text("messages.two_handed.offhand_required"))
+        if (itemFactory.isKatana(newMainHandItem) && !hasEmptyOffHand(player)) {
+            SchedulerCompat.runForPlayer(player, plugin, () ->
+                    showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
         }
     }
@@ -183,7 +185,7 @@ public final class KatanaListener implements Listener {
         }
 
         if (mainHandKatana && !hasEmptyOffHand(player)) {
-            plugin.getServer().getScheduler().runTask(plugin, () ->
+            SchedulerCompat.runForPlayer(player, plugin, () ->
                     showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
         }
@@ -203,7 +205,7 @@ public final class KatanaListener implements Listener {
         }
 
         if (itemFactory.isKatana(player.getInventory().getItemInMainHand()) && !hasEmptyOffHand(player)) {
-            plugin.getServer().getScheduler().runTask(plugin, () ->
+            SchedulerCompat.runForPlayer(player, plugin, () ->
                     showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
         }
@@ -247,7 +249,7 @@ public final class KatanaListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
-        BukkitTask task = activeTasks.remove(playerId);
+        ScheduledTaskCompat task = activeTasks.remove(playerId);
         if (task != null) {
             task.cancel();
         }
@@ -271,12 +273,12 @@ public final class KatanaListener implements Listener {
         world.playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.75f, 1.4f);
         world.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.35f, 1.7f);
 
-        BukkitTask previousTask = activeTasks.remove(player.getUniqueId());
+        ScheduledTaskCompat previousTask = activeTasks.remove(player.getUniqueId());
         if (previousTask != null) {
             previousTask.cancel();
         }
 
-        BukkitTask task = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, () -> {
             long currentTime = System.currentTimeMillis();
             if (currentTime >= activeParryUntil.getOrDefault(player.getUniqueId(), 0L) || !player.isOnline()) {
                 clearActiveParry(player, katana);
@@ -412,7 +414,7 @@ public final class KatanaListener implements Listener {
             itemFactory.setKatanaParryVisual(katana, false);
         }
         activeParryUntil.remove(player.getUniqueId());
-        BukkitTask activeTask = activeTasks.remove(player.getUniqueId());
+        ScheduledTaskCompat activeTask = activeTasks.remove(player.getUniqueId());
         if (activeTask != null) {
             activeTask.cancel();
         }
