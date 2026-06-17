@@ -1,8 +1,5 @@
 package pepin.pepeforge.weapons.solarshield;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -28,8 +25,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.SchedulerCompat;
@@ -41,7 +36,6 @@ import java.util.UUID;
 
 public final class SolarShieldListener implements Listener {
 
-    private static final int CHARGE_BAR_SEGMENTS = 20;
     private static final int OFF_HAND_INVENTORY_SLOT = 40;
 
     private final JavaPlugin plugin;

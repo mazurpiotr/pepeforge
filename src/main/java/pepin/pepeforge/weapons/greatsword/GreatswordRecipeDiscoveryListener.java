@@ -8,16 +8,12 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
-import pepin.pepeforge.item.ItemFactory;
-
 public final class GreatswordRecipeDiscoveryListener implements Listener {
 
     private final JavaPlugin plugin;
-    private final ItemFactory itemFactory;
 
-    public GreatswordRecipeDiscoveryListener(JavaPlugin plugin, ItemFactory itemFactory) {
+    public GreatswordRecipeDiscoveryListener(JavaPlugin plugin) {
         this.plugin = plugin;
-        this.itemFactory = itemFactory;
     }
 
     @EventHandler

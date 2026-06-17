@@ -24,7 +24,7 @@ public class CrimsonSwordModule implements ItemModule {
 
     @Override
     public void onEnable() {
-        this.listener = new CrimsonSwordListener(plugin, itemFactory, crimsonSwordManager, auraManager);
+        this.listener = new CrimsonSwordListener(itemFactory, crimsonSwordManager, auraManager);
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
     }
 

@@ -25,7 +25,7 @@ public class ScytheModule implements ItemModule {
 
         plugin.getServer().getPluginManager().registerEvents(new ScytheListener(itemFactory), plugin);
 
-        this.discoveryListener = new ScytheRecipeDiscoveryListener(plugin, itemFactory);
+        this.discoveryListener = new ScytheRecipeDiscoveryListener(plugin);
         plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
     }
 
