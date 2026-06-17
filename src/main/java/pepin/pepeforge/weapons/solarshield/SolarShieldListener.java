@@ -36,7 +36,6 @@ import java.util.UUID;
 
 public final class SolarShieldListener implements Listener {
 
-    private static final int CHARGE_BAR_SEGMENTS = 20;
     private static final int OFF_HAND_INVENTORY_SLOT = 40;
 
     private final JavaPlugin plugin;

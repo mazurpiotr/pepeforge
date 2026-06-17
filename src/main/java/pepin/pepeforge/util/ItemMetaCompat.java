@@ -20,35 +20,30 @@ public final class ItemMetaCompat {
     }
 
     @Deprecated
-    @SuppressWarnings("deprecation")
     public static void setDisplayName(ItemMeta meta, String name) {
         meta.setDisplayName(name);
     }
 
 
     @Deprecated
-    @SuppressWarnings("deprecation")
     public static void setItemName(ItemMeta meta, String name) {
         meta.setItemName(name);
     }
 
 
     @Deprecated
-    @SuppressWarnings("deprecation")
     public static String getDisplayName(ItemMeta meta) {
         return meta.getDisplayName();
     }
 
 
     @Deprecated
-    @SuppressWarnings("deprecation")
     public static String getItemName(ItemMeta meta) {
         return meta.getItemName();
     }
 
 
     @Deprecated
-    @SuppressWarnings("deprecation")
     public static void setStringLore(ItemMeta meta, List<String> lore) {
         meta.setLore(lore);
     }

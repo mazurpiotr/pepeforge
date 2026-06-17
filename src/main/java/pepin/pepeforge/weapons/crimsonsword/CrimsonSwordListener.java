@@ -8,7 +8,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.util.AuraManager;
 
@@ -20,15 +19,13 @@ import java.util.UUID;
 
 public final class CrimsonSwordListener implements Listener {
 
-    private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final CrimsonSwordManager manager;
     private final AuraManager auraManager;
     private final Map<UUID, Double> auraDamageProgress = new HashMap<>();
     private final Set<UUID> auraDrainingPlayers = new HashSet<>();
 
-    public CrimsonSwordListener(JavaPlugin plugin, ItemFactory itemFactory, CrimsonSwordManager manager, AuraManager auraManager) {
-        this.plugin = plugin;
+    public CrimsonSwordListener(ItemFactory itemFactory, CrimsonSwordManager manager, AuraManager auraManager) {
         this.itemFactory = itemFactory;
         this.manager = manager;
         this.auraManager = auraManager;
