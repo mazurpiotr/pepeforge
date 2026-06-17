@@ -37,7 +37,7 @@ public class WindBladeModule implements ItemModule {
         this.listener.startHoldingTask();
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
 
-        this.discoveryListener = new WindBladeRecipeDiscoveryListener(plugin, itemFactory);
+        this.discoveryListener = new WindBladeRecipeDiscoveryListener(plugin);
         plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
     }
 

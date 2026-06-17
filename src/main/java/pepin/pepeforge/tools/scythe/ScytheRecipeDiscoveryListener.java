@@ -8,16 +8,13 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
-import pepin.pepeforge.item.ItemFactory;
 
 public final class ScytheRecipeDiscoveryListener implements Listener {
 
     private final JavaPlugin plugin;
-    private final ItemFactory itemFactory;
 
-    public ScytheRecipeDiscoveryListener(JavaPlugin plugin, ItemFactory itemFactory) {
+    public ScytheRecipeDiscoveryListener(JavaPlugin plugin) {
         this.plugin = plugin;
-        this.itemFactory = itemFactory;
     }
 
     @EventHandler

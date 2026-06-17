@@ -31,7 +31,7 @@ public class GreatswordModule implements ItemModule {
         this.listener.startStatusTask();
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
 
-        this.discoveryListener = new GreatswordRecipeDiscoveryListener(plugin, itemFactory);
+        this.discoveryListener = new GreatswordRecipeDiscoveryListener(plugin);
         plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
     }
 
