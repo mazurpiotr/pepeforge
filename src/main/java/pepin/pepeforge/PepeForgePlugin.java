@@ -30,6 +30,7 @@ import pepin.pepeforge.weapons.greatsword.GreatswordModule;
 import pepin.pepeforge.weapons.katana.KatanaModule;
 import pepin.pepeforge.weapons.solarshield.SolarShieldModule;
 import pepin.pepeforge.weapons.windblade.WindBladeModule;
+import pepin.pepeforge.weapons.anchor.AnchorModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,8 @@ public final class PepeForgePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
         
         String version = getDescription().getVersion();
         
@@ -171,6 +174,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         modules.add(new GreatswordModule(this, itemFactory, lang));
         modules.add(new CrimsonSwordModule(this, itemFactory, crimsonSwordManager, auraManager));
         modules.add(new SolarShieldModule(this, itemFactory, lang, bossBarManager));
+        modules.add(new AnchorModule(this, itemFactory));
 
         for (ItemModule module : modules) {
             module.onEnable();
