@@ -174,7 +174,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         modules.add(new GreatswordModule(this, itemFactory, lang));
         modules.add(new CrimsonSwordModule(this, itemFactory, crimsonSwordManager, auraManager));
         modules.add(new SolarShieldModule(this, itemFactory, lang, bossBarManager));
-        modules.add(new AnchorModule(this, itemFactory));
+        modules.add(new AnchorModule(this, itemFactory, cooldownManager, lang));
 
         for (ItemModule module : modules) {
             module.onEnable();

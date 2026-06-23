@@ -17,6 +17,7 @@ public final class ItemIds {
     public static final String NETHERITE_SCYTHE = "netherite_scythe";
     public static final String CRIMSON_SWORD = "crimson_sword";
     public static final String SOLAR_SHIELD = "solar_shield";
+    public static final String ANCHOR = "anchor";
 
     private ItemIds() {
     }

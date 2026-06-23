@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cTylko gracze mogą użyć tej komendy."
     no_permission: "&cNie masz uprawnień do użycia tej komendy."
-    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword> <player> lub /pepeforge items"
+    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor> <player> lub /pepeforge items"
     unknown_subcommand: "&cNieznana podkomenda."
     unknown_item: "&cNieznany przedmiot: {item}"
     item_disabled: "&cTen przedmiot jest obecnie wyłączony: {item}"
@@ -31,6 +31,8 @@ messages:
     ready: "&dŁadunek księżyca gotowy! &fNastępne trafienie wzmocnione {bar}"
   greatsword:
     rhythm: "&6Rytm {bar} &f{stage}/{max_stage}"
+  anchor:
+    cooldown: "&cPrzyciągnięcie ładuje się... {bar} &7{seconds}s"
 items:
   crescent_bow:
     fallback_name: "&#667DB4Łuk Półksiężyca"
@@ -183,4 +185,13 @@ items:
       - "&3Ładuje się pasywnie w słońcu."
       - "&3Blokowanie zużywa ładunek, wyzwalając błysk i podpalając atakującego."
       - "&#D69E2ELegendarna"
+      - "&6---------------"
+  anchor:
+    fallback_name: "&#94A6B8Kotwica"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &9Unieruchomienie"
+      - "&3Pierwszy atak unieruchamia cel na 1 sekundę."
+      - "&3Może unieruchomić ten sam cel ponownie dopiero po 4 sekundach."
+      - "&#805AD5Epicka"
       - "&6---------------"

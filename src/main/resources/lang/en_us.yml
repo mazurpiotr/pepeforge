@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cOnly players can use this command."
     no_permission: "&cYou do not have permission to use this command."
-    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword> <player> or /pepeforge items"
+    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor> <player> or /pepeforge items"
     unknown_subcommand: "&cUnknown subcommand."
     unknown_item: "&cUnknown item: {item}"
     item_disabled: "&cThat item is currently disabled: {item}"
@@ -31,6 +31,8 @@ messages:
     ready: "&dMoon charge ready! &fNext strike empowered {bar}"
   greatsword:
     rhythm: "&6Rhythm {bar} &f{stage}/{max_stage}"
+  anchor:
+    cooldown: "&cAnchor hook recharging... {bar} &7{seconds}s"
 items:
   crescent_bow:
     fallback_name: "&#667DB4Crescent Bow"
@@ -183,4 +185,13 @@ items:
       - "&3Charges passively in sunlight."
       - "&3Blocking consumes a charge to ignite attackers and trigger a flashbang."
       - "&#D69E2ELegendary"
+      - "&6---------------"
+  anchor:
+    fallback_name: "&#94A6B8Anchor"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &9Snare"
+      - "&3First attack immobilizes the target for 1 second."
+      - "&3Cannot snare the same target again for 4 seconds."
+      - "&#805AD5Epic"
       - "&6---------------"

@@ -120,5 +120,12 @@
   "item.pepeforge.solar_shield.lore.4": "§3Charges passively in sunlight.",
   "item.pepeforge.solar_shield.lore.5": "§3Blocking consumes a charge to ignite attackers and trigger a flashbang.",
   "item.pepeforge.solar_shield.lore.6": "Legendary",
-  "item.pepeforge.solar_shield.lore.7": "§6---------------"
+  "item.pepeforge.solar_shield.lore.7": "§6---------------",
+  "item.pepeforge.anchor.name": "Anchor",
+  "item.pepeforge.anchor.lore.1": "§6---------------",
+  "item.pepeforge.anchor.lore.2": "§eAbility: §9Snare",
+  "item.pepeforge.anchor.lore.3": "§3First attack immobilizes the target for 1 second.",
+  "item.pepeforge.anchor.lore.4": "§3Cannot snare the same target again for 4 seconds.",
+  "item.pepeforge.anchor.lore.5": "Epic",
+  "item.pepeforge.anchor.lore.6": "§6---------------"
 }

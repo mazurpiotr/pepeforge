@@ -20,6 +20,7 @@ import pepin.pepeforge.weapons.greatsword.GreatswordTier;
 import pepin.pepeforge.weapons.katana.KatanaDefinition;
 import pepin.pepeforge.weapons.solarshield.SolarShieldDefinition;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
+import pepin.pepeforge.weapons.anchor.AnchorDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,8 @@ public final class ItemFactory {
             ItemIds.DIAMOND_SCYTHE,
             ItemIds.NETHERITE_SCYTHE,
             ItemIds.CRIMSON_SWORD,
-            ItemIds.SOLAR_SHIELD
+            ItemIds.SOLAR_SHIELD,
+            ItemIds.ANCHOR
     );
 
     private static final Map<String, String> ITEM_ALIASES = Map.ofEntries(
@@ -61,7 +63,8 @@ public final class ItemFactory {
             Map.entry(ItemIds.DIAMOND_SCYTHE, ItemIds.DIAMOND_SCYTHE),
             Map.entry(ItemIds.NETHERITE_SCYTHE, ItemIds.NETHERITE_SCYTHE),
             Map.entry(ItemIds.CRIMSON_SWORD, ItemIds.CRIMSON_SWORD),
-            Map.entry(ItemIds.SOLAR_SHIELD, ItemIds.SOLAR_SHIELD)
+            Map.entry(ItemIds.SOLAR_SHIELD, ItemIds.SOLAR_SHIELD),
+            Map.entry(ItemIds.ANCHOR, ItemIds.ANCHOR)
     );
 
     private final NamespacedKey itemIdKey;
@@ -241,6 +244,24 @@ public final class ItemFactory {
         return item;
     }
 
+    public ItemStack createAnchor() {
+        return createItem(new ItemSpec(
+                AnchorDefinition.ITEM_ID,
+                AnchorDefinition.BASE_MATERIAL,
+                AnchorDefinition.LANG_PATH,
+                AnchorDefinition.TRANSLATION_KEY_BASE,
+                AnchorDefinition.LORE_LINE_COUNT,
+                AnchorDefinition.RARITY,
+                AnchorDefinition.NAME_COLOR,
+                0,
+                AnchorDefinition.MODEL_KEY,
+                List.of(
+                        new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", AnchorDefinition.ATTACK_DAMAGE),
+                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", AnchorDefinition.ATTACK_SPEED)
+                )
+        ));
+    }
+
     public void updateSolarShieldVisuals(ItemStack item, int charges) {
         if (item == null || !isSolarShield(item) || !item.hasItemMeta()) {
             return;
@@ -283,7 +304,9 @@ public final class ItemFactory {
             ItemMetaManager.setDisplayName(meta, fallbackName);
         }
         ItemMetaManager.setStringLore(meta, fallbackLore);
-        ItemMetaManager.setCustomModelData(meta, spec.customModelData());
+        if (spec.customModelData() > 0) {
+            ItemMetaManager.setCustomModelData(meta, spec.customModelData());
+        }
         if (spec.modelKey() != null) {
             ItemMetaManager.setItemModelIfSupported(meta, spec.modelKey());
         }
@@ -337,6 +360,7 @@ public final class ItemFactory {
             case ItemIds.NETHERITE_SCYTHE -> createScythe(ScytheTier.NETHERITE);
             case ItemIds.CRIMSON_SWORD -> createCrimsonSword();
             case ItemIds.SOLAR_SHIELD -> createSolarShield();
+            case ItemIds.ANCHOR -> createAnchor();
             default -> null;
         };
     }
@@ -411,6 +435,10 @@ public final class ItemFactory {
 
     public boolean isSolarShield(ItemStack item) {
         return ItemIds.SOLAR_SHIELD.equals(getItemId(item)) && isItemEnabled(ItemIds.SOLAR_SHIELD);
+    }
+
+    public boolean isAnchor(ItemStack item) {
+        return ItemIds.ANCHOR.equals(getItemId(item)) && isItemEnabled(ItemIds.ANCHOR);
     }
 
     public void setKatanaParryVisual(ItemStack item, boolean active) {
@@ -532,6 +560,7 @@ public final class ItemFactory {
             case ItemIds.KATANA -> lang.itemFallbackName(KatanaDefinition.LANG_PATH);
             case ItemIds.CRIMSON_SWORD -> lang.itemFallbackName(CrimsonSwordDefinition.LANG_PATH);
             case ItemIds.SOLAR_SHIELD -> lang.itemFallbackName(SolarShieldDefinition.LANG_PATH);
+            case ItemIds.ANCHOR -> lang.itemFallbackName(AnchorDefinition.LANG_PATH);
             default -> null;
         };
     }
