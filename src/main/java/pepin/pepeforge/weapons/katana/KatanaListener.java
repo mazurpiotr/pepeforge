@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class KatanaListener implements Listener {
 
@@ -55,8 +56,8 @@ public final class KatanaListener implements Listener {
     private final PluginLang lang;
     private final CooldownManager cooldownManager;
     private final NamespacedKey reflectUntilKey;
-    private final Map<UUID, Long> activeParryUntil = new HashMap<>();
-    private final Map<UUID, ScheduledTaskCompat> activeTasks = new HashMap<>();
+    private final Map<UUID, Long> activeParryUntil = new ConcurrentHashMap<>();
+    private final Map<UUID, ScheduledTaskCompat> activeTasks = new ConcurrentHashMap<>();
 
     public KatanaListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang, CooldownManager cooldownManager) {
         this.plugin = plugin;
@@ -71,21 +72,23 @@ public final class KatanaListener implements Listener {
     public void startStatusTask() {
         statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
-                if (!itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
-                    clearActiveParry(player);
-                    continue;
-                }
+                SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    if (!itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
+                        clearActiveParry(player);
+                        return;
+                    }
 
-                if (!hasEmptyOffHand(player)) {
-                    clearActiveParry(player);
-                    showActionBar(player, lang.text("messages.two_handed.offhand_required"));
-                    continue;
-                }
+                    if (!hasEmptyOffHand(player)) {
+                        clearActiveParry(player);
+                        showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+                        return;
+                    }
 
-                long remainingMillis = cooldownManager.getRemainingCooldownMillis(player, PARRY_COOLDOWN_KEY);
-                if (remainingMillis > 0L) {
-                    showCooldownActionBar(player, remainingMillis);
-                }
+                    long remainingMillis = cooldownManager.getRemainingCooldownMillis(player, PARRY_COOLDOWN_KEY);
+                    if (remainingMillis > 0L) {
+                        showCooldownActionBar(player, remainingMillis);
+                    }
+                });
             }
         }, 1L, 2L);
     }
@@ -343,7 +346,7 @@ public final class KatanaListener implements Listener {
         double speed = Math.max(projectile.getVelocity().length(), KatanaDefinition.REFLECT_MIN_SPEED);
         projectile.getPersistentDataContainer().set(reflectUntilKey, PersistentDataType.LONG, now + 250L);
         projectile.setShooter(player);
-        projectile.teleport(player.getEyeLocation().add(direction.clone().multiply(0.9D)));
+        SchedulerCompat.teleport(projectile, player.getEyeLocation().add(direction.clone().multiply(0.9D)));
         projectile.setVelocity(direction.multiply(speed));
 
         if (projectile instanceof AbstractArrow arrow) {

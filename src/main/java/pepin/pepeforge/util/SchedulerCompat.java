@@ -1,12 +1,15 @@
 package pepin.pepeforge.util;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SchedulerCompat {
 
     private static final boolean REGIONIZED;
+    private static java.lang.reflect.Method teleportAsyncMethod;
 
     static {
         boolean regionized;
@@ -17,6 +20,12 @@ public final class SchedulerCompat {
             regionized = false;
         }
         REGIONIZED = regionized;
+
+        try {
+            teleportAsyncMethod = Entity.class.getMethod("teleportAsync", Location.class);
+        } catch (NoSuchMethodException ignored) {
+            teleportAsyncMethod = null;
+        }
     }
 
     private SchedulerCompat() {
@@ -24,6 +33,17 @@ public final class SchedulerCompat {
 
     public static boolean isRegionized() {
         return REGIONIZED;
+    }
+
+    public static void teleport(Entity entity, Location location) {
+        if (teleportAsyncMethod != null) {
+            try {
+                teleportAsyncMethod.invoke(entity, location);
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        entity.teleport(location);
     }
 
     public static void run(
@@ -99,6 +119,25 @@ public final class SchedulerCompat {
     ) {
         if (REGIONIZED) {
             player.getScheduler().run(
+                    plugin,
+                    task -> runnable.run(),
+                    null
+            );
+        } else {
+            Bukkit.getScheduler().runTask(
+                    plugin,
+                    runnable
+            );
+        }
+    }
+
+    public static void runForEntity(
+            org.bukkit.entity.Entity entity,
+            JavaPlugin plugin,
+            Runnable runnable
+    ) {
+        if (REGIONIZED) {
+            entity.getScheduler().run(
                     plugin,
                     task -> runnable.run(),
                     null

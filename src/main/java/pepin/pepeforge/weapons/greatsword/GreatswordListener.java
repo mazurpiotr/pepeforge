@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public final class GreatswordListener implements Listener {
@@ -81,13 +82,13 @@ public final class GreatswordListener implements Listener {
     private final ItemFactory itemFactory;
     private final PluginLang lang;
     private final NamespacedKey reachModifierKey;
-    private final Map<UUID, ComboState> comboStates = new HashMap<>();
-    private final Map<UUID, PendingSwing> pendingSwings = new HashMap<>();
-    private final Map<UUID, Long> resolvedHitTicks = new HashMap<>();
-    private final Map<UUID, Long> nonCombatInteractionTicks = new HashMap<>();
-    private final Map<UUID, Long> rhythmCueTicks = new HashMap<>();
-    private final Set<UUID> rhythmBarShown = new HashSet<>();
-    private final Set<UUID> cleavingPlayers = new HashSet<>();
+    private final Map<UUID, ComboState> comboStates = new ConcurrentHashMap<>();
+    private final Map<UUID, PendingSwing> pendingSwings = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> resolvedHitTicks = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> nonCombatInteractionTicks = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> rhythmCueTicks = new ConcurrentHashMap<>();
+    private final Set<UUID> rhythmBarShown = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> cleavingPlayers = ConcurrentHashMap.newKeySet();
     private boolean transientModifierLogged = false;
 
     public GreatswordListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
@@ -102,36 +103,38 @@ public final class GreatswordListener implements Listener {
     public void startStatusTask() {
         statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
-                GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
-                if (tier == null) {
-                    clearPlayerState(player);
-                    continue;
-                }
+                SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
+                    if (tier == null) {
+                        clearPlayerState(player);
+                        return;
+                    }
 
-                if (!hasEmptyOffHand(player)) {
-                    clearPlayerState(player);
-                    showActionBar(player, lang.text("messages.two_handed.offhand_required"));
-                    continue;
-                }
+                    if (!hasEmptyOffHand(player)) {
+                        clearPlayerState(player);
+                        showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+                        return;
+                    }
 
-                long currentTick = currentTick(player);
-                cleanupResolvedHitTick(player.getUniqueId(), currentTick);
-                cleanupNonCombatInteractionTick(player.getUniqueId(), currentTick);
-                expirePendingSwing(player, tier, currentTick);
+                    long currentTick = currentTick(player);
+                    cleanupResolvedHitTick(player.getUniqueId(), currentTick);
+                    cleanupNonCombatInteractionTick(player.getUniqueId(), currentTick);
+                    expirePendingSwing(player, tier, currentTick);
 
-                ComboState state = comboStates.get(player.getUniqueId());
-                if (state != null && state.stage() > 0 && currentTick - state.lastSuccessTick() > RHYTHM_GRACE_END_TICK) {
-                    breakCombo(player);
+                    ComboState state = comboStates.get(player.getUniqueId());
+                    if (state != null && state.stage() > 0 && currentTick - state.lastSuccessTick() > RHYTHM_GRACE_END_TICK) {
+                        breakCombo(player);
+                        applyReachModifier(player, FIXED_REACH_BONUS);
+                        return;
+                    }
+
+                    int currentStage = state == null ? 0 : state.stage();
                     applyReachModifier(player, FIXED_REACH_BONUS);
-                    continue;
-                }
-
-                int currentStage = state == null ? 0 : state.stage();
-                applyReachModifier(player, FIXED_REACH_BONUS);
-                if (currentStage > 0) {
-                    playRhythmCue(player, state, currentTick);
-                    showRhythmActionBar(player, state, currentTick);
-                }
+                    if (currentStage > 0) {
+                        playRhythmCue(player, state, currentTick);
+                        showRhythmActionBar(player, state, currentTick);
+                    }
+                });
             }
         }, 1L, STATUS_INTERVAL_TICKS);
     }

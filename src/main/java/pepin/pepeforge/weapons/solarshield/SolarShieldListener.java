@@ -33,6 +33,7 @@ import pepin.pepeforge.util.ScheduledTaskCompat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class SolarShieldListener implements Listener {
 
@@ -42,11 +43,8 @@ public final class SolarShieldListener implements Listener {
     private final ItemFactory itemFactory;
     private final PluginLang lang;
 
-    private final Map<UUID, Double> activeProgress = new HashMap<>();
-    private final Map<UUID, Integer> passiveTicks = new HashMap<>();
-    
-    private final Set<Item> droppedShields = new HashSet<>();
-    private final Map<UUID, Double> droppedShieldProgress = new HashMap<>();
+    private final Map<UUID, Double> activeProgress = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> passiveTicks = new ConcurrentHashMap<>();
     
     private ScheduledTaskCompat statusTask;
     private final pepin.pepeforge.util.ui.BossBarManager bossBarManager;
@@ -62,191 +60,127 @@ public final class SolarShieldListener implements Listener {
         // Run every 2 ticks for smooth UI
         statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
-                UUID playerId = player.getUniqueId();
-                
-                int pTicks = passiveTicks.getOrDefault(playerId, 0) + 2;
-                boolean doPassiveDischarge = false;
-                if (pTicks >= SolarShieldDefinition.DISCHARGE_TICKS) {
-                    pTicks = 0;
-                    doPassiveDischarge = true;
-                }
-                passiveTicks.put(playerId, pTicks);
+                SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    UUID playerId = player.getUniqueId();
+                    
+                    int pTicks = passiveTicks.getOrDefault(playerId, 0) + 2;
+                    boolean doPassiveDischarge = false;
+                    if (pTicks >= SolarShieldDefinition.DISCHARGE_TICKS) {
+                        pTicks = 0;
+                        doPassiveDischarge = true;
+                    }
+                    passiveTicks.put(playerId, pTicks);
 
-                PlayerInventory inv = player.getInventory();
-                ItemStack mainHand = inv.getItemInMainHand();
-                ItemStack offHand = inv.getItemInOffHand();
+                    PlayerInventory inv = player.getInventory();
+                    ItemStack mainHand = inv.getItemInMainHand();
+                    ItemStack offHand = inv.getItemInOffHand();
 
-                ItemStack activeShield = null;
-                boolean isMainHand = false;
-                if (itemFactory.isSolarShield(offHand)) {
-                    activeShield = offHand;
-                } else if (itemFactory.isSolarShield(mainHand)) {
-                    activeShield = mainHand;
-                    isMainHand = true;
-                }
+                    ItemStack activeShield = null;
+                    boolean isMainHand = false;
+                    if (itemFactory.isSolarShield(offHand)) {
+                        activeShield = offHand;
+                    } else if (itemFactory.isSolarShield(mainHand)) {
+                        activeShield = mainHand;
+                        isMainHand = true;
+                    }
 
-                // Slowly discharge ALL other solar shields in inventory when not equipped
-                if (doPassiveDischarge) {
-                    for (int i = 0; i < inv.getSize(); i++) {
-                        if (i == inv.getHeldItemSlot() || i == OFF_HAND_INVENTORY_SLOT) {
-                            continue;
-                        }
-                        ItemStack item = inv.getItem(i);
-                        if (itemFactory.isSolarShield(item)) {
-                            int currentCharges = getCharges(item);
-                            if (currentCharges > 0) {
-                                itemFactory.updateSolarShieldVisuals(item, currentCharges - 1);
-                                inv.setItem(i, item);
+                    // Slowly discharge ALL other solar shields in inventory when not equipped
+                    if (doPassiveDischarge) {
+                        for (int i = 0; i < inv.getSize(); i++) {
+                            if (i == inv.getHeldItemSlot() || i == OFF_HAND_INVENTORY_SLOT) {
+                                continue;
+                            }
+                            ItemStack item = inv.getItem(i);
+                            if (itemFactory.isSolarShield(item)) {
+                                int currentCharges = getCharges(item);
+                                if (currentCharges > 0) {
+                                    itemFactory.updateSolarShieldVisuals(item, currentCharges - 1);
+                                    inv.setItem(i, item);
+                                }
                             }
                         }
                     }
-                }
 
-                if (activeShield != null) {
-                    int charges = getCharges(activeShield);
-                    double progress = activeProgress.getOrDefault(playerId, 0.0);
+                    if (activeShield != null) {
+                        int charges = getCharges(activeShield);
+                        double progress = activeProgress.getOrDefault(playerId, 0.0);
 
-                    if (SolarPower.isSunlit(player)) {
-                        if (charges < SolarShieldDefinition.MAX_CHARGES) {
-                            progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
-                            
-                            if (progress >= 1.0) {
-                                progress -= 1.0;
-                                int newCharges = charges + 1;
-                                itemFactory.updateSolarShieldVisuals(activeShield, newCharges);
-                                if (isMainHand) {
-                                    inv.setItemInMainHand(activeShield);
-                                } else {
-                                    inv.setItemInOffHand(activeShield);
+                        if (SolarPower.isSunlit(player)) {
+                            if (charges < SolarShieldDefinition.MAX_CHARGES) {
+                                progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                                
+                                if (progress >= 1.0) {
+                                    progress -= 1.0;
+                                    int newCharges = charges + 1;
+                                    itemFactory.updateSolarShieldVisuals(activeShield, newCharges);
+                                    if (isMainHand) {
+                                        inv.setItemInMainHand(activeShield);
+                                    } else {
+                                        inv.setItemInOffHand(activeShield);
+                                    }
+                                    charges = newCharges;
+                                    player.getWorld().spawnParticle(Particle.WAX_ON, player.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
+                                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.5f);
                                 }
-                                charges = newCharges;
-                                player.getWorld().spawnParticle(Particle.WAX_ON, player.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
-                                player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.5f);
-                            }
-                            activeProgress.put(playerId, progress);
-                            
-                            if (charges >= SolarShieldDefinition.MAX_CHARGES) {
-                                showReadyBossBar(player);
+                                activeProgress.put(playerId, progress);
+                                
+                                if (charges >= SolarShieldDefinition.MAX_CHARGES) {
+                                    showReadyBossBar(player);
+                                } else {
+                                    updateBossBar(player, progress, charges, true);
+                                }
                             } else {
-                                updateBossBar(player, progress, charges, true);
+                                if (progress < SolarShieldDefinition.OVERCHARGE_BUFFER) {
+                                    progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                                    progress = Math.min(progress, SolarShieldDefinition.OVERCHARGE_BUFFER);
+                                    activeProgress.put(playerId, progress);
+                                }
+                                showReadyBossBar(player);
                             }
                         } else {
-                            if (progress < SolarShieldDefinition.OVERCHARGE_BUFFER) {
-                                progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
-                                progress = Math.min(progress, SolarShieldDefinition.OVERCHARGE_BUFFER);
-                                activeProgress.put(playerId, progress);
-                            }
-                            showReadyBossBar(player);
-                        }
-                    } else {
-                        if (charges > 0 || progress > 0.0) {
-                            if (progress <= 0.0 && charges > 0) {
-                                int newCharges = charges - 1;
-                                itemFactory.updateSolarShieldVisuals(activeShield, newCharges);
-                                if (isMainHand) {
-                                    inv.setItemInMainHand(activeShield);
-                                } else {
-                                    inv.setItemInOffHand(activeShield);
-                                }
-                                charges = newCharges;
-                                progress = 1.0;
-                            }
-                            
-                            if (progress > 0.0) {
-                                progress -= 2.0 / SolarShieldDefinition.DISCHARGE_TICKS;
-                                if (progress <= 0.0) {
-                                    if (charges > 0) {
-                                        int newCharges = charges - 1;
-                                        itemFactory.updateSolarShieldVisuals(activeShield, newCharges);
-                                        if (isMainHand) {
-                                            inv.setItemInMainHand(activeShield);
-                                        } else {
-                                            inv.setItemInOffHand(activeShield);
-                                        }
-                                        charges = newCharges;
-                                        progress = 1.0;
+                            if (charges > 0 || progress > 0.0) {
+                                if (progress <= 0.0 && charges > 0) {
+                                    int newCharges = charges - 1;
+                                    itemFactory.updateSolarShieldVisuals(activeShield, newCharges);
+                                    if (isMainHand) {
+                                        inv.setItemInMainHand(activeShield);
                                     } else {
-                                        progress = 0.0;
+                                        inv.setItemInOffHand(activeShield);
+                                    }
+                                    charges = newCharges;
+                                    progress = 1.0;
+                                }
+                                
+                                if (progress > 0.0) {
+                                    progress -= 2.0 / SolarShieldDefinition.DISCHARGE_TICKS;
+                                    if (progress <= 0.0) {
+                                        if (charges > 0) {
+                                            int newCharges = charges - 1;
+                                            itemFactory.updateSolarShieldVisuals(activeShield, newCharges);
+                                            if (isMainHand) {
+                                                inv.setItemInMainHand(activeShield);
+                                            } else {
+                                                inv.setItemInOffHand(activeShield);
+                                            }
+                                            charges = newCharges;
+                                            progress = 1.0;
+                                        } else {
+                                            progress = 0.0;
+                                        }
                                     }
                                 }
-                            }
-                            activeProgress.put(playerId, progress);
-                            updateBossBar(player, progress, charges, false);
-                        } else {
-                            activeProgress.remove(playerId);
-                            bossBarManager.removeBar(player, "solar_shield");
-                        }
-                    }
-                } else {
-                    activeProgress.remove(playerId);
-                    bossBarManager.removeBar(player, "solar_shield");
-                }
-            }
-
-            // Process dropped shields
-            Iterator<Item> iterator = droppedShields.iterator();
-            while (iterator.hasNext()) {
-                Item itemEntity = iterator.next();
-                if (!itemEntity.isValid() || itemEntity.isDead()) {
-                    droppedShieldProgress.remove(itemEntity.getUniqueId());
-                    iterator.remove();
-                    continue;
-                }
-                
-                ItemStack shield = itemEntity.getItemStack();
-                int charges = getCharges(shield);
-                UUID entityId = itemEntity.getUniqueId();
-                double progress = droppedShieldProgress.getOrDefault(entityId, 0.0);
-                boolean updated = false;
-
-                if (SolarPower.isSunlit(itemEntity.getLocation())) {
-                    if (charges < SolarShieldDefinition.MAX_CHARGES) {
-                        progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
-                        if (progress >= 1.0) {
-                            progress -= 1.0;
-                            charges++;
-                            itemFactory.updateSolarShieldVisuals(shield, charges);
-                            updated = true;
-                            itemEntity.getWorld().spawnParticle(Particle.WAX_ON, itemEntity.getLocation().add(0, 0.5, 0), 5, 0.2, 0.2, 0.2, 0.05);
-                        }
-                        droppedShieldProgress.put(entityId, progress);
-                    } else {
-                        if (progress < SolarShieldDefinition.OVERCHARGE_BUFFER) {
-                            progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
-                            progress = Math.min(progress, SolarShieldDefinition.OVERCHARGE_BUFFER);
-                            droppedShieldProgress.put(entityId, progress);
-                        }
-                    }
-                } else {
-                    if (charges > 0 || progress > 0.0) {
-                        if (progress <= 0.0 && charges > 0) {
-                            charges--;
-                            itemFactory.updateSolarShieldVisuals(shield, charges);
-                            updated = true;
-                            progress = 1.0;
-                        }
-                        if (progress > 0.0) {
-                            progress -= 2.0 / SolarShieldDefinition.DISCHARGE_TICKS;
-                            if (progress <= 0.0) {
-                                if (charges > 0) {
-                                    charges--;
-                                    itemFactory.updateSolarShieldVisuals(shield, charges);
-                                    updated = true;
-                                    progress = 1.0;
-                                } else {
-                                    progress = 0.0;
-                                }
+                                activeProgress.put(playerId, progress);
+                                updateBossBar(player, progress, charges, false);
+                            } else {
+                                activeProgress.remove(playerId);
+                                bossBarManager.removeBar(player, "solar_shield");
                             }
                         }
-                        droppedShieldProgress.put(entityId, progress);
                     } else {
-                        droppedShieldProgress.remove(entityId);
+                        activeProgress.remove(playerId);
+                        bossBarManager.removeBar(player, "solar_shield");
                     }
-                }
-                
-                if (updated) {
-                    itemEntity.setItemStack(shield);
-                }
+                });
             }
         }, 2L, 2L);
     }
@@ -386,7 +320,71 @@ public final class SolarShieldListener implements Listener {
         Item itemEntity = event.getEntity();
         ItemStack item = itemEntity.getItemStack();
         if (itemFactory.isSolarShield(item)) {
-            droppedShields.add(itemEntity);
+            class DroppedShieldRunner implements Runnable {
+                ScheduledTaskCompat taskRef;
+                double progress = 0.0;
+                
+                @Override
+                public void run() {
+                    if (!itemEntity.isValid() || itemEntity.isDead()) {
+                        if (taskRef != null) {
+                            taskRef.cancel();
+                        }
+                        return;
+                    }
+                    
+                    ItemStack shield = itemEntity.getItemStack();
+                    int charges = getCharges(shield);
+                    boolean updated = false;
+
+                    if (SolarPower.isSunlit(itemEntity.getLocation())) {
+                        if (charges < SolarShieldDefinition.MAX_CHARGES) {
+                            progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                            if (progress >= 1.0) {
+                                progress -= 1.0;
+                                charges++;
+                                itemFactory.updateSolarShieldVisuals(shield, charges);
+                                updated = true;
+                                itemEntity.getWorld().spawnParticle(Particle.WAX_ON, itemEntity.getLocation().add(0, 0.5, 0), 5, 0.2, 0.2, 0.2, 0.05);
+                            }
+                        } else {
+                            if (progress < SolarShieldDefinition.OVERCHARGE_BUFFER) {
+                                progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                                progress = Math.min(progress, SolarShieldDefinition.OVERCHARGE_BUFFER);
+                            }
+                        }
+                    } else {
+                        if (charges > 0 || progress > 0.0) {
+                            if (progress <= 0.0 && charges > 0) {
+                                charges--;
+                                itemFactory.updateSolarShieldVisuals(shield, charges);
+                                updated = true;
+                                progress = 1.0;
+                            }
+                            if (progress > 0.0) {
+                                progress -= 2.0 / SolarShieldDefinition.DISCHARGE_TICKS;
+                                if (progress <= 0.0) {
+                                    if (charges > 0) {
+                                        charges--;
+                                        itemFactory.updateSolarShieldVisuals(shield, charges);
+                                        updated = true;
+                                        progress = 1.0;
+                                    } else {
+                                        progress = 0.0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (updated) {
+                        itemEntity.setItemStack(shield);
+                    }
+                }
+            }
+            
+            DroppedShieldRunner runner = new DroppedShieldRunner();
+            runner.taskRef = SchedulerCompat.runTimerForEntity(itemEntity, plugin, runner, 2L, 2L);
         }
     }
 
