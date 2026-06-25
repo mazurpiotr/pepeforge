@@ -23,6 +23,7 @@ Current content includes:
 - Crescent-themed weapons (moonlight-powered bow and spear)
 - Chisel and scythes (specialized building & AoE farming tools)
 - Legendary Crimson Sword and Solar Shield (combat progression & sun energy defense)
+- Heavy Anchor (grappling hook movement & snare utility)
 - Custom models and textures via modern/classic resource packs
 
 See [ITEMS.md](ITEMS.md) for the full item and recipe list.

@@ -120,9 +120,11 @@
   "item.pepeforge.solar_shield.lore.7": "§6---------------",
   "item.pepeforge.anchor.name": "Kotwica",
   "item.pepeforge.anchor.lore.1": "§6---------------",
-  "item.pepeforge.anchor.lore.2": "§eUmiejętność: §9Unieruchomienie",
-  "item.pepeforge.anchor.lore.3": "§3Pierwszy atak unieruchamia cel na 1 sekundę.",
-  "item.pepeforge.anchor.lore.4": "§3Może unieruchomić ten sam cel ponownie dopiero po 4 sekundach.",
-  "item.pepeforge.anchor.lore.5": "Epicka",
-  "item.pepeforge.anchor.lore.6": "§6---------------"
+  "item.pepeforge.anchor.lore.2": "§eZwykły Atak: §9Unieruchomienie",
+  "item.pepeforge.anchor.lore.3": "§3Ciosy spowalniają i unieruchamiają cele (odnowienie 5s).",
+  "item.pepeforge.anchor.lore.4": "§eUmiejętność: §9Zarzucenie Kotwicy",
+  "item.pepeforge.anchor.lore.5": "§3Prawy przycisk wyrzuca kotwicę, przyciągając",
+  "item.pepeforge.anchor.lore.6": "§3ciebie do bloków lub byty do ciebie.",
+  "item.pepeforge.anchor.lore.7": "Rzadka",
+  "item.pepeforge.anchor.lore.8": "§6---------------"
 }
