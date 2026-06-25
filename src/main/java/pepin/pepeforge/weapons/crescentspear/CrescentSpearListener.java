@@ -23,6 +23,7 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ScheduledTaskCompat;
 import pepin.pepeforge.util.SchedulerCompat;
+import pepin.pepeforge.util.ProtectionUtil;
 import pepin.pepeforge.weapons.crescent.CrescentMoonPower;
 
 import java.util.HashMap;
@@ -189,6 +190,9 @@ public final class CrescentSpearListener implements Listener {
 
                 LivingEntity target = findActiveTarget(player);
                 if (target == null || target.isDead() || !target.isValid()) {
+                    return;
+                }
+                if (!ProtectionUtil.canDamage(player, target)) {
                     return;
                 }
 

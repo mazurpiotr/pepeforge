@@ -37,12 +37,11 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ScheduledTaskCompat;
 import pepin.pepeforge.util.SchedulerCompat;
+import pepin.pepeforge.util.ProtectionUtil;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,7 +121,8 @@ public final class GreatswordListener implements Listener {
                     expirePendingSwing(player, tier, currentTick);
 
                     ComboState state = comboStates.get(player.getUniqueId());
-                    if (state != null && state.stage() > 0 && currentTick - state.lastSuccessTick() > RHYTHM_GRACE_END_TICK) {
+                    if (state != null && state.stage() > 0
+                            && currentTick - state.lastSuccessTick() > RHYTHM_GRACE_END_TICK) {
                         breakCombo(player);
                         applyReachModifier(player, FIXED_REACH_BONUS);
                         return;
@@ -318,8 +318,7 @@ public final class GreatswordListener implements Listener {
                     areaTargets,
                     tier.attackDamage() * AREA_DAMAGE_MULTIPLIER,
                     currentStage,
-                    true
-            );
+                    true);
             advanceCombo(player, currentStage, swing.tick());
             applyReachModifier(player, FIXED_REACH_BONUS);
             return;
@@ -394,8 +393,7 @@ public final class GreatswordListener implements Listener {
     private List<LivingEntity> findAreaTargets(
             Player player,
             LivingEntity excludedTarget,
-            int stage
-    ) {
+            int stage) {
         Location eyeLocation = player.getEyeLocation();
         Vector facing = horizontalDirection(eyeLocation.getDirection());
         double range = AREA_ATTACK_RANGE;
@@ -439,8 +437,7 @@ public final class GreatswordListener implements Listener {
             List<LivingEntity> targets,
             double damage,
             int stage,
-            boolean playSwingEffects
-    ) {
+            boolean playSwingEffects) {
         if (targets.isEmpty() && !playSwingEffects) {
             return;
         }
@@ -451,6 +448,9 @@ public final class GreatswordListener implements Listener {
         cleavingPlayers.add(player.getUniqueId());
         try {
             for (LivingEntity target : targets) {
+                if (!ProtectionUtil.canDamage(player, target)) {
+                    continue;
+                }
                 target.setNoDamageTicks(0);
                 target.damage(areaDamage, player);
                 applyKnockback(player, target, knockbackStrength);
@@ -469,8 +469,7 @@ public final class GreatswordListener implements Listener {
                 0.25D,
                 0.12D,
                 0.25D,
-                0.0D
-        );
+                0.0D);
     }
 
     private void applyKnockback(Player player, LivingEntity target, double strength) {
@@ -519,8 +518,7 @@ public final class GreatswordListener implements Listener {
                 0.18D,
                 0.20D,
                 0.18D,
-                0.01D
-        );
+                0.01D);
     }
 
     private void applyReachModifier(Player player, double amount) {
@@ -543,8 +541,7 @@ public final class GreatswordListener implements Listener {
                 reachModifierKey,
                 amount,
                 AttributeModifier.Operation.ADD_NUMBER,
-                EquipmentSlotGroup.ANY
-        ));
+                EquipmentSlotGroup.ANY));
     }
 
     private void addReachModifier(AttributeInstance attribute, AttributeModifier modifier) {
@@ -553,7 +550,9 @@ public final class GreatswordListener implements Listener {
             method.invoke(attribute, modifier);
         } catch (ReflectiveOperationException | SecurityException e) {
             if (!transientModifierLogged) {
-                plugin.getLogger().log(Level.WARNING, "Failed to use addTransientModifier for Greatsword reach (likely not on Paper). Falling back to standard addModifier. This warning is printed only once.", e);
+                plugin.getLogger().log(Level.WARNING,
+                        "Failed to use addTransientModifier for Greatsword reach (likely not on Paper). Falling back to standard addModifier. This warning is printed only once.",
+                        e);
                 transientModifierLogged = true;
             }
             attribute.addModifier(modifier);
@@ -600,8 +599,7 @@ public final class GreatswordListener implements Listener {
                 COMBO_BREAK_FATIGUE_AMPLIFIER,
                 true,
                 false,
-                true
-        );
+                true);
         PotionEffect current = player.getPotionEffect(PotionEffectType.MINING_FATIGUE);
         if (current != null
                 && current.getAmplifier() >= penalty.getAmplifier()
@@ -672,8 +670,7 @@ public final class GreatswordListener implements Listener {
     private void showActionBar(Player player, String message) {
         player.spigot().sendMessage(
                 ChatMessageType.ACTION_BAR,
-                TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message))
-        );
+                TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message)));
     }
 
     private String buildRhythmBar(ComboState state, long currentTick) {
@@ -703,8 +700,7 @@ public final class GreatswordListener implements Listener {
             int innerStartIndex,
             int innerEndIndex,
             int graceStartIndex,
-            int graceEndIndex
-    ) {
+            int graceEndIndex) {
         if (index >= innerStartIndex && index <= innerEndIndex) {
             return "&a";
         }

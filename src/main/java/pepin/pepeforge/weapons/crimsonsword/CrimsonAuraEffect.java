@@ -7,6 +7,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import pepin.pepeforge.util.aura.TimedAuraEffect;
+import pepin.pepeforge.util.ProtectionUtil;
+
 
 import java.util.UUID;
 
@@ -74,6 +76,9 @@ public final class CrimsonAuraEffect implements TimedAuraEffect {
         try {
             for (Entity entity : player.getWorld().getNearbyEntities(base, radius, radius, radius)) {
                 if (!(entity instanceof LivingEntity target) || target == player || target.isDead() || !target.isValid()) {
+                    continue;
+                }
+                if (!ProtectionUtil.canDamage(player, target)) {
                     continue;
                 }
 

@@ -26,7 +26,7 @@ public enum GreatswordTier {
             new NamespacedKey("pepeforge", "iron_greatsword"),
             CustomModelDataIds.IRON_GREATSWORD,
             6.0D,
-            1.52D
+            -0.5D
     ),
     DIAMOND(
             ItemIds.DIAMOND_GREATSWORD,
@@ -41,7 +41,7 @@ public enum GreatswordTier {
             new NamespacedKey("pepeforge", "diamond_greatsword"),
             CustomModelDataIds.DIAMOND_GREATSWORD,
             7.0D,
-            1.52D
+            -0.5D
     ),
     NETHERITE(
             ItemIds.NETHERITE_GREATSWORD,
@@ -56,7 +56,7 @@ public enum GreatswordTier {
             new NamespacedKey("pepeforge", "netherite_greatsword"),
             CustomModelDataIds.NETHERITE_GREATSWORD,
             8.0D,
-            1.52D
+            -0.5D
     );
 
     private static final Map<String, GreatswordTier> BY_ITEM_ID = Arrays.stream(values())
