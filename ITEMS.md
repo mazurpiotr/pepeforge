@@ -12,6 +12,7 @@ Detailed item and recipe reference for the current Pepe's Forge item set.
 - [Katana](#️-katana)
 - [Solar Shield](#️-solar-shield)
 - [Crimson Sword](#-crimson-sword)
+- [Anchor](#-anchor)
 - [Give Names](#give-names)
 
 ## 🪚 Chisel
@@ -187,6 +188,29 @@ A legendary weapon that grows stronger through combat, feeding on the blood of i
 
 *Subjected for changes*
 
+## ⚓ Anchor
+
+A heavy, slow-swinging marine weapon with crowd-control capability and a grappling-hook active utility.
+
+| Property | Details |
+|---|---|
+| **Attack Damage** | 8 |
+| **Attack Speed** | 0.5 (4.0 - 3.5 modifier) |
+| **Rarity** | Rare |
+| **LPM Passive** | Inflicts a **Snare** (Slowness 10 + Jump Boost 250) on targets for 2 seconds (5s per-target cooldown). A Tube Coral display wraps the snared target's feet (without particles). |
+| **PPM Active** | Launches the anchor as a projectile. Hitting a **block** pulls the player to the block. Hitting a **living entity** pulls both player and target to meet in the middle. (1s cooldown, 20 block range). |
+
+**Crafting** (Shaped Recipe):
+- `I` = Iron Ingot
+- `B` = Iron Block
+- `R` = Lead (Smycz)
+
+```
+[Iron Ingot] [Iron Block] [Iron Ingot]
+[          ] [Iron Ingot] [          ]
+[          ] [Iron Ingot] [Lead      ]
+```
+
 ## Give Names
 
 Available internal item names for `/pepeforge give`:
@@ -206,3 +230,4 @@ Available internal item names for `/pepeforge give`:
 - `netherite_scythe`
 - `crimson_sword`
 - `solar_shield`
+- `anchor`

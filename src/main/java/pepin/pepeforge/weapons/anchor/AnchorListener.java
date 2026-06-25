@@ -17,8 +17,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import pepin.pepeforge.util.ProtectionUtil;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -223,6 +223,7 @@ public final class AnchorListener implements Listener {
             // faces the player. This lets the entity's actual pitch rotate correctly along the flight path.
             Transformation trans = entity.getTransformation();
             trans.getLeftRotation().rotateY((float) Math.toRadians(90.0));
+            trans.getScale().set(2.0f, 2.0f, 2.0f);
             entity.setTransformation(trans);
         });
 
@@ -290,16 +291,8 @@ public final class AnchorListener implements Listener {
 
             private void onHit(RayTraceResult hit, Location impactLoc) {
                 if (hit.getHitEntity() != null && hit.getHitEntity() instanceof LivingEntity target) {
-                    // Protection PvP/PvE check via custom event trigger
-                    EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(
-                            player,
-                            target,
-                            EntityDamageEvent.DamageCause.CUSTOM,
-                            0.0D
-                    );
-                    plugin.getServer().getPluginManager().callEvent(damageEvent);
-
-                    if (!damageEvent.isCancelled()) {
+                    // Protection PvP/PvE check
+                    if (ProtectionUtil.canDamage(player, target)) {
                         Vector toTarget = target.getLocation().toVector().subtract(player.getLocation().toVector());
                         double distance = toTarget.length();
                         if (distance > 2.2D) { // Only pull if they are outside the 2-block gap

@@ -2,8 +2,6 @@ package pepin.pepeforge.weapons.anchor;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
-import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
@@ -31,9 +29,9 @@ public final class AnchorRecipes {
         recipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
 
         // Layout:
-        // IBI 
-        //  I
-        //  IR
+        // IBI
+        // I
+        // IR
         recipe.shape("IBI", " I ", " IR");
 
         recipe.setIngredient('B', Material.IRON_BLOCK);
