@@ -53,14 +53,16 @@ public class StatisticsManager {
     }
 
     public void incrementCrafted(String itemId) {
-        if (itemId == null || itemId.isEmpty()) return;
-        craftedCounts.merge(itemId, 1, Integer::sum);
+        if (itemId == null || itemId.isEmpty())
+            return;
+        craftedCounts.merge(itemId, 1, (Integer a, Integer b) -> Integer.sum(a, b));
         markDirty();
     }
 
     public void incrementGiven(String itemId) {
-        if (itemId == null || itemId.isEmpty()) return;
-        givenCounts.merge(itemId, 1, Integer::sum);
+        if (itemId == null || itemId.isEmpty())
+            return;
+        givenCounts.merge(itemId, 1, (Integer a, Integer b) -> Integer.sum(a, b));
         markDirty();
     }
 
@@ -86,12 +88,12 @@ public class StatisticsManager {
 
     private void saveAsync() {
         FileConfiguration configToSave = new YamlConfiguration();
-        
+
         Map<String, Integer> craftedCopy = new HashMap<>(craftedCounts);
         for (Map.Entry<String, Integer> entry : craftedCopy.entrySet()) {
             configToSave.set("crafted." + entry.getKey(), entry.getValue());
         }
-        
+
         Map<String, Integer> givenCopy = new HashMap<>(givenCounts);
         for (Map.Entry<String, Integer> entry : givenCopy.entrySet()) {
             configToSave.set("given." + entry.getKey(), entry.getValue());
@@ -105,7 +107,7 @@ public class StatisticsManager {
             isDirty = true;
         }
     }
-    
+
     public void forceSave() {
         if (isDirty) {
             saveAsync();

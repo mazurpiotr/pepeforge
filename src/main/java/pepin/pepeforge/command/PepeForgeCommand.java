@@ -54,6 +54,32 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if ("config".equalsIgnoreCase(args[0])) {
+            if (!sender.hasPermission("pepeforge.config") && !sender.isOp()) {
+                sender.sendMessage(lang.message("messages.command.no_permission"));
+                return true;
+            }
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(lang.message("messages.command.players_only"));
+                return true;
+            }
+            player.openInventory(pepin.pepeforge.gui.ConfigMenu.create(itemFactory));
+            return true;
+        }
+
+        if ("reload".equalsIgnoreCase(args[0])) {
+            if (!sender.hasPermission("pepeforge.reload") && !sender.isOp()) {
+                sender.sendMessage(lang.message("messages.command.no_permission"));
+                return true;
+            }
+            org.bukkit.plugin.Plugin plugin = Bukkit.getPluginManager().getPlugin("PepeForge");
+            if (plugin instanceof pepin.pepeforge.PepeForgePlugin pepePlugin) {
+                pepePlugin.reloadPlugin();
+                sender.sendMessage(org.bukkit.ChatColor.GREEN + "PepeForge configuration and recipes reloaded!");
+            }
+            return true;
+        }
+
         if ("setlevel".equalsIgnoreCase(args[0])) {
             if (!sender.hasPermission("pepeforge.setlevel") && !sender.isOp()) {
                 sender.sendMessage(lang.message("messages.command.no_permission"));
@@ -156,7 +182,7 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("give", "items", "setlevel", "migration").stream()
+            return List.of("give", "items", "setlevel", "migration", "config", "reload").stream()
                     .filter(option -> option.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }

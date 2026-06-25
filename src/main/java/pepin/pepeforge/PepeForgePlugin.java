@@ -110,6 +110,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         crimsonSwordManager = new CrimsonSwordManager(this, lang);
         itemFactory = new ItemFactory(this, lang, crimsonSwordManager);
         statsManager = new StatisticsManager(this);
+        pepin.pepeforge.util.ProtectionUtil.initialize(this);
         getServer().getPluginManager().registerEvents(new StatisticsListener(statsManager, itemFactory), this);
 
         boolean migrationEnabled = getConfig().getBoolean("migration.enabled", true);
@@ -133,6 +134,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents(new CustomItemsMenuListener(lang, itemFactory), this);
+        getServer().getPluginManager().registerEvents(new pepin.pepeforge.gui.ConfigMenuListener(this, itemFactory), this);
 
         RecipeDiscoveryRefresher recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
             for (ItemModule module : modules) {
@@ -199,5 +201,47 @@ public final class PepeForgePlugin extends JavaPlugin {
             statsManager.forceSave();
         }
         HandlerList.unregisterAll(this);
+    }
+
+    public void reloadPlugin() {
+        if (statsManager != null) {
+            statsManager.forceSave();
+        }
+        HandlerList.unregisterAll(this);
+        if (auraManager != null) {
+            auraManager.stop();
+        }
+        if (cooldownManager != null) {
+            cooldownManager.clearAll();
+        }
+        if (bossBarManager != null) {
+            bossBarManager.clearAll();
+        }
+        for (ItemModule module : modules) {
+            module.onDisable();
+        }
+        modules.clear();
+
+        reloadConfig();
+
+        boolean migrationEnabled = getConfig().getBoolean("migration.enabled", true);
+        pepin.pepeforge.item.ItemMigrator itemMigrator = new pepin.pepeforge.item.ItemMigrator(this, itemFactory, migrationEnabled);
+        
+        getServer().getPluginManager().registerEvents(new StatisticsListener(statsManager, itemFactory), this);
+        getServer().getPluginManager().registerEvents(new pepin.pepeforge.item.ItemMigrationListener(itemMigrator), this);
+        getServer().getPluginManager().registerEvents(new CustomItemsMenuListener(lang, itemFactory), this);
+        getServer().getPluginManager().registerEvents(new pepin.pepeforge.gui.ConfigMenuListener(this, itemFactory), this);
+
+        RecipeDiscoveryRefresher recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
+            for (ItemModule module : modules) {
+                module.discoverRecipesFor(player);
+            }
+        });
+        getServer().getPluginManager().registerEvents(recipeDiscoveryRefresher, this);
+        getServer().getPluginManager().registerEvents(new SmithingUpgradeListener(itemFactory), this);
+
+        auraManager.startTask();
+        registerModules();
+        recipeDiscoveryRefresher.refreshAllOnlinePlayers();
     }
 }

@@ -39,7 +39,6 @@ import pepin.pepeforge.util.CooldownManager;
 import pepin.pepeforge.util.ScheduledTaskCompat;
 import pepin.pepeforge.util.SchedulerCompat;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;

@@ -25,7 +25,6 @@ import pepin.pepeforge.weapons.anchor.AnchorDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public final class ItemFactory {
 
@@ -45,27 +44,7 @@ public final class ItemFactory {
             ItemIds.NETHERITE_SCYTHE,
             ItemIds.CRIMSON_SWORD,
             ItemIds.SOLAR_SHIELD,
-            ItemIds.ANCHOR
-    );
-
-    private static final Map<String, String> ITEM_ALIASES = Map.ofEntries(
-            Map.entry(ItemIds.CRESCENT_BOW, ItemIds.CRESCENT_BOW),
-            Map.entry(ItemIds.CRESCENT_SPEAR, ItemIds.CRESCENT_SPEAR),
-            Map.entry(ItemIds.CHISEL, ItemIds.CHISEL),
-            Map.entry(ItemIds.KATANA, ItemIds.KATANA),
-            Map.entry(ItemIds.IRON_WIND_BLADE, ItemIds.IRON_WIND_BLADE),
-            Map.entry(ItemIds.DIAMOND_WIND_BLADE, ItemIds.DIAMOND_WIND_BLADE),
-            Map.entry(ItemIds.NETHERITE_WIND_BLADE, ItemIds.NETHERITE_WIND_BLADE),
-            Map.entry(ItemIds.IRON_GREATSWORD, ItemIds.IRON_GREATSWORD),
-            Map.entry(ItemIds.DIAMOND_GREATSWORD, ItemIds.DIAMOND_GREATSWORD),
-            Map.entry(ItemIds.NETHERITE_GREATSWORD, ItemIds.NETHERITE_GREATSWORD),
-            Map.entry(ItemIds.IRON_SCYTHE, ItemIds.IRON_SCYTHE),
-            Map.entry(ItemIds.DIAMOND_SCYTHE, ItemIds.DIAMOND_SCYTHE),
-            Map.entry(ItemIds.NETHERITE_SCYTHE, ItemIds.NETHERITE_SCYTHE),
-            Map.entry(ItemIds.CRIMSON_SWORD, ItemIds.CRIMSON_SWORD),
-            Map.entry(ItemIds.SOLAR_SHIELD, ItemIds.SOLAR_SHIELD),
-            Map.entry(ItemIds.ANCHOR, ItemIds.ANCHOR)
-    );
+            ItemIds.ANCHOR);
 
     private final NamespacedKey itemIdKey;
     private final JavaPlugin plugin;
@@ -92,9 +71,7 @@ public final class ItemFactory {
                 tier.modelKey(),
                 List.of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", tier.attackDamage()),
-                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", tier.attackSpeed())
-                )
-        ));
+                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", tier.attackSpeed()))));
     }
 
     public ItemStack createGreatsword(GreatswordTier tier) {
@@ -110,9 +87,7 @@ public final class ItemFactory {
                 tier.modelKey(),
                 List.of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", tier.attackDamage()),
-                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", tier.attackSpeed())
-                )
-        ));
+                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", tier.attackSpeed()))));
     }
 
     public ItemStack createCrescentBow() {
@@ -126,8 +101,7 @@ public final class ItemFactory {
                 CrescentBowDefinition.NAME_COLOR,
                 CrescentBowDefinition.CUSTOM_MODEL_DATA,
                 CrescentBowDefinition.MODEL_KEY,
-                List.of()
-        ));
+                List.of()));
     }
 
     public ItemStack createCrescentSpear() {
@@ -141,8 +115,7 @@ public final class ItemFactory {
                 CrescentSpearDefinition.NAME_COLOR,
                 CrescentSpearDefinition.CUSTOM_MODEL_DATA,
                 CrescentSpearDefinition.MODEL_KEY,
-                List.of()
-        ));
+                List.of()));
     }
 
     public ItemStack createChisel() {
@@ -156,8 +129,7 @@ public final class ItemFactory {
                 ChiselDefinition.NAME_COLOR,
                 ChiselDefinition.CUSTOM_MODEL_DATA,
                 ChiselDefinition.MODEL_KEY,
-                List.of()
-        ));
+                List.of()));
     }
 
     public ItemStack createKatana() {
@@ -174,9 +146,8 @@ public final class ItemFactory {
                 List.of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", KatanaDefinition.ATTACK_DAMAGE),
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", KatanaDefinition.ATTACK_SPEED),
-                        new ItemAttributeSpec(Attribute.ENTITY_INTERACTION_RANGE, "attack_range", KatanaDefinition.ATTACK_RANGE_BONUS)
-                )
-        ));
+                        new ItemAttributeSpec(Attribute.ENTITY_INTERACTION_RANGE, "attack_range",
+                                KatanaDefinition.ATTACK_RANGE_BONUS))));
     }
 
     public ItemStack createScythe(ScytheTier tier) {
@@ -190,8 +161,7 @@ public final class ItemFactory {
                 tier.nameColor(),
                 tier.customModelData(),
                 tier.modelKey(),
-                List.of()
-        ));
+                List.of()));
     }
 
     public ItemStack createCrimsonSword() {
@@ -210,14 +180,12 @@ public final class ItemFactory {
                 meta,
                 Attribute.ATTACK_DAMAGE,
                 CrimsonSwordDefinition.ITEM_ID + "_attack_damage",
-                CrimsonSwordDefinition.ATTACK_DAMAGE
-        );
+                CrimsonSwordDefinition.ATTACK_DAMAGE);
         ItemMetaManager.addMainHandAttribute(
                 meta,
                 Attribute.ATTACK_SPEED,
                 CrimsonSwordDefinition.ITEM_ID + "_attack_speed",
-                CrimsonSwordDefinition.ATTACK_SPEED
-        );
+                CrimsonSwordDefinition.ATTACK_SPEED);
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, CrimsonSwordDefinition.ITEM_ID);
         item.setItemMeta(meta);
         crimsonSwordManager.initialize(item);
@@ -235,8 +203,7 @@ public final class ItemFactory {
                 SolarShieldDefinition.NAME_COLOR,
                 SolarShieldDefinition.CUSTOM_MODEL_DATA_0,
                 SolarShieldDefinition.MODEL_KEY_0,
-                List.of()
-        ));
+                List.of()));
         ItemMeta meta = item.getItemMeta();
         NamespacedKey chargesKey = new NamespacedKey(plugin, SolarShieldDefinition.CHARGES_KEY_STRING);
         meta.getPersistentDataContainer().set(chargesKey, PersistentDataType.INTEGER, 0);
@@ -257,9 +224,7 @@ public final class ItemFactory {
                 AnchorDefinition.MODEL_KEY,
                 List.of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", AnchorDefinition.ATTACK_DAMAGE),
-                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", AnchorDefinition.ATTACK_SPEED)
-                )
-        ));
+                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", AnchorDefinition.ATTACK_SPEED))));
     }
 
     public void updateSolarShieldVisuals(ItemStack item, int charges) {
@@ -297,7 +262,8 @@ public final class ItemFactory {
 
         String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
         String fallbackName = lang.getItemNameForLang(spec.langPath(), serverLang);
-        List<String> fallbackLore = trimLore(lang.getItemLoreForLang(spec.langPath(), serverLang), spec.loreLineCount());
+        List<String> fallbackLore = trimLore(lang.getItemLoreForLang(spec.langPath(), serverLang),
+                spec.loreLineCount());
 
         ItemMetaManager.setItemName(meta, fallbackName);
         if (!clientSideTranslations) {
@@ -315,8 +281,7 @@ public final class ItemFactory {
                     meta,
                     attribute.attribute(),
                     spec.itemId() + "_" + attribute.idSuffix(),
-                    attribute.value()
-            );
+                    attribute.value());
         }
 
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, spec.itemId());
@@ -328,8 +293,7 @@ public final class ItemFactory {
                     spec.translationKeyBase() + ".name",
                     spec.nameColor().colorName(),
                     buildLoreKeys(spec.translationKeyBase(), spec.loreLineCount()),
-                    buildLoreColors(spec.loreLineCount(), spec.rarity())
-            );
+                    buildLoreColors(spec.loreLineCount(), spec.rarity()));
         }
         return item;
     }
@@ -451,7 +415,8 @@ public final class ItemFactory {
             return;
         }
         ItemMetaManager.setCustomModelData(meta, targetData);
-        ItemMetaManager.setItemModelIfSupported(meta, active ? KatanaDefinition.PARRY_MODEL_KEY : KatanaDefinition.MODEL_KEY);
+        ItemMetaManager.setItemModelIfSupported(meta,
+                active ? KatanaDefinition.PARRY_MODEL_KEY : KatanaDefinition.MODEL_KEY);
         item.setItemMeta(meta);
     }
 
@@ -520,6 +485,10 @@ public final class ItemFactory {
         return names;
     }
 
+    public List<String> getAllCanonicalIds() {
+        return CANONICAL_ITEM_IDS;
+    }
+
     public List<ItemStack> createAllCustomItems() {
         List<ItemStack> items = new ArrayList<>();
         for (String itemId : CANONICAL_ITEM_IDS) {
@@ -569,7 +538,8 @@ public final class ItemFactory {
         if (name == null) {
             return null;
         }
-        return ITEM_ALIASES.get(name.toLowerCase(Locale.ROOT));
+        String lowerName = name.toLowerCase(Locale.ROOT);
+        return CANONICAL_ITEM_IDS.contains(lowerName) ? lowerName : null;
     }
 
     private String getItemConfigPath(String itemId) {
@@ -613,14 +583,12 @@ public final class ItemFactory {
             ItemNameColor nameColor,
             int customModelData,
             NamespacedKey modelKey,
-            List<ItemAttributeSpec> attributes
-    ) {
+            List<ItemAttributeSpec> attributes) {
     }
 
     private record ItemAttributeSpec(
             Attribute attribute,
             String idSuffix,
-            double value
-    ) {
+            double value) {
     }
 }

@@ -44,13 +44,11 @@ public class ItemMigrationListener implements Listener {
         if (inventory == null) return;
         
         ItemStack[] contents = inventory.getContents();
-        boolean changed = false;
         
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
             if (item != null && migrator.migrateItem(item)) {
                 inventory.setItem(i, item);
-                changed = true;
             }
         }
     }
