@@ -17,7 +17,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import pepin.pepeforge.util.ProtectionUtil;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -51,6 +53,7 @@ public final class AnchorListener implements Listener {
     private final NamespacedKey cooldownKey;
     private final Set<ItemDisplay> activeDisplays = ConcurrentHashMap.newKeySet();
     private final Map<UUID, ItemStack> activeThrows = new ConcurrentHashMap<>();
+    private final Set<ScheduledTaskCompat> activeTasks = ConcurrentHashMap.newKeySet();
 
     private static final String ABILITY_COOLDOWN_KEY = "anchor:hook";
 
@@ -63,6 +66,11 @@ public final class AnchorListener implements Listener {
     }
 
     public void cleanup() {
+        for (ScheduledTaskCompat task : activeTasks) {
+            task.cancel();
+        }
+        activeTasks.clear();
+
         for (ItemDisplay display : activeDisplays) {
             if (display.isValid()) {
                 display.remove();
@@ -71,21 +79,30 @@ public final class AnchorListener implements Listener {
         activeDisplays.clear();
 
         for (Map.Entry<UUID, ItemStack> entry : activeThrows.entrySet()) {
-            Player player = plugin.getServer().getPlayer(entry.getKey());
-            if (player != null && player.isOnline() && !player.isDead()) {
-                ItemStack hand = player.getInventory().getItemInMainHand();
-                if (hand == null || hand.getType().isAir()) {
-                    player.getInventory().setItemInMainHand(entry.getValue());
-                } else {
-                    HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(entry.getValue());
-                    if (!remaining.isEmpty()) {
-                        for (ItemStack rest : remaining.values()) {
-                            player.getWorld().dropItemNaturally(player.getLocation(), rest);
+            UUID uuid = entry.getKey();
+            ItemStack stored = activeThrows.remove(uuid);
+            if (stored != null) {
+                Player player = plugin.getServer().getPlayer(uuid);
+                if (player != null && player.isOnline() && !player.isDead()) {
+                    ItemStack hand = player.getInventory().getItemInMainHand();
+                    if (hand == null || hand.getType().isAir()) {
+                        player.getInventory().setItemInMainHand(stored);
+                    } else {
+                        HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(stored);
+                        if (!remaining.isEmpty()) {
+                            for (ItemStack rest : remaining.values()) {
+                                player.getWorld().dropItemNaturally(player.getLocation(), rest);
+                            }
                         }
                     }
+                } else if (player != null) {
+                    try {
+                        Location loc = player.getLocation();
+                        if (loc != null && loc.getWorld() != null) {
+                            loc.getWorld().dropItemNaturally(loc, stored);
+                        }
+                    } catch (Exception ignored) {}
                 }
-            } else if (player != null) {
-                player.getWorld().dropItemNaturally(player.getLocation(), entry.getValue());
             }
         }
         activeThrows.clear();
@@ -154,6 +171,7 @@ public final class AnchorListener implements Listener {
                 private void cleanup() {
                     if (taskRef != null) {
                         taskRef.cancel();
+                        activeTasks.remove(taskRef);
                     }
                     if (coral.isValid()) {
                         coral.remove();
@@ -165,6 +183,7 @@ public final class AnchorListener implements Listener {
             SnareEffectTask snareTask = new SnareEffectTask();
             ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(target, plugin, snareTask, 1L, 1L);
             snareTask.taskRef = task;
+            activeTasks.add(task);
         }
     }
 
@@ -238,7 +257,7 @@ public final class AnchorListener implements Listener {
             @Override
             public void run() {
                 tick++;
-                if (!player.isOnline() || display.isDead() || !display.isValid() || tick > 60) {
+                if (!player.isOnline() || player.isDead() || display.isDead() || !display.isValid() || tick > 60) {
                     cleanup();
                     return;
                 }
@@ -346,6 +365,7 @@ public final class AnchorListener implements Listener {
                         private void cleanupPull() {
                             if (pullTaskRef != null) {
                                 pullTaskRef.cancel();
+                                activeTasks.remove(pullTaskRef);
                             }
                         }
                     }
@@ -353,6 +373,7 @@ public final class AnchorListener implements Listener {
                     PlayerPullTask pullTask = new PlayerPullTask();
                     ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, pullTask, 0L, 1L);
                     pullTask.pullTaskRef = task;
+                    activeTasks.add(task);
 
                     player.getWorld().playSound(impactLoc, Sound.BLOCK_CHAIN_PLACE, 1.0f, 1.2f);
                     player.getWorld().playSound(impactLoc, Sound.ITEM_TRIDENT_HIT, 1.0f, 0.8f);
@@ -394,25 +415,28 @@ public final class AnchorListener implements Listener {
             private void cleanup() {
                 if (taskRef != null) {
                     taskRef.cancel();
+                    activeTasks.remove(taskRef);
                 }
                 display.remove();
                 activeDisplays.remove(display);
 
-                activeThrows.remove(player.getUniqueId());
-                if (player.isOnline() && !player.isDead()) {
-                    ItemStack hand = player.getInventory().getItemInMainHand();
-                    if (hand == null || hand.getType().isAir()) {
-                        player.getInventory().setItemInMainHand(anchorItem);
-                    } else {
-                        HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(anchorItem);
-                        if (!remaining.isEmpty()) {
-                            for (ItemStack rest : remaining.values()) {
-                                player.getWorld().dropItemNaturally(player.getLocation(), rest);
+                ItemStack stored = activeThrows.remove(player.getUniqueId());
+                if (stored != null) {
+                    if (player.isOnline() && !player.isDead()) {
+                        ItemStack hand = player.getInventory().getItemInMainHand();
+                        if (hand == null || hand.getType().isAir()) {
+                            player.getInventory().setItemInMainHand(stored);
+                        } else {
+                            HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(stored);
+                            if (!remaining.isEmpty()) {
+                                for (ItemStack rest : remaining.values()) {
+                                    player.getWorld().dropItemNaturally(player.getLocation(), rest);
+                                }
                             }
                         }
+                    } else {
+                        player.getWorld().dropItemNaturally(currentLoc, stored);
                     }
-                } else {
-                    player.getWorld().dropItemNaturally(player.getLocation(), anchorItem);
                 }
             }
         }
@@ -420,6 +444,7 @@ public final class AnchorListener implements Listener {
         AnchorFlightTask flightTask = new AnchorFlightTask();
         ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, flightTask, 1L, 1L);
         flightTask.taskRef = task;
+        activeTasks.add(task);
     }
 
     private void denyInteraction(PlayerInteractEvent event) {
@@ -450,5 +475,33 @@ public final class AnchorListener implements Listener {
             bar.append(i < filled ? "&a|" : "&8|");
         }
         return bar.toString();
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        ItemStack stored = activeThrows.remove(player.getUniqueId());
+        if (stored != null) {
+            ItemStack hand = player.getInventory().getItemInMainHand();
+            if (hand == null || hand.getType().isAir()) {
+                player.getInventory().setItemInMainHand(stored);
+            } else {
+                HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(stored);
+                if (!remaining.isEmpty()) {
+                    for (ItemStack rest : remaining.values()) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), rest);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        ItemStack stored = activeThrows.remove(player.getUniqueId());
+        if (stored != null) {
+            event.getDrops().add(stored);
+        }
     }
 }

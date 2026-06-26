@@ -37,6 +37,7 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ScheduledTaskCompat;
 import pepin.pepeforge.util.SchedulerCompat;
+import pepin.pepeforge.util.CombatUtils;
 import pepin.pepeforge.util.ProtectionUtil;
 
 import java.lang.reflect.Method;
@@ -109,7 +110,7 @@ public final class GreatswordListener implements Listener {
                         return;
                     }
 
-                    if (!hasEmptyOffHand(player)) {
+                    if (!CombatUtils.hasEmptyOffHand(player)) {
                         clearPlayerState(player);
                         showActionBar(player, lang.text("messages.two_handed.offhand_required"));
                         return;
@@ -165,7 +166,7 @@ public final class GreatswordListener implements Listener {
             return;
         }
 
-        if (!hasEmptyOffHand(player)) {
+        if (!CombatUtils.hasEmptyOffHand(player)) {
             clearPlayerState(player);
             showActionBar(player, lang.text("messages.two_handed.offhand_required"));
             return;
@@ -206,7 +207,7 @@ public final class GreatswordListener implements Listener {
             return;
         }
 
-        if (!hasEmptyOffHand(player)) {
+        if (!CombatUtils.hasEmptyOffHand(player)) {
             clearPlayerState(player);
             showActionBar(player, lang.text("messages.two_handed.offhand_required"));
             return;
@@ -241,7 +242,7 @@ public final class GreatswordListener implements Listener {
         }
 
         GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
-        if (tier == null || !hasEmptyOffHand(player)) {
+        if (tier == null || !CombatUtils.hasEmptyOffHand(player)) {
             return;
         }
 
@@ -493,18 +494,9 @@ public final class GreatswordListener implements Listener {
 
     private boolean isDamageSourceInFront(Player player, Entity damager) {
         if (damager instanceof Projectile projectile) {
-            return isInFront(player, projectile.getLocation().toVector());
+            return CombatUtils.isInFront(player, projectile.getLocation().toVector(), DEFLECT_FRONT_DOT_THRESHOLD);
         }
-        return isInFront(player, damager.getLocation().toVector());
-    }
-
-    private boolean isInFront(Player player, Vector targetPosition) {
-        Vector facing = player.getEyeLocation().getDirection().normalize();
-        Vector toTarget = targetPosition.subtract(player.getEyeLocation().toVector());
-        if (toTarget.lengthSquared() < 0.001D) {
-            return true;
-        }
-        return facing.dot(toTarget.normalize()) >= DEFLECT_FRONT_DOT_THRESHOLD;
+        return CombatUtils.isInFront(player, damager.getLocation().toVector(), DEFLECT_FRONT_DOT_THRESHOLD);
     }
 
     private void playDeflectEffects(Player player, int stage) {
@@ -620,10 +612,6 @@ public final class GreatswordListener implements Listener {
         clearRhythmActionBar(player);
     }
 
-    private boolean hasEmptyOffHand(Player player) {
-        ItemStack offHandItem = player.getInventory().getItemInOffHand();
-        return offHandItem == null || offHandItem.getType().isAir();
-    }
 
     private long currentTick(Player player) {
         return player.getWorld().getGameTime();

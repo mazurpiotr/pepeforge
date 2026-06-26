@@ -35,6 +35,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.CombatUtils;
 import pepin.pepeforge.util.CooldownManager;
 import pepin.pepeforge.util.ScheduledTaskCompat;
 import pepin.pepeforge.util.SchedulerCompat;
@@ -77,7 +78,7 @@ public final class KatanaListener implements Listener {
                         return;
                     }
 
-                    if (!hasEmptyOffHand(player)) {
+                    if (!CombatUtils.hasEmptyOffHand(player)) {
                         clearActiveParry(player);
                         showActionBar(player, lang.text("messages.two_handed.offhand_required"));
                         return;
@@ -117,7 +118,7 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        if (!hasEmptyOffHand(player)) {
+        if (!CombatUtils.hasEmptyOffHand(player)) {
             // Katana stays equipable with an occupied off-hand, but its custom
             // mechanics are disabled until the player goes back to a valid 2H state.
             return;
@@ -155,7 +156,7 @@ public final class KatanaListener implements Listener {
         Player player = event.getPlayer();
         PlayerInventory inventory = player.getInventory();
         ItemStack newMainHandItem = inventory.getItem(event.getNewSlot());
-        if (itemFactory.isKatana(newMainHandItem) && !hasEmptyOffHand(player)) {
+        if (itemFactory.isKatana(newMainHandItem) && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin, () ->
                     showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
@@ -184,7 +185,7 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        if (mainHandKatana && !hasEmptyOffHand(player)) {
+        if (mainHandKatana && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin, () ->
                     showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
@@ -204,7 +205,7 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        if (itemFactory.isKatana(player.getInventory().getItemInMainHand()) && !hasEmptyOffHand(player)) {
+        if (itemFactory.isKatana(player.getInventory().getItemInMainHand()) && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin, () ->
                     showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
@@ -218,7 +219,7 @@ public final class KatanaListener implements Listener {
         }
 
         long now = System.currentTimeMillis();
-        if (!isParryActive(player, now) || !hasEmptyOffHand(player)) {
+        if (!isParryActive(player, now) || !CombatUtils.hasEmptyOffHand(player)) {
             return;
         }
 
@@ -237,7 +238,7 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        if (!isInFront(player, attacker.getEyeLocation().toVector())) {
+        if (!CombatUtils.isInFront(player, attacker.getEyeLocation().toVector(), KatanaDefinition.PARRY_FRONT_DOT_THRESHOLD)) {
             return;
         }
 
@@ -285,7 +286,7 @@ public final class KatanaListener implements Listener {
                 return;
             }
 
-            if (!hasEmptyOffHand(player) || !itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
+            if (!CombatUtils.hasEmptyOffHand(player) || !itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
                 clearActiveParry(player, katana);
                 return;
             }
@@ -328,7 +329,7 @@ public final class KatanaListener implements Listener {
             return false;
         }
 
-        if (!isInFront(player, projectile.getLocation().toVector())) {
+        if (!CombatUtils.isInFront(player, projectile.getLocation().toVector(), KatanaDefinition.PARRY_FRONT_DOT_THRESHOLD)) {
             return false;
         }
 
@@ -397,13 +398,6 @@ public final class KatanaListener implements Listener {
                 && event.getView().convertSlot(rawSlot) == OFF_HAND_INVENTORY_SLOT;
     }
 
-    private boolean hasEmptyOffHand(Player player) {
-        return isEmpty(player.getInventory().getItemInOffHand());
-    }
-
-    private boolean isEmpty(ItemStack item) {
-        return item == null || item.getType().isAir();
-    }
 
     private void clearActiveParry(Player player) {
         clearActiveParry(player, player.getInventory().getItemInMainHand());
@@ -431,14 +425,6 @@ public final class KatanaListener implements Listener {
         event.setCancelled(true);
     }
 
-    private boolean isInFront(Player player, Vector targetPosition) {
-        Vector facing = player.getEyeLocation().getDirection().normalize();
-        Vector toTarget = targetPosition.subtract(player.getEyeLocation().toVector());
-        if (toTarget.lengthSquared() < 0.001D) {
-            return true;
-        }
-        return facing.dot(toTarget.normalize()) >= KatanaDefinition.PARRY_FRONT_DOT_THRESHOLD;
-    }
 
     private void knockBackAttacker(Player defender, LivingEntity attacker) {
         Vector push = attacker.getLocation().toVector().subtract(defender.getLocation().toVector());
