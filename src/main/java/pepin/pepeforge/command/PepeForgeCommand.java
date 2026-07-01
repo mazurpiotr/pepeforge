@@ -75,7 +75,7 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
             org.bukkit.plugin.Plugin plugin = Bukkit.getPluginManager().getPlugin("PepeForge");
             if (plugin instanceof pepin.pepeforge.PepeForgePlugin pepePlugin) {
                 pepePlugin.reloadPlugin();
-                sender.sendMessage(org.bukkit.ChatColor.GREEN + "PepeForge configuration and recipes reloaded!");
+                sender.sendMessage(lang.message("messages.config.reloaded"));
             }
             return true;
         }

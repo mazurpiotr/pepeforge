@@ -93,6 +93,6 @@ public final class CrimsonSwordKyoriFormatter {
         lore.add(Component.translatable(CrimsonSwordDefinition.TRANSLATION_KEY_BASE + ".lore.rarity").color(NamedTextColor.GOLD));
         lore.add(Component.translatable(CrimsonSwordDefinition.TRANSLATION_KEY_BASE + ".lore.1"));
 
-        pepin.pepeforge.util.PaperDataComponentAdapter.applyRawComponents(item, name, lore);
+        pepin.pepeforge.util.itemmeta.PaperDataComponentAdapter.applyRawComponents(item, name, lore);
     }
 }

@@ -1,4 +1,4 @@
-package pepin.pepeforge.util;
+package pepin.pepeforge.util.itemmeta;
 
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;

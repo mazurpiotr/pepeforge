@@ -1,9 +1,11 @@
-package pepin.pepeforge.util;
+package pepin.pepeforge.util.aura;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.util.aura.AuraEffect;
 import pepin.pepeforge.util.aura.TimedAuraEffect;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.List;
 import java.util.Map;

@@ -1,8 +1,9 @@
-package pepin.pepeforge.util;
+package pepin.pepeforge.util.itemmeta;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.inventory.meta.ItemMeta;
+import pepin.pepeforge.util.env.ServerEnv;
 
 import java.util.List;
 

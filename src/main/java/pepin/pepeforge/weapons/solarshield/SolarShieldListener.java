@@ -24,8 +24,8 @@ import org.bukkit.entity.Item;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.SchedulerCompat;
-import pepin.pepeforge.util.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 
 import java.util.Map;
 import java.util.UUID;
@@ -44,6 +44,7 @@ public final class SolarShieldListener implements Listener {
 
     private ScheduledTaskCompat statusTask;
     private final pepin.pepeforge.util.ui.BossBarManager bossBarManager;
+    private final org.bukkit.NamespacedKey chargesKey;
 
     public SolarShieldListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang,
             pepin.pepeforge.util.ui.BossBarManager bossBarManager) {
@@ -51,6 +52,7 @@ public final class SolarShieldListener implements Listener {
         this.itemFactory = itemFactory;
         this.lang = lang;
         this.bossBarManager = bossBarManager;
+        this.chargesKey = new org.bukkit.NamespacedKey(plugin, SolarShieldDefinition.CHARGES_KEY_STRING);
     }
 
     public void startStatusTask() {
@@ -289,7 +291,7 @@ public final class SolarShieldListener implements Listener {
         if (item == null || !item.hasItemMeta())
             return 0;
         Integer charges = item.getItemMeta().getPersistentDataContainer().get(
-                new org.bukkit.NamespacedKey(plugin, SolarShieldDefinition.CHARGES_KEY_STRING),
+                chargesKey,
                 PersistentDataType.INTEGER);
         return charges == null ? 0 : charges;
     }

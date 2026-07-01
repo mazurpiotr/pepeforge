@@ -1,4 +1,4 @@
-package pepin.pepeforge.util;
+package pepin.pepeforge.util.env;
 
 public final class ServerEnv {
 

@@ -1,4 +1,4 @@
-package pepin.pepeforge.util;
+package pepin.pepeforge.util.combat;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

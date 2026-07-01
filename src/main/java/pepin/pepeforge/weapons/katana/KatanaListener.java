@@ -35,10 +35,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.CombatUtils;
-import pepin.pepeforge.util.CooldownManager;
-import pepin.pepeforge.util.ScheduledTaskCompat;
-import pepin.pepeforge.util.SchedulerCompat;
+import pepin.pepeforge.util.combat.CombatUtils;
+import pepin.pepeforge.util.ui.ActionBarHelper;
+import pepin.pepeforge.util.cooldown.CooldownManager;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.Locale;
 import java.util.Map;
@@ -46,8 +47,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class KatanaListener implements Listener {
-
-    private static final int COOLDOWN_BAR_SEGMENTS = 20;
     private static final int OFF_HAND_INVENTORY_SLOT = 40;
     private static final String PARRY_COOLDOWN_KEY = "katana:parry";
 
@@ -80,7 +79,7 @@ public final class KatanaListener implements Listener {
 
                     if (!CombatUtils.hasEmptyOffHand(player)) {
                         clearActiveParry(player);
-                        showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+                        ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
                         return;
                     }
 
@@ -158,7 +157,7 @@ public final class KatanaListener implements Listener {
         ItemStack newMainHandItem = inventory.getItem(event.getNewSlot());
         if (itemFactory.isKatana(newMainHandItem) && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin, () ->
-                    showActionBar(player, lang.text("messages.two_handed.offhand_required"))
+                    ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
         }
     }
@@ -187,7 +186,7 @@ public final class KatanaListener implements Listener {
 
         if (mainHandKatana && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin, () ->
-                    showActionBar(player, lang.text("messages.two_handed.offhand_required"))
+                    ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
         }
     }
@@ -207,7 +206,7 @@ public final class KatanaListener implements Listener {
 
         if (itemFactory.isKatana(player.getInventory().getItemInMainHand()) && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin, () ->
-                    showActionBar(player, lang.text("messages.two_handed.offhand_required"))
+                    ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"))
             );
         }
     }
@@ -451,27 +450,14 @@ public final class KatanaListener implements Listener {
         double seconds = remainingMillis / 1000.0D;
         long cooldownMillis = KatanaDefinition.COOLDOWN_TICKS * 50L;
         double progress = Math.max(0.0D, Math.min(1.0D, 1.0D - ((double) remainingMillis / cooldownMillis)));
-        String bar = buildProgressBar(progress);
+        String bar = ActionBarHelper.buildProgressBar(progress);
         String message = lang.text("messages.katana.cooldown")
                 .replace("{bar}", bar)
                 .replace("{seconds}", String.format(Locale.US, "%.1f", seconds));
-        showActionBar(player, message);
+        ActionBarHelper.showActionBar(player, message);
     }
 
-    private void showActionBar(Player player, String message) {
-        String coloredMessage = ChatColor.translateAlternateColorCodes('&', message);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(coloredMessage));
-    }
 
-    private String buildProgressBar(double progress) {
-        int filledSegments = (int) Math.round(progress * COOLDOWN_BAR_SEGMENTS);
-        StringBuilder bar = new StringBuilder("&a");
-        for (int i = 0; i < COOLDOWN_BAR_SEGMENTS; i++) {
-            if (i == filledSegments) {
-                bar.append("&7");
-            }
-            bar.append('|');
-        }
-        return bar.toString();
-    }
+
+
 }

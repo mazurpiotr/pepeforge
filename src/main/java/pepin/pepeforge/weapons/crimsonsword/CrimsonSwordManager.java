@@ -10,7 +10,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.ItemMetaManager;
+import pepin.pepeforge.util.itemmeta.ItemMetaManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -303,7 +303,7 @@ public final class CrimsonSwordManager {
 
     private boolean useClientSideTranslations() {
         return plugin.getConfig().getBoolean("translations.use_client_side", true)
-                && pepin.pepeforge.util.ServerEnv.hasDataComponentApi();
+                && pepin.pepeforge.util.env.ServerEnv.hasDataComponentApi();
     }
 
     public String formatPercent(double value) {

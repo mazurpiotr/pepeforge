@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.module.ItemModule;
-import pepin.pepeforge.util.AuraManager;
+import pepin.pepeforge.util.aura.AuraManager;
 
 public class CrimsonSwordModule implements ItemModule {
 

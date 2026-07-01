@@ -5,7 +5,7 @@ import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.module.ItemModule;
-import pepin.pepeforge.util.CooldownManager;
+import pepin.pepeforge.util.cooldown.CooldownManager;
 
 public class KatanaModule implements ItemModule {
 

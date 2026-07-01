@@ -21,13 +21,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.ScheduledTaskCompat;
-import pepin.pepeforge.util.SchedulerCompat;
-import pepin.pepeforge.util.ProtectionUtil;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
+import pepin.pepeforge.util.protection.ProtectionUtil;
+import pepin.pepeforge.util.ui.ActionBarHelper;
 import pepin.pepeforge.weapons.crescent.CrescentMoonPower;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -41,11 +41,11 @@ public final class CrescentSpearListener implements Listener {
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final PluginLang lang;
-    private final Map<UUID, Integer> charge = new HashMap<>();
-    private final Map<UUID, Long> lastChargeGainTick = new HashMap<>();
-    private final Map<UUID, Long> lastCountedTick = new HashMap<>();
-    private final Map<UUID, Long> specialAttackUntilTick = new HashMap<>();
-    private final Set<UUID> armedPlayers = new HashSet<>();
+    private final Map<UUID, Integer> charge = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastChargeGainTick = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastCountedTick = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> specialAttackUntilTick = new ConcurrentHashMap<>();
+    private final Set<UUID> armedPlayers = ConcurrentHashMap.newKeySet();
 
     public CrescentSpearListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
         this.plugin = plugin;
@@ -295,32 +295,16 @@ public final class CrescentSpearListener implements Listener {
     private void showChargeActionBar(Player player, int currentCharge) {
         double progress = Math.max(0.0D, Math.min(1.0D, (double) currentCharge / CrescentSpearDefinition.CHARGE_MAX));
         String message = lang.text("messages.crescent_spear.charge")
-                .replace("{bar}", buildProgressBar(progress));
-        showActionBar(player, message);
+                .replace("{bar}", ActionBarHelper.buildProgressBar(progress));
+        ActionBarHelper.showActionBar(player, message);
     }
 
     private void showReadyActionBar(Player player) {
         String message = lang.text("messages.crescent_spear.ready")
-                .replace("{bar}", buildProgressBar(1.0D));
-        showActionBar(player, message);
+                .replace("{bar}", ActionBarHelper.buildProgressBar(1.0D));
+        ActionBarHelper.showActionBar(player, message);
     }
 
-    private void showActionBar(Player player, String message) {
-        player.spigot().sendMessage(
-                ChatMessageType.ACTION_BAR,
-                TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message))
-        );
-    }
 
-    private String buildProgressBar(double progress) {
-        int filled = (int) Math.round(progress * CHARGE_BAR_SEGMENTS);
-        StringBuilder bar = new StringBuilder("&d");
-        for (int i = 0; i < CHARGE_BAR_SEGMENTS; i++) {
-            if (i == filled) {
-                bar.append("&7");
-            }
-            bar.append('|');
-        }
-        return bar.toString();
-    }
+
 }

@@ -1,4 +1,4 @@
-package pepin.pepeforge.util;
+package pepin.pepeforge.util.itemmeta;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;

@@ -6,7 +6,7 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.module.ItemModule;
 
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.CooldownManager;
+import pepin.pepeforge.util.cooldown.CooldownManager;
 
 public final class AnchorModule implements ItemModule {
 

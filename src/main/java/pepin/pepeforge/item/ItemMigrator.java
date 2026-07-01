@@ -4,7 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import pepin.pepeforge.util.ItemMetaManager;
+import pepin.pepeforge.util.itemmeta.ItemMetaManager;
 import pepin.pepeforge.weapons.solarshield.SolarShieldDefinition;
 
 import java.util.HashMap;

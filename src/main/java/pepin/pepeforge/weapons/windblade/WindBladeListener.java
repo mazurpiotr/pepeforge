@@ -23,17 +23,17 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.AuraManager;
-import pepin.pepeforge.util.CooldownManager;
-import pepin.pepeforge.util.ScheduledTaskCompat;
-import pepin.pepeforge.util.SchedulerCompat;
+import pepin.pepeforge.util.aura.AuraManager;
+import pepin.pepeforge.util.ui.ActionBarHelper;
+import pepin.pepeforge.util.cooldown.CooldownManager;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.Locale;
 
 public final class WindBladeListener implements Listener {
 
     private static final int HOLDING_SPEED_DURATION_TICKS = 200;
-    private static final int COOLDOWN_BAR_SEGMENTS = 20;
     private static final String DASH_COOLDOWN_KEY = "wind_blade:dash";
     private static final long DASH_COOLDOWN_MILLIS = 5_000L;
     private static final double DASH_STRENGTH = 1.5D;
@@ -203,27 +203,14 @@ public final class WindBladeListener implements Listener {
     private void showCooldownActionBar(Player player, long remainingMillis) {
         double seconds = remainingMillis / 1000.0D;
         double progress = Math.max(0.0D, Math.min(1.0D, 1.0D - ((double) remainingMillis / DASH_COOLDOWN_MILLIS)));
-        String bar = buildProgressBar(progress);
+        String bar = ActionBarHelper.buildProgressBar(progress);
         String message = lang.text("messages.wind_blade.cooldown")
                 .replace("{bar}", bar)
                 .replace("{seconds}", String.format(Locale.US, "%.1f", seconds));
-        showActionBar(player, message);
+        ActionBarHelper.showActionBar(player, message);
     }
 
-    private void showActionBar(Player player, String message) {
-        String coloredMessage = ChatColor.translateAlternateColorCodes('&', message);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(coloredMessage));
-    }
 
-    private String buildProgressBar(double progress) {
-        int filled = (int) Math.round(progress * COOLDOWN_BAR_SEGMENTS);
 
-        StringBuilder bar = new StringBuilder();
 
-        for (int i = 0; i < COOLDOWN_BAR_SEGMENTS; i++) {
-            bar.append(i < filled ? "&a|" : "&8|");
-        }
-
-        return bar.toString();
-    }
 }

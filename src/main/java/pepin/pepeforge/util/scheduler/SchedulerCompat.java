@@ -1,4 +1,4 @@
-package pepin.pepeforge.util;
+package pepin.pepeforge.util.scheduler;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

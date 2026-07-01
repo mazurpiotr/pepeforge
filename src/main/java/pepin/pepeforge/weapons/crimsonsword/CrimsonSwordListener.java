@@ -9,10 +9,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.item.ItemFactory;
-import pepin.pepeforge.util.AuraManager;
+import pepin.pepeforge.util.aura.AuraManager;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -22,8 +21,8 @@ public final class CrimsonSwordListener implements Listener {
     private final ItemFactory itemFactory;
     private final CrimsonSwordManager manager;
     private final AuraManager auraManager;
-    private final Map<UUID, Double> auraDamageProgress = new HashMap<>();
-    private final Set<UUID> auraDrainingPlayers = new HashSet<>();
+    private final Map<UUID, Double> auraDamageProgress = new ConcurrentHashMap<>();
+    private final Set<UUID> auraDrainingPlayers = ConcurrentHashMap.newKeySet();
 
     public CrimsonSwordListener(ItemFactory itemFactory, CrimsonSwordManager manager, AuraManager auraManager) {
         this.itemFactory = itemFactory;

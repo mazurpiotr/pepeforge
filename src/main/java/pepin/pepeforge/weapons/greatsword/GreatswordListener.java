@@ -35,10 +35,11 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.ScheduledTaskCompat;
-import pepin.pepeforge.util.SchedulerCompat;
-import pepin.pepeforge.util.CombatUtils;
-import pepin.pepeforge.util.ProtectionUtil;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
+import pepin.pepeforge.util.combat.CombatUtils;
+import pepin.pepeforge.util.ui.ActionBarHelper;
+import pepin.pepeforge.util.protection.ProtectionUtil;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public final class GreatswordListener implements Listener {
 
                     if (!CombatUtils.hasEmptyOffHand(player)) {
                         clearPlayerState(player);
-                        showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+                        ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
                         return;
                     }
 
@@ -168,7 +169,7 @@ public final class GreatswordListener implements Listener {
 
         if (!CombatUtils.hasEmptyOffHand(player)) {
             clearPlayerState(player);
-            showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+            ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
             return;
         }
 
@@ -209,7 +210,7 @@ public final class GreatswordListener implements Listener {
 
         if (!CombatUtils.hasEmptyOffHand(player)) {
             clearPlayerState(player);
-            showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+            ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
             return;
         }
 
@@ -631,7 +632,7 @@ public final class GreatswordListener implements Listener {
                 .replace("{stage}", String.valueOf(state.stage()))
                 .replace("{max_stage}", String.valueOf(COMBO_STAGE_MAX));
         rhythmBarShown.add(player.getUniqueId());
-        showActionBar(player, message);
+        ActionBarHelper.showActionBar(player, message);
     }
 
     private void playRhythmCue(Player player, ComboState state, long currentTick) {
@@ -651,15 +652,11 @@ public final class GreatswordListener implements Listener {
 
     private void clearRhythmActionBar(Player player) {
         if (rhythmBarShown.remove(player.getUniqueId())) {
-            showActionBar(player, "");
+            ActionBarHelper.showActionBar(player, "");
         }
     }
 
-    private void showActionBar(Player player, String message) {
-        player.spigot().sendMessage(
-                ChatMessageType.ACTION_BAR,
-                TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message)));
-    }
+
 
     private String buildRhythmBar(ComboState state, long currentTick) {
         long elapsed = Math.max(0L, Math.min(RHYTHM_CYCLE_TICKS, currentTick - state.lastSuccessTick()));

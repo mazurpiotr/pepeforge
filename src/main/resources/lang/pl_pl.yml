@@ -33,6 +33,9 @@ messages:
     rhythm: "&6Rytm {bar} &f{stage}/{max_stage}"
   anchor:
     cooldown: "&cPrzyciągnięcie ładuje się... {bar} &7{seconds}s"
+  config:
+    reloaded: "&aPepeForge przeładowano pomyślnie."
+    reload_reminder: "&eKonfiguracja zapisana. Użyj przycisku &6Reload Plugin &elub &6/pepeforge reload &eaby zastosować zmiany."
 items:
   crescent_bow:
     fallback_name: "&#667DB4Łuk Półksiężyca"

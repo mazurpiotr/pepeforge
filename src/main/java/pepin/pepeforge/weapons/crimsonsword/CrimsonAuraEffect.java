@@ -7,7 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import pepin.pepeforge.util.aura.TimedAuraEffect;
-import pepin.pepeforge.util.ProtectionUtil;
+import pepin.pepeforge.util.protection.ProtectionUtil;
 
 
 import java.util.UUID;

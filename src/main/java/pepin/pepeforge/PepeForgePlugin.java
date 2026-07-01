@@ -8,8 +8,8 @@ import pepin.pepeforge.gui.CustomItemsMenuListener;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.recipe.RecipeDiscoveryRefresher;
-import pepin.pepeforge.util.AuraManager;
-import pepin.pepeforge.util.CooldownManager;
+import pepin.pepeforge.util.aura.AuraManager;
+import pepin.pepeforge.util.cooldown.CooldownManager;
 import pepin.pepeforge.weapons.crescent.CrescentAuraEffect;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 import pepin.pepeforge.recipe.SmithingUpgradeListener;
@@ -110,7 +110,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         crimsonSwordManager = new CrimsonSwordManager(this, lang);
         itemFactory = new ItemFactory(this, lang, crimsonSwordManager);
         statsManager = new StatisticsManager(this);
-        pepin.pepeforge.util.ProtectionUtil.initialize(this);
+        pepin.pepeforge.util.protection.ProtectionUtil.initialize(this);
         getServer().getPluginManager().registerEvents(new StatisticsListener(statsManager, itemFactory), this);
 
         boolean migrationEnabled = getConfig().getBoolean("migration.enabled", true);
@@ -134,7 +134,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents(new CustomItemsMenuListener(lang, itemFactory), this);
-        getServer().getPluginManager().registerEvents(new pepin.pepeforge.gui.ConfigMenuListener(this, itemFactory), this);
+        getServer().getPluginManager().registerEvents(new pepin.pepeforge.gui.ConfigMenuListener(this, itemFactory, lang), this);
 
         RecipeDiscoveryRefresher recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
             for (ItemModule module : modules) {
@@ -224,13 +224,18 @@ public final class PepeForgePlugin extends JavaPlugin {
 
         reloadConfig();
 
+        pepin.pepeforge.util.protection.ProtectionUtil.initialize(this);
+        lang = new PluginLang(this);
+        crimsonSwordManager = new CrimsonSwordManager(this, lang);
+        itemFactory = new ItemFactory(this, lang, crimsonSwordManager);
+
         boolean migrationEnabled = getConfig().getBoolean("migration.enabled", true);
         pepin.pepeforge.item.ItemMigrator itemMigrator = new pepin.pepeforge.item.ItemMigrator(this, itemFactory, migrationEnabled);
         
         getServer().getPluginManager().registerEvents(new StatisticsListener(statsManager, itemFactory), this);
         getServer().getPluginManager().registerEvents(new pepin.pepeforge.item.ItemMigrationListener(itemMigrator), this);
         getServer().getPluginManager().registerEvents(new CustomItemsMenuListener(lang, itemFactory), this);
-        getServer().getPluginManager().registerEvents(new pepin.pepeforge.gui.ConfigMenuListener(this, itemFactory), this);
+        getServer().getPluginManager().registerEvents(new pepin.pepeforge.gui.ConfigMenuListener(this, itemFactory, lang), this);
 
         RecipeDiscoveryRefresher recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
             for (ItemModule module : modules) {
@@ -240,8 +245,18 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(recipeDiscoveryRefresher, this);
         getServer().getPluginManager().registerEvents(new SmithingUpgradeListener(itemFactory), this);
 
+        auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
         auraManager.startTask();
+
         registerModules();
+
+        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory, crimsonSwordManager, statsManager, itemMigrator);
+        PluginCommand command = getCommand("pepeforge");
+        if (command != null) {
+            command.setExecutor(commandExecutor);
+            command.setTabCompleter(commandExecutor);
+        }
+
         recipeDiscoveryRefresher.refreshAllOnlinePlayers();
     }
 }

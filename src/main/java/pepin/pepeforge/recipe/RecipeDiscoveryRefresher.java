@@ -12,10 +12,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import pepin.pepeforge.util.ScheduledTaskCompat;
-import pepin.pepeforge.util.SchedulerCompat;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -24,7 +24,7 @@ public final class RecipeDiscoveryRefresher implements Listener {
 
     private final JavaPlugin plugin;
     private final Consumer<Player> discoverer;
-    private final Map<UUID, ScheduledTaskCompat> pendingTasks = new HashMap<>();
+    private final Map<UUID, ScheduledTaskCompat> pendingTasks = new ConcurrentHashMap<>();
 
     public RecipeDiscoveryRefresher(JavaPlugin plugin, Consumer<Player> discoverer) {
         this.plugin = plugin;

@@ -1,4 +1,4 @@
-package pepin.pepeforge.util;
+package pepin.pepeforge.util.cooldown;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

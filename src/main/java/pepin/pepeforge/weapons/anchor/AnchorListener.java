@@ -1,8 +1,5 @@
 package pepin.pepeforge.weapons.anchor;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,7 +17,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import pepin.pepeforge.util.ProtectionUtil;
+import pepin.pepeforge.util.protection.ProtectionUtil;
+import pepin.pepeforge.util.ui.ActionBarHelper;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -33,9 +31,9 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.CooldownManager;
-import pepin.pepeforge.util.ScheduledTaskCompat;
-import pepin.pepeforge.util.SchedulerCompat;
+import pepin.pepeforge.util.cooldown.CooldownManager;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -57,7 +55,8 @@ public final class AnchorListener implements Listener {
 
     private static final String ABILITY_COOLDOWN_KEY = "anchor:hook";
 
-    public AnchorListener(JavaPlugin plugin, ItemFactory itemFactory, CooldownManager cooldownManager, PluginLang lang) {
+    public AnchorListener(JavaPlugin plugin, ItemFactory itemFactory, CooldownManager cooldownManager,
+            PluginLang lang) {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.cooldownManager = cooldownManager;
@@ -101,7 +100,8 @@ public final class AnchorListener implements Listener {
                         if (loc != null && loc.getWorld() != null) {
                             loc.getWorld().dropItemNaturally(loc, stored);
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }
@@ -131,9 +131,12 @@ public final class AnchorListener implements Listener {
         Long cooldownUntil = pdc.get(cooldownKey, PersistentDataType.LONG);
 
         if (cooldownUntil == null || now >= cooldownUntil) {
-            // Apply Snare (SLOWNESS 10 + JUMP_BOOST 250) for the configured duration (e.g. 40 ticks = 2s)
-            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, AnchorDefinition.SNARE_DURATION_TICKS, 9, false, false, true));
-            target.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, AnchorDefinition.SNARE_DURATION_TICKS, 249, false, false, false));
+            // Apply Snare (SLOWNESS 10 + JUMP_BOOST 250) for the configured duration (e.g.
+            // 40 ticks = 2s)
+            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, AnchorDefinition.SNARE_DURATION_TICKS, 9,
+                    false, false, true));
+            target.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, AnchorDefinition.SNARE_DURATION_TICKS,
+                    249, false, false, false));
 
             // Set per-target cooldown
             pdc.set(cooldownKey, PersistentDataType.LONG, now + AnchorDefinition.SNARE_COOLDOWN_MILLIS);
@@ -142,14 +145,15 @@ public final class AnchorListener implements Listener {
             target.getWorld().playSound(target.getLocation(), Sound.BLOCK_ANVIL_LAND, 1.0f, 1.0f);
 
             // Spawn Tube Coral wrapping the feet
-            ItemDisplay coral = target.getWorld().spawn(target.getLocation().add(0, 0.1, 0), ItemDisplay.class, entity -> {
-                entity.setItemStack(new ItemStack(Material.TUBE_CORAL));
-                entity.setGravity(false);
-                entity.setPersistent(false);
-                Transformation trans = entity.getTransformation();
-                trans.getScale().set(1.3f, 1.3f, 1.3f);
-                entity.setTransformation(trans);
-            });
+            ItemDisplay coral = target.getWorld().spawn(target.getLocation().add(0, 0.1, 0), ItemDisplay.class,
+                    entity -> {
+                        entity.setItemStack(new ItemStack(Material.TUBE_CORAL));
+                        entity.setGravity(false);
+                        entity.setPersistent(false);
+                        Transformation trans = entity.getTransformation();
+                        trans.getScale().set(1.3f, 1.3f, 1.3f);
+                        entity.setTransformation(trans);
+                    });
             activeDisplays.add(coral);
 
             class SnareEffectTask implements Runnable {
@@ -238,8 +242,10 @@ public final class AnchorListener implements Listener {
             entity.setItemStack(anchorItem);
             entity.setGravity(false);
             entity.setPersistent(false);
-            // Rotate the model internally by 90 degrees around the Y-axis (yaw) so the narrow side (handle)
-            // faces the player. This lets the entity's actual pitch rotate correctly along the flight path.
+            // Rotate the model internally by 90 degrees around the Y-axis (yaw) so the
+            // narrow side (handle)
+            // faces the player. This lets the entity's actual pitch rotate correctly along
+            // the flight path.
             Transformation trans = entity.getTransformation();
             trans.getLeftRotation().rotateY((float) Math.toRadians(90.0));
             trans.getScale().set(2.0f, 2.0f, 2.0f);
@@ -252,7 +258,8 @@ public final class AnchorListener implements Listener {
             private int tick = 0;
             private ScheduledTaskCompat taskRef;
             private final Location currentLoc = startLoc.clone();
-            private final Vector velocity = direction.multiply(AnchorDefinition.THROW_SPEED); // Fired with configured velocity
+            private final Vector velocity = direction.multiply(AnchorDefinition.THROW_SPEED); // Fired with configured
+                                                                                              // velocity
 
             @Override
             public void run() {
@@ -287,8 +294,7 @@ public final class AnchorListener implements Listener {
                             FluidCollisionMode.NEVER,
                             true,
                             0.4D,
-                            entity -> entity != player && entity instanceof LivingEntity
-                    );
+                            entity -> entity != player && entity instanceof LivingEntity);
                 }
 
                 if (hit != null && (hit.getHitBlock() != null || hit.getHitEntity() != null)) {
@@ -303,7 +309,7 @@ public final class AnchorListener implements Listener {
                 if (velocity.lengthSquared() > 0.01D) {
                     teleportLoc.setDirection(velocity);
                 }
-                
+
                 SchedulerCompat.teleport(display, teleportLoc);
                 drawChain(player.getEyeLocation().add(0, -0.3, 0), currentLoc);
             }
@@ -317,7 +323,8 @@ public final class AnchorListener implements Listener {
                         if (distance > 2.2D) { // Only pull if they are outside the 2-block gap
                             Vector dir = toTarget.clone().normalize();
 
-                            // Each entity covers half of the remaining distance after leaving a 2.0 block gap
+                            // Each entity covers half of the remaining distance after leaving a 2.0 block
+                            // gap
                             double pullDistance = (distance - 2.0D) / 2.0D;
                             double speed = Math.min(AnchorDefinition.PULL_FORCE * 0.7D, pullDistance * 0.35D);
 
@@ -385,8 +392,7 @@ public final class AnchorListener implements Listener {
                             0.2,
                             0.2,
                             0.0,
-                            hit.getHitBlock().getBlockData()
-                    );
+                            hit.getHitBlock().getBlockData());
                 }
             }
 
@@ -406,8 +412,7 @@ public final class AnchorListener implements Listener {
                                 0.0,
                                 0.0,
                                 0.0,
-                                new Particle.DustOptions(org.bukkit.Color.fromRGB(150, 110, 70), 0.8f)
-                        );
+                                new Particle.DustOptions(org.bukkit.Color.fromRGB(150, 110, 70), 0.8f));
                     }
                 }
             }
@@ -455,26 +460,13 @@ public final class AnchorListener implements Listener {
 
     private void showCooldownActionBar(Player player, long remainingMillis) {
         double seconds = remainingMillis / 1000.0D;
-        double progress = Math.max(0.0D, Math.min(1.0D, 1.0D - ((double) remainingMillis / AnchorDefinition.ABILITY_COOLDOWN_MILLIS)));
-        String bar = buildProgressBar(progress);
+        double progress = Math.max(0.0D,
+                Math.min(1.0D, 1.0D - ((double) remainingMillis / AnchorDefinition.ABILITY_COOLDOWN_MILLIS)));
+        String bar = ActionBarHelper.buildProgressBar(progress);
         String message = lang.text("messages.anchor.cooldown")
                 .replace("{bar}", bar)
                 .replace("{seconds}", String.format(Locale.US, "%.1f", seconds));
-        showActionBar(player, message);
-    }
-
-    private void showActionBar(Player player, String message) {
-        String coloredMessage = ChatColor.translateAlternateColorCodes('&', message);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(coloredMessage));
-    }
-
-    private String buildProgressBar(double progress) {
-        int filled = (int) Math.round(progress * 20);
-        StringBuilder bar = new StringBuilder();
-        for (int i = 0; i < 20; i++) {
-            bar.append(i < filled ? "&a|" : "&8|");
-        }
-        return bar.toString();
+        ActionBarHelper.showActionBar(player, message);
     }
 
     @EventHandler

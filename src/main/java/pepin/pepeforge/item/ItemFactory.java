@@ -11,7 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.tools.chisel.ChiselDefinition;
 import pepin.pepeforge.tools.scythe.ScytheTier;
-import pepin.pepeforge.util.ItemMetaManager;
+import pepin.pepeforge.util.itemmeta.ItemMetaManager;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowDefinition;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
@@ -288,7 +288,7 @@ public final class ItemFactory {
         item.setItemMeta(meta);
 
         if (clientSideTranslations) {
-            pepin.pepeforge.util.PaperDataComponentAdapter.applyTranslatableItemTextData(
+            pepin.pepeforge.util.itemmeta.PaperDataComponentAdapter.applyTranslatableItemTextData(
                     item,
                     spec.translationKeyBase() + ".name",
                     spec.nameColor().colorName(),
@@ -300,7 +300,7 @@ public final class ItemFactory {
 
     private boolean useClientSideTranslations() {
         return plugin.getConfig().getBoolean("translations.use_client_side", true)
-                && pepin.pepeforge.util.ServerEnv.hasDataComponentApi();
+                && pepin.pepeforge.util.env.ServerEnv.hasDataComponentApi();
     }
 
     public ItemStack createByName(String name) {

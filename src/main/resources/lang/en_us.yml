@@ -33,6 +33,9 @@ messages:
     rhythm: "&6Rhythm {bar} &f{stage}/{max_stage}"
   anchor:
     cooldown: "&cAnchor hook recharging... {bar} &7{seconds}s"
+  config:
+    reloaded: "&aPepeForge reloaded successfully."
+    reload_reminder: "&eConfiguration saved. Use the &6Reload Plugin &ebutton or &6/pepeforge reload &eto apply changes."
 items:
   crescent_bow:
     fallback_name: "&#667DB4Crescent Bow"
