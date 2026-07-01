@@ -1,8 +1,5 @@
 package pepin.pepeforge.weapons.crescentspear;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -35,7 +32,6 @@ import java.util.UUID;
 
 public final class CrescentSpearListener implements Listener {
 
-    private static final int CHARGE_BAR_SEGMENTS = 20;
     private static final double ACTIVE_FRONT_ARC_DOT = 0.5D;
 
     private final JavaPlugin plugin;
@@ -81,7 +77,8 @@ public final class CrescentSpearListener implements Listener {
                             return;
                         }
 
-                        int decayedCharge = Math.max(0, currentCharge - CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL);
+                        int decayedCharge = Math.max(0,
+                                currentCharge - CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL);
                         if (decayedCharge == 0) {
                             charge.remove(playerId);
                             lastChargeGainTick.remove(playerId);
@@ -145,8 +142,7 @@ public final class CrescentSpearListener implements Listener {
         lastChargeGainTick.put(playerId, currentTick);
         int nextCharge = Math.min(
                 CrescentSpearDefinition.CHARGE_MAX,
-                charge.getOrDefault(playerId, 0) + CrescentSpearDefinition.CHARGE_PER_HIT
-        );
+                charge.getOrDefault(playerId, 0) + CrescentSpearDefinition.CHARGE_PER_HIT);
         charge.put(playerId, nextCharge);
 
         if (nextCharge >= CrescentSpearDefinition.CHARGE_MAX) {
@@ -168,7 +164,8 @@ public final class CrescentSpearListener implements Listener {
     }
 
     private void triggerActiveSkill(Player player) {
-        Location effectPoint = player.getEyeLocation().add(player.getLocation().getDirection().normalize().multiply(CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE));
+        Location effectPoint = player.getEyeLocation().add(player.getLocation().getDirection().normalize()
+                .multiply(CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE));
 
         playSpecialEffects(player.getWorld(), effectPoint);
 
@@ -177,8 +174,8 @@ public final class CrescentSpearListener implements Listener {
                 playerId,
                 player.getWorld().getGameTime()
                         + CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS
-                        + (long) ((CrescentSpearDefinition.ACTIVE_HIT_COUNT - 1) * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS)
-        );
+                        + (long) ((CrescentSpearDefinition.ACTIVE_HIT_COUNT - 1)
+                                * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS));
 
         double hitDamage = resolveActiveHitDamage(player);
         for (int i = 0; i < CrescentSpearDefinition.ACTIVE_HIT_COUNT; i++) {
@@ -199,7 +196,8 @@ public final class CrescentSpearListener implements Listener {
                 playSpecialEffects(player.getWorld(), target.getLocation().add(0.0D, 1.0D, 0.0D));
                 target.setNoDamageTicks(0);
                 target.damage(hitDamage, player);
-            }, CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS + (long) i * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS);
+            }, CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS
+                    + (long) i * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS);
         }
     }
 
@@ -211,15 +209,15 @@ public final class CrescentSpearListener implements Listener {
         for (Entity entity : player.getNearbyEntities(
                 CrescentSpearDefinition.ACTIVE_TARGET_RANGE,
                 CrescentSpearDefinition.ACTIVE_TARGET_RANGE,
-                CrescentSpearDefinition.ACTIVE_TARGET_RANGE
-        )) {
+                CrescentSpearDefinition.ACTIVE_TARGET_RANGE)) {
             if (!(entity instanceof LivingEntity livingTarget) || livingTarget == player || livingTarget.isDead()) {
                 continue;
             }
 
             Vector toTarget = livingTarget.getEyeLocation().toVector().subtract(player.getEyeLocation().toVector());
             double distanceSquared = toTarget.lengthSquared();
-            if (distanceSquared > CrescentSpearDefinition.ACTIVE_TARGET_RANGE * CrescentSpearDefinition.ACTIVE_TARGET_RANGE) {
+            if (distanceSquared > CrescentSpearDefinition.ACTIVE_TARGET_RANGE
+                    * CrescentSpearDefinition.ACTIVE_TARGET_RANGE) {
                 continue;
             }
 
@@ -253,13 +251,11 @@ public final class CrescentSpearListener implements Listener {
         Vector rotatedDirection = new Vector(
                 sweepDirection.getX() * cos - sweepDirection.getZ() * sin,
                 0.0D,
-                sweepDirection.getX() * sin + sweepDirection.getZ() * cos
-        );
+                sweepDirection.getX() * sin + sweepDirection.getZ() * cos);
 
         double distance = random.nextDouble(
                 CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE - 0.25D,
-                CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE + 0.15D
-        );
+                CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE + 0.15D);
         double verticalOffset = random.nextDouble(-0.08D, 0.08D);
         Location slashPoint = player.getEyeLocation()
                 .add(rotatedDirection.multiply(distance))
@@ -282,14 +278,12 @@ public final class CrescentSpearListener implements Listener {
                 point,
                 2,
                 0.03D, 0.03D, 0.03D,
-                0.01D
-        );
+                0.01D);
         world.playSound(
                 point,
                 Sound.BLOCK_AMETHYST_BLOCK_CHIME,
                 0.8f,
-                1.4f
-        );
+                1.4f);
     }
 
     private void showChargeActionBar(Player player, int currentCharge) {
@@ -304,7 +298,5 @@ public final class CrescentSpearListener implements Listener {
                 .replace("{bar}", ActionBarHelper.buildProgressBar(1.0D));
         ActionBarHelper.showActionBar(player, message);
     }
-
-
 
 }

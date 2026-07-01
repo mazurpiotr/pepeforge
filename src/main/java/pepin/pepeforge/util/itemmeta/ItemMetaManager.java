@@ -60,6 +60,10 @@ public final class ItemMetaManager {
         return ItemMetaCompat.readCustomModelData(meta);
     }
 
+    public static boolean hasCustomModelData(ItemMeta meta, int targetData) {
+        return ItemMetaCompat.hasCustomModelData(meta, targetData);
+    }
+
     public static String readItemModel(ItemMeta meta) {
         return ItemMetaCompat.readItemModel(meta);
     }

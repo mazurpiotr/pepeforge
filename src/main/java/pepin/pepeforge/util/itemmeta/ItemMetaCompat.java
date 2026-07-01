@@ -62,6 +62,14 @@ public final class ItemMetaCompat {
         return String.valueOf(meta.getCustomModelDataComponent().getFloats());
     }
 
+    public static boolean hasCustomModelData(ItemMeta meta, int targetData) {
+        if (!meta.hasCustomModelDataComponent()) {
+            return false;
+        }
+        List<Float> floats = meta.getCustomModelDataComponent().getFloats();
+        return !floats.isEmpty() && floats.get(0) == (float) targetData;
+    }
+
     public static String readItemModel(ItemMeta meta) {
         if (!meta.hasItemModel()) {
             return "-";

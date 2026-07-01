@@ -1,8 +1,5 @@
 package pepin.pepeforge.weapons.greatsword;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -613,7 +610,6 @@ public final class GreatswordListener implements Listener {
         clearRhythmActionBar(player);
     }
 
-
     private long currentTick(Player player) {
         return player.getWorld().getGameTime();
     }
@@ -655,8 +651,6 @@ public final class GreatswordListener implements Listener {
             ActionBarHelper.showActionBar(player, "");
         }
     }
-
-
 
     private String buildRhythmBar(ComboState state, long currentTick) {
         long elapsed = Math.max(0L, Math.min(RHYTHM_CYCLE_TICKS, currentTick - state.lastSuccessTick()));

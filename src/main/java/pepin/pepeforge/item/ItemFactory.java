@@ -411,7 +411,7 @@ public final class ItemFactory {
         }
         ItemMeta meta = item.getItemMeta();
         int targetData = active ? KatanaDefinition.PARRY_MODEL_DATA : KatanaDefinition.CUSTOM_MODEL_DATA;
-        if (meta.hasCustomModelData() && meta.getCustomModelData() == targetData) {
+        if (ItemMetaManager.hasCustomModelData(meta, targetData)) {
             return;
         }
         ItemMetaManager.setCustomModelData(meta, targetData);

@@ -1,8 +1,5 @@
 package pepin.pepeforge.weapons.windblade;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -44,8 +41,7 @@ public final class WindBladeListener implements Listener {
             0,
             true,
             false,
-            true
-    );
+            true);
 
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
@@ -58,8 +54,7 @@ public final class WindBladeListener implements Listener {
             ItemFactory itemFactory,
             PluginLang lang,
             CooldownManager cooldownManager,
-            AuraManager auraManager
-    ) {
+            AuraManager auraManager) {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.lang = lang;
@@ -152,8 +147,7 @@ public final class WindBladeListener implements Listener {
                 tier.hitSpeedAmplifier(),
                 true,
                 false,
-                true
-        ));
+                true));
     }
 
     @EventHandler
@@ -174,7 +168,8 @@ public final class WindBladeListener implements Listener {
 
         player.setVelocity(direction.multiply(DASH_STRENGTH).setY(DASH_LIFT));
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BREEZE_SHOOT, 1.0f, 1.2f);
-        player.getWorld().spawnParticle(Particle.GUST, player.getLocation().add(0.0D, 1.0D, 0.0D), 3, 0.5D, 0.5D, 0.5D, 0.0D);
+        player.getWorld().spawnParticle(Particle.GUST, player.getLocation().add(0.0D, 1.0D, 0.0D), 3, 0.5D, 0.5D, 0.5D,
+                0.0D);
     }
 
     private void applySpeedEffectIfBetter(Player player, PotionEffect candidate) {
@@ -209,8 +204,5 @@ public final class WindBladeListener implements Listener {
                 .replace("{seconds}", String.format(Locale.US, "%.1f", seconds));
         ActionBarHelper.showActionBar(player, message);
     }
-
-
-
 
 }

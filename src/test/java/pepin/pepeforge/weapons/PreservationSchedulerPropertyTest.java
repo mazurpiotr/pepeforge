@@ -24,10 +24,10 @@ import java.util.regex.Pattern;
 class PreservationSchedulerPropertyTest {
 
         private static final Path SCHEDULER_COMPAT_PATH = Path
-                        .of("src/main/java/pepin/pepeforge/util/SchedulerCompat.java");
+                        .of("src/main/java/pepin/pepeforge/util/scheduler/SchedulerCompat.java");
 
         private static final Path SCHEDULED_TASK_COMPAT_PATH = Path
-                        .of("src/main/java/pepin/pepeforge/util/ScheduledTaskCompat.java");
+                        .of("src/main/java/pepin/pepeforge/util/scheduler/ScheduledTaskCompat.java");
 
         private static final Path SOURCE_ROOT = Path.of("src/main/java/pepin/pepeforge/weapons");
 
