@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cOnly players can use this command."
     no_permission: "&cYou do not have permission to use this command."
-    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor> <player> or /pepeforge items"
+    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife> <player> or /pepeforge items"
     unknown_subcommand: "&cUnknown subcommand."
     unknown_item: "&cUnknown item: {item}"
     item_disabled: "&cThat item is currently disabled: {item}"
@@ -199,4 +199,13 @@ items:
       - "&3Right-click to throw the anchor, pulling"
       - "&3you to blocks or entities to you."
       - "&#3182CERare"
+      - "&6---------------"
+  throwing_knife:
+    fallback_name: "&#A0AEC0Throwing Knife"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &dKnife Throw"
+      - "&3Left-click to throw the knife."
+      - "&3Missed knives can be picked up from the ground."
+      - "&#A0AEC0Common"
       - "&6---------------"

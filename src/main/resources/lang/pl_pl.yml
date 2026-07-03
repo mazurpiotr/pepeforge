@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cTylko gracze mogą użyć tej komendy."
     no_permission: "&cNie masz uprawnień do użycia tej komendy."
-    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor> <player> lub /pepeforge items"
+    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife> <player> lub /pepeforge items"
     unknown_subcommand: "&cNieznana podkomenda."
     unknown_item: "&cNieznany przedmiot: {item}"
     item_disabled: "&cTen przedmiot jest obecnie wyłączony: {item}"
@@ -199,4 +199,13 @@ items:
       - "&3Prawy przycisk wyrzuca kotwicę, przyciągając"
       - "&3ciebie do bloków lub byty do ciebie."
       - "&#3182CERzadka"
+      - "&6---------------"
+  throwing_knife:
+    fallback_name: "&#A0AEC0Nóż do Rzucania"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &dRzut Nożem"
+      - "&3LPM rzuca nożem."
+      - "&3Chybione noże można podnieść z ziemi."
+      - "&#A0AEC0Pospolita"
       - "&6---------------"

@@ -10,6 +10,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.ColorUtil;
 import pepin.pepeforge.util.itemmeta.ItemMetaManager;
 
 import java.util.ArrayList;
@@ -140,13 +141,13 @@ public final class CrimsonSwordManager {
 
     private String fallbackName(String serverLang, int level) {
         String baseName = lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang);
-        return org.bukkit.ChatColor.translateAlternateColorCodes('&', baseName) + org.bukkit.ChatColor.GRAY + " [Lv. " + level + "]";
+        return ColorUtil.translate(baseName) + ColorUtil.GRAY + " [Lv. " + level + "]";
     }
 
     private List<String> fallbackFeatures(int level) {
         List<String> features = new ArrayList<>();
 
-        features.add(org.bukkit.ChatColor.translateAlternateColorCodes('&',
+        features.add(ColorUtil.translate(
                 lang.text("items.crimson_sword.features.edge")
                         .replace("{percent}", String.valueOf(damageBonusPercent(level)))
         ));
@@ -159,7 +160,7 @@ public final class CrimsonSwordManager {
     private void addLifestealFeature(int level, List<String> features) {
         double lifesteal = lifesteal(level);
         if (lifesteal <= 0.0D) {
-            features.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', lang.text("items.crimson_sword.features.lifesteal_locked")));
+            features.add(ColorUtil.translate(lang.text("items.crimson_sword.features.lifesteal_locked")));
             return;
         }
 
@@ -170,7 +171,7 @@ public final class CrimsonSwordManager {
                 ? lang.text("items.crimson_sword.features.lifesteal_next")
                 : lang.text("items.crimson_sword.features.lifesteal");
 
-        features.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', line
+        features.add(ColorUtil.translate(line
                 .replace("{percent}", formatPercent(lifesteal * 100))
                 .replace("{next_level}", String.valueOf(nextLevel))
                 .replace("{next_percent}", formatPercent(nextPercent * 100))
@@ -179,7 +180,7 @@ public final class CrimsonSwordManager {
 
     private void addAuraFeature(int level, List<String> features) {
         if (level < 10) {
-            features.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', lang.text("items.crimson_sword.features.aura_locked")));
+            features.add(ColorUtil.translate(lang.text("items.crimson_sword.features.aura_locked")));
             return;
         }
 
@@ -194,7 +195,7 @@ public final class CrimsonSwordManager {
                 ? lang.text("items.crimson_sword.features.aura_next")
                 : lang.text("items.crimson_sword.features.aura");
 
-        features.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', line
+        features.add(ColorUtil.translate(line
                 .replace("{seconds}", seconds)
                 .replace("{drain}", drain)
                 .replace("{radius}", radius)
@@ -221,14 +222,14 @@ public final class CrimsonSwordManager {
 
             if (line.contains("{features}")) {
                 if (features.isEmpty()) {
-                    result.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', line.replace("{features}", "-")));
+                    result.add(ColorUtil.translate(line.replace("{features}", "-")));
                 } else {
                     for(String f : features) {
-                        result.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', line.replace("{features}", "") + f));
+                        result.add(ColorUtil.translate(line.replace("{features}", "") + f));
                     }
                 }
             } else {
-                result.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', line));
+                result.add(ColorUtil.translate(line));
             }
         }
 

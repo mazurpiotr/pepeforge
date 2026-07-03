@@ -68,4 +68,7 @@ items:
   anchor:
     enabled: true
     recipe_enabled: true
+  throwing_knife:
+    enabled: true
+    recipe_enabled: true
 

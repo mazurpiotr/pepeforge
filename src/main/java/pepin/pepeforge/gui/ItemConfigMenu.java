@@ -1,13 +1,13 @@
 package pepin.pepeforge.gui;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.util.ColorUtil;
 
 public final class ItemConfigMenu {
 
@@ -15,7 +15,7 @@ public final class ItemConfigMenu {
     }
 
     public static Inventory create(String itemId, ItemFactory itemFactory) {
-        Inventory inventory = Bukkit.createInventory(new Holder(itemId), 27, ChatColor.DARK_GRAY + "Config: " + itemId);
+        Inventory inventory = Bukkit.createInventory(new Holder(itemId), 27, ColorUtil.DARK_GRAY + "Config: " + itemId);
         
         boolean isEnabled = itemFactory.isItemEnabled(itemId);
         boolean isRecipeEnabled = itemFactory.isRecipeEnabled(itemId);
@@ -23,7 +23,7 @@ public final class ItemConfigMenu {
         ItemStack enabledBtn = new ItemStack(isEnabled ? Material.LIME_DYE : Material.RED_DYE);
         ItemMeta enabledMeta = enabledBtn.getItemMeta();
         if (enabledMeta != null) {
-            enabledMeta.setDisplayName(ChatColor.WHITE + "Item Enabled: " + (isEnabled ? ChatColor.GREEN + "TRUE" : ChatColor.RED + "FALSE"));
+            enabledMeta.setDisplayName(ColorUtil.WHITE + "Item Enabled: " + (isEnabled ? ColorUtil.GREEN + "TRUE" : ColorUtil.RED + "FALSE"));
             enabledBtn.setItemMeta(enabledMeta);
         }
         inventory.setItem(11, enabledBtn);
@@ -31,7 +31,7 @@ public final class ItemConfigMenu {
         ItemStack recipeBtn = new ItemStack(isRecipeEnabled ? Material.LIME_DYE : Material.RED_DYE);
         ItemMeta recipeMeta = recipeBtn.getItemMeta();
         if (recipeMeta != null) {
-            recipeMeta.setDisplayName(ChatColor.WHITE + "Recipe Enabled: " + (isRecipeEnabled ? ChatColor.GREEN + "TRUE" : ChatColor.RED + "FALSE"));
+            recipeMeta.setDisplayName(ColorUtil.WHITE + "Recipe Enabled: " + (isRecipeEnabled ? ColorUtil.GREEN + "TRUE" : ColorUtil.RED + "FALSE"));
             recipeBtn.setItemMeta(recipeMeta);
         }
         inventory.setItem(15, recipeBtn);
@@ -39,7 +39,7 @@ public final class ItemConfigMenu {
         ItemStack backBtn = new ItemStack(Material.ARROW);
         ItemMeta backMeta = backBtn.getItemMeta();
         if (backMeta != null) {
-            backMeta.setDisplayName(ChatColor.YELLOW + "Back");
+            backMeta.setDisplayName(ColorUtil.YELLOW + "Back");
             backBtn.setItemMeta(backMeta);
         }
         inventory.setItem(26, backBtn);

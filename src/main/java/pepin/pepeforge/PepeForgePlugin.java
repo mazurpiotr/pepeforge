@@ -31,6 +31,7 @@ import pepin.pepeforge.weapons.katana.KatanaModule;
 import pepin.pepeforge.weapons.solarshield.SolarShieldModule;
 import pepin.pepeforge.weapons.windblade.WindBladeModule;
 import pepin.pepeforge.weapons.anchor.AnchorModule;
+import pepin.pepeforge.weapons.throwingknife.ThrowingKnifeModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,6 +178,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         modules.add(new CrimsonSwordModule(this, itemFactory, crimsonSwordManager, auraManager));
         modules.add(new SolarShieldModule(this, itemFactory, lang, bossBarManager));
         modules.add(new AnchorModule(this, itemFactory, cooldownManager, lang));
+        modules.add(new ThrowingKnifeModule(this, itemFactory, cooldownManager));
 
         for (ItemModule module : modules) {
             module.onEnable();

@@ -129,5 +129,12 @@
   "item.pepeforge.anchor.lore.5": "§3Right-click to throw the anchor, pulling",
   "item.pepeforge.anchor.lore.6": "§3you to blocks or entities to you.",
   "item.pepeforge.anchor.lore.7": "Rare",
-  "item.pepeforge.anchor.lore.8": "§6---------------"
+  "item.pepeforge.anchor.lore.8": "§6---------------",
+  "item.pepeforge.throwing_knife.name": "Throwing Knife",
+  "item.pepeforge.throwing_knife.lore.1": "§6---------------",
+  "item.pepeforge.throwing_knife.lore.2": "§eAbility: §dKnife Throw",
+  "item.pepeforge.throwing_knife.lore.3": "§3Left-click to throw the knife.",
+  "item.pepeforge.throwing_knife.lore.4": "§3Missed knives can be picked up from the ground.",
+  "item.pepeforge.throwing_knife.lore.5": "Common",
+  "item.pepeforge.throwing_knife.lore.6": "§6---------------"
 }

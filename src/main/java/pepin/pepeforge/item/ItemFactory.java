@@ -21,6 +21,7 @@ import pepin.pepeforge.weapons.katana.KatanaDefinition;
 import pepin.pepeforge.weapons.solarshield.SolarShieldDefinition;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
 import pepin.pepeforge.weapons.anchor.AnchorDefinition;
+import pepin.pepeforge.weapons.throwingknife.ThrowingKnifeDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,8 @@ public final class ItemFactory {
             ItemIds.NETHERITE_SCYTHE,
             ItemIds.CRIMSON_SWORD,
             ItemIds.SOLAR_SHIELD,
-            ItemIds.ANCHOR);
+            ItemIds.ANCHOR,
+            ItemIds.THROWING_KNIFE);
 
     private final NamespacedKey itemIdKey;
     private final JavaPlugin plugin;
@@ -227,6 +229,24 @@ public final class ItemFactory {
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", AnchorDefinition.ATTACK_SPEED))));
     }
 
+    public ItemStack createThrowingKnife() {
+        return createItem(new ItemSpec(
+                ThrowingKnifeDefinition.ITEM_ID,
+                ThrowingKnifeDefinition.BASE_MATERIAL,
+                ThrowingKnifeDefinition.LANG_PATH,
+                ThrowingKnifeDefinition.TRANSLATION_KEY_BASE,
+                ThrowingKnifeDefinition.LORE_LINE_COUNT,
+                ThrowingKnifeDefinition.RARITY,
+                ThrowingKnifeDefinition.NAME_COLOR,
+                ThrowingKnifeDefinition.CUSTOM_MODEL_DATA,
+                ThrowingKnifeDefinition.MODEL_KEY,
+                List.of()));
+    }
+
+    public boolean isThrowingKnife(ItemStack item) {
+        return ItemIds.THROWING_KNIFE.equals(getItemId(item)) && isItemEnabled(ItemIds.THROWING_KNIFE);
+    }
+
     public void updateSolarShieldVisuals(ItemStack item, int charges) {
         if (item == null || !isSolarShield(item) || !item.hasItemMeta()) {
             return;
@@ -287,6 +307,12 @@ public final class ItemFactory {
         meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, spec.itemId());
         item.setItemMeta(meta);
 
+        if (pepin.pepeforge.util.env.ServerEnv.hasDataComponentApi()) {
+            if (spec.itemId().equals(ItemIds.THROWING_KNIFE)) {
+                pepin.pepeforge.util.itemmeta.PaperDataComponentAdapter.applyMaxStackSize(item, 16);
+            }
+        }
+
         if (clientSideTranslations) {
             pepin.pepeforge.util.itemmeta.PaperDataComponentAdapter.applyTranslatableItemTextData(
                     item,
@@ -325,6 +351,7 @@ public final class ItemFactory {
             case ItemIds.CRIMSON_SWORD -> createCrimsonSword();
             case ItemIds.SOLAR_SHIELD -> createSolarShield();
             case ItemIds.ANCHOR -> createAnchor();
+            case ItemIds.THROWING_KNIFE -> createThrowingKnife();
             default -> null;
         };
     }
@@ -530,6 +557,7 @@ public final class ItemFactory {
             case ItemIds.CRIMSON_SWORD -> lang.itemFallbackName(CrimsonSwordDefinition.LANG_PATH);
             case ItemIds.SOLAR_SHIELD -> lang.itemFallbackName(SolarShieldDefinition.LANG_PATH);
             case ItemIds.ANCHOR -> lang.itemFallbackName(AnchorDefinition.LANG_PATH);
+            case ItemIds.THROWING_KNIFE -> lang.itemFallbackName(ThrowingKnifeDefinition.LANG_PATH);
             default -> null;
         };
     }

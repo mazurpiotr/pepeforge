@@ -1,6 +1,5 @@
 package pepin.pepeforge.lang;
 
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,12 +13,8 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class PluginLang {
-
-    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("&#([0-9a-fA-F]{6})");
 
     private final YamlConfiguration messages;
     private final Map<String, YamlConfiguration> langFiles = new HashMap<>();
@@ -131,22 +126,7 @@ public final class PluginLang {
     }
 
     private String color(String value) {
-        return ChatColor.translateAlternateColorCodes('&', translateHexColors(value));
-    }
-
-    private String translateHexColors(String value) {
-        Matcher matcher = HEX_COLOR_PATTERN.matcher(value);
-        StringBuffer buffer = new StringBuffer();
-        while (matcher.find()) {
-            String hex = matcher.group(1);
-            StringBuilder replacement = new StringBuilder("&x");
-            for (char character : hex.toCharArray()) {
-                replacement.append('&').append(character);
-            }
-            matcher.appendReplacement(buffer, Matcher.quoteReplacement(replacement.toString()));
-        }
-        matcher.appendTail(buffer);
-        return buffer.toString();
+        return pepin.pepeforge.util.ColorUtil.translate(value);
     }
 
     private String resolveText(String path, String fallback) {

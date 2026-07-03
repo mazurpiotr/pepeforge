@@ -65,4 +65,8 @@ public final class PaperDataComponentAdapter {
         }
         return component;
     }
+
+    public static void applyMaxStackSize(ItemStack item, int maxStackSize) {
+        item.setData(DataComponentTypes.MAX_STACK_SIZE, maxStackSize);
+    }
 }

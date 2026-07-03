@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.gui.CustomItemsMenu;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.ColorUtil;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 
@@ -114,7 +115,7 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (args.length != 2) {
-                sender.sendMessage(org.bukkit.ChatColor.RED + "Usage: /pepeforge migration <on|pause|disable>");
+                sender.sendMessage(ColorUtil.RED + "Usage: /pepeforge migration <on|pause|disable>");
                 return true;
             }
             String action = args[1].toLowerCase(java.util.Locale.ROOT);
@@ -124,17 +125,17 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
                     itemMigrator.setActive(true);
                     plugin.getConfig().set("migration.enabled", true);
                     plugin.saveConfig();
-                    sender.sendMessage(org.bukkit.ChatColor.GREEN + "Lazy Item Migration enabled completely.");
+                    sender.sendMessage(ColorUtil.GREEN + "Lazy Item Migration enabled completely.");
                 } else if ("pause".equals(action)) {
                     itemMigrator.setActive(false);
-                    sender.sendMessage(org.bukkit.ChatColor.YELLOW + "Lazy Item Migration paused until restart.");
+                    sender.sendMessage(ColorUtil.YELLOW + "Lazy Item Migration paused until restart.");
                 } else if ("disable".equals(action) || "off".equals(action)) {
                     itemMigrator.setActive(false);
                     plugin.getConfig().set("migration.enabled", false);
                     plugin.saveConfig();
-                    sender.sendMessage(org.bukkit.ChatColor.RED + "Lazy Item Migration disabled completely.");
+                    sender.sendMessage(ColorUtil.RED + "Lazy Item Migration disabled completely.");
                 } else {
-                    sender.sendMessage(org.bukkit.ChatColor.RED + "Invalid state. Use on, pause, or disable.");
+                    sender.sendMessage(ColorUtil.RED + "Invalid state. Use on, pause, or disable.");
                 }
             }
             return true;

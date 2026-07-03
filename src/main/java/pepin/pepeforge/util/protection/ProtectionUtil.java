@@ -43,29 +43,41 @@ public final class ProtectionUtil {
         }
 
         try {
-            DamageSource source = DamageSource.builder(DamageType.PLAYER_ATTACK)
-                    .withDirectEntity(player)
-                    .withCausingEntity(player)
-                    .build();
+            try {
+                DamageSource source = DamageSource.builder(DamageType.PLAYER_ATTACK)
+                        .withDirectEntity(player)
+                        .withCausingEntity(player)
+                        .build();
 
-            // Using the non-deprecated constructor to avoid warnings.
-            // We pass raw Maps to avoid importing the deprecated DamageModifier enum.
-            @SuppressWarnings({"unchecked", "rawtypes"})
-            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
-                    player,
-                    target,
-                    DamageCause.ENTITY_ATTACK,
-                    source,
-                    new java.util.HashMap(),
-                    new java.util.HashMap(),
-                    false
-            );
+                // Try modern constructor first (expects base modifier if maps are passed, so we construct it carefully or let it fail to fallback)
+                @SuppressWarnings({"unchecked", "rawtypes"})
+                EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                        player,
+                        target,
+                        DamageCause.ENTITY_ATTACK,
+                        source,
+                        new java.util.HashMap(),
+                        new java.util.HashMap(),
+                        false
+                );
 
-            Bukkit.getPluginManager().callEvent(event);
-            return !event.isCancelled();
-        } catch (Exception e) {
+                Bukkit.getPluginManager().callEvent(event);
+                return !event.isCancelled();
+            } catch (Throwable t) {
+                // Fallback to classic constructor supported by all silniks/forks (including CraftBukkit/Spigot/Paper)
+                @SuppressWarnings("deprecation")
+                EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                        player,
+                        target,
+                        DamageCause.ENTITY_ATTACK,
+                        1.0D
+                );
+                Bukkit.getPluginManager().callEvent(event);
+                return !event.isCancelled();
+            }
+        } catch (Throwable t2) {
             // Fallback to true if event creation/execution encounters any errors
-            pluginInstance.getLogger().warning("Error checking damage protection: " + e.getMessage());
+            pluginInstance.getLogger().warning("Error checking damage protection: " + t2.getMessage());
             return true;
         }
     }

@@ -48,7 +48,7 @@ public final class PaperItemMetaAdapter {
 
     private static Component parse(String text) {
         if (text == null) return null;
-        // Use legacySection to properly parse strings that already went through ChatColor translation
+        // Use legacySection to properly parse strings that already went through ColorUtil translation
         return LegacyComponentSerializer.legacySection().deserialize(text);
     }
 

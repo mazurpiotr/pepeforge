@@ -126,5 +126,12 @@
   "item.pepeforge.anchor.lore.5": "§3Prawy przycisk wyrzuca kotwicę, przyciągając",
   "item.pepeforge.anchor.lore.6": "§3ciebie do bloków lub byty do ciebie.",
   "item.pepeforge.anchor.lore.7": "Rzadka",
-  "item.pepeforge.anchor.lore.8": "§6---------------"
+  "item.pepeforge.anchor.lore.8": "§6---------------",
+  "item.pepeforge.throwing_knife.name": "Nóż do Rzucania",
+  "item.pepeforge.throwing_knife.lore.1": "§6---------------",
+  "item.pepeforge.throwing_knife.lore.2": "§eUmiejętność: §dRzut Nożem",
+  "item.pepeforge.throwing_knife.lore.3": "§3LPM rzuca nożem.",
+  "item.pepeforge.throwing_knife.lore.4": "§3Chybione noże można podnieść z ziemi.",
+  "item.pepeforge.throwing_knife.lore.5": "Pospolita",
+  "item.pepeforge.throwing_knife.lore.6": "§6---------------"
 }

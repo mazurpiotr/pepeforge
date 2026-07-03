@@ -18,6 +18,7 @@ public final class ItemIds {
     public static final String CRIMSON_SWORD = "crimson_sword";
     public static final String SOLAR_SHIELD = "solar_shield";
     public static final String ANCHOR = "anchor";
+    public static final String THROWING_KNIFE = "throwing_knife";
 
     private ItemIds() {
     }

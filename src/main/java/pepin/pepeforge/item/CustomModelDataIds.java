@@ -31,6 +31,9 @@ public final class CustomModelDataIds {
     public static final int NETHERITE_WIND_BLADE = 213001;
     public static final int NETHERITE_GREATSWORD = 213002;
 
+    // SNOWBALL family in the resource pack (vanilla base item grouping, not gameplay grouping)
+    public static final int THROWING_KNIFE = 261001;
+
     private CustomModelDataIds() {
     }
 }
