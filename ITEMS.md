@@ -13,7 +13,9 @@ Detailed item and recipe reference for the current Pepe's Forge item set.
 - [Solar Shield](#️-solar-shield)
 - [Crimson Sword](#-crimson-sword)
 - [Anchor](#-anchor)
+- [Throwing Knife](#-throwing-knife)
 - [Give Names](#give-names)
+
 
 ## 🪚 Chisel
 
@@ -23,7 +25,6 @@ Decorative utility tool for cycling supported block variants.
 |---------|---------|
 | Use | Right-click a supported block to advance one decorative variant |
 | Reverse | Sneak + right-click to cycle backward |
-| Rarity | Common |
 
 **Crafting** (Shaped Recipe):
 
@@ -110,7 +111,6 @@ Moon-themed ranged weapon that fires a three-arrow volley.
 | Day | Deals 1 less damage during the day |
 | Moonlight | Deals 2 bonus damage at night under open sky |
 | Visual | Subtly shimmers under moonlight |
-| Rarity | Epic |
 
 **Crafting** (Shaped Recipe):
 
@@ -127,7 +127,6 @@ Moon-themed melee weapon with an armed follow-up burst.
 | Day | Deals 1 less damage during the day |
 | Moonlight | Deals 2 bonus damage at night under open sky |
 | Visual | Subtly shimmers under moonlight |
-| Rarity | Epic |
 
 **Crafting** (Shaped Recipe):
 
@@ -142,7 +141,6 @@ Two-handed parry weapon built around short defensive timing windows.
 | Parry | Right-click enters a brief parry stance |
 | Defense | Blocks melee and reflects projectiles during the active window |
 | Restriction | Requires an empty off-hand for custom mechanics |
-| Rarity | Rare |
 
 **Crafting** (Shaped Recipe):
 
@@ -150,7 +148,8 @@ Two-handed parry weapon built around short defensive timing windows.
 
 ## ☀️ Solar Shield
 
-A legendary sun-blessed shield that charges passively during the day. *Ancient Cities were not always shrouded in darkness...*
+A legendary sun-blessed shield that charges passively during the day.
+*Ancient Cities were not always shrouded in darkness...*
 
 | Feature | Details |
 |---------|---------|
@@ -167,11 +166,9 @@ A legendary sun-blessed shield that charges passively during the day. *Ancient C
 
 A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
 
-| Property | Details |
+| Feature | Details |
 |----------|---------|
-| **Rarity** | Legendary |
 | **Acquisition** | Boss Drop / Quest Reward |
-| **Level Cap** | 30 |
 | **Experience Source** | Damage Dealt |
 | **Passive Scaling** | +1% Damage per weapon level (up to +30% at level 30) |
 
@@ -192,23 +189,39 @@ A legendary weapon that grows stronger through combat, feeding on the blood of i
 
 A heavy, slow-swinging marine weapon with crowd-control capability and a grappling-hook active utility.
 
-| Property | Details |
-|---|---|
-| **Attack Damage** | 8 |
-| **Attack Speed** | 0.5 (4.0 - 3.5 modifier) |
-| **Rarity** | Rare |
-| **LPM Passive** | Inflicts a **Snare** (Slowness 10 + Jump Boost 250) on targets for 2 seconds (5s per-target cooldown). A Tube Coral display wraps the snared target's feet (without particles). |
-| **PPM Active** | Launches the anchor as a projectile. Hitting a **block** pulls the player to the block. Hitting a **living entity** pulls both player and target to meet in the middle. (1s cooldown, 20 block range). |
+| Feature | Details |
+|---------|---------|
+| **Snare (LPM)** | Melee attacks temporarily lock the target in place and prevent jumping, wrapping their feet in a visual coral display. |
+| **Hook (PPM)** | Right-click launches the anchor as a projectile. Hitting a block pulls you to it, while hitting a living entity pulls you and the target together to meet in the middle. |
 
 **Crafting** (Shaped Recipe):
 - `I` = Iron Ingot
 - `B` = Iron Block
-- `R` = Lead (Smycz)
+- `R` = Lead
 
 ```
 [Iron Ingot] [Iron Block] [Iron Ingot]
 [          ] [Iron Ingot] [          ]
 [          ] [Iron Ingot] [Lead      ]
+```
+
+## 🗡️ Throwing Knife
+
+A consumable ranged weapon that's perfect for finishing off fleeing enemies or opening a fight from a distance.
+
+| Feature | Details |
+|---|---|
+| **Throwing** | Can be thrown rapidly with a short cooldown. |
+
+**Crafting** (Shaped Recipe):
+- `I` = Iron Ingot
+- `S` = Stick
+
+Result: **4x Throwing Knife**
+
+```
+[          ] [Iron Ingot]
+[Stick     ] [          ]
 ```
 
 ## Give Names
@@ -231,3 +244,5 @@ Available internal item names for `/pepeforge give`:
 - `crimson_sword`
 - `solar_shield`
 - `anchor`
+- `throwing_knife`
+
