@@ -40,10 +40,7 @@ public final class CrescentBowRecipeDiscoveryListener implements Listener {
 
     @EventHandler
     public void onPlayerRecipeDiscover(PlayerRecipeDiscoverEvent event) {
-        if (event.getRecipe() == null || event.getRecipe().getKey() == null) {
-            return;
-        }
-        if (CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED.equals(event.getRecipe().getKey())) {
+        if (CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED.equals(event.getRecipe())) {
             event.setCancelled(true);
         }
     }

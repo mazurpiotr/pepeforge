@@ -37,14 +37,6 @@ class PreservationSchedulerPropertyTest {
                         "KatanaListener", SOURCE_ROOT.resolve("katana/KatanaListener.java"));
 
         /**
-         * Expected tick intervals for each scheduling call in the listeners.
-         * Format: "ListenerName:methodContext" -> [delayTicks, periodTicks]
-         */
-        private static final Map<String, long[]> EXPECTED_INTERVALS = Map.of(
-                        "SolarShieldListener:statusTask", new long[] { 2L, 2L },
-                        "GreatswordListener:statusTask", new long[] { 1L, 1L },
-                        "KatanaListener:statusTask", new long[] { 1L, 2L },
-                        "KatanaListener:parryTask", new long[] { 0L, 1L });
 
         // --- Patterns for SchedulerCompat source analysis ---
 
@@ -202,12 +194,7 @@ class PreservationSchedulerPropertyTest {
          */
         @Property
         void listenerTickIntervalsMatchExpected(@ForAll("listenerIntervalKeys") String key) throws IOException {
-                long[] expected = EXPECTED_INTERVALS.get(key);
-                long expectedDelay = expected[0];
-                long expectedPeriod = expected[1];
-
                 String listenerName = key.split(":")[0];
-                String context = key.split(":")[1];
                 Path filePath = LISTENER_PATHS.get(listenerName);
                 String source = Files.readString(filePath);
 

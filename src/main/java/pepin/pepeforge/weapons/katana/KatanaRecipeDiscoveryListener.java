@@ -40,10 +40,7 @@ public final class KatanaRecipeDiscoveryListener implements Listener {
 
     @EventHandler
     public void onPlayerRecipeDiscover(PlayerRecipeDiscoverEvent event) {
-        if (event.getRecipe() == null || event.getRecipe().getKey() == null) {
-            return;
-        }
-        if (KatanaRecipeKeys.KATANA_MIRRORED.equals(event.getRecipe().getKey())) {
+        if (KatanaRecipeKeys.KATANA_MIRRORED.equals(event.getRecipe())) {
             event.setCancelled(true);
         }
     }

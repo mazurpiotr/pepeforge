@@ -26,8 +26,10 @@ public final class ProtectionUtil {
     }
 
     /**
-     * Checks if a player is allowed to damage/affect an entity according to server protections
-     * (e.g. WorldGuard, GriefPrevention, Towny, Lands, etc.) without actually causing damage.
+     * Checks if a player is allowed to damage/affect an entity according to server
+     * protections
+     * (e.g. WorldGuard, GriefPrevention, Towny, Lands, etc.) without actually
+     * causing damage.
      *
      * @param player the player performing the action
      * @param target the target entity
@@ -49,8 +51,9 @@ public final class ProtectionUtil {
                         .withCausingEntity(player)
                         .build();
 
-                // Try modern constructor first (expects base modifier if maps are passed, so we construct it carefully or let it fail to fallback)
-                @SuppressWarnings({"unchecked", "rawtypes"})
+                // Try modern constructor first (expects base modifier if maps are passed, so we
+                // construct it carefully or let it fail to fallback)
+                @SuppressWarnings({ "unchecked", "rawtypes" })
                 EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
                         player,
                         target,
@@ -58,20 +61,19 @@ public final class ProtectionUtil {
                         source,
                         new java.util.HashMap(),
                         new java.util.HashMap(),
-                        false
-                );
+                        false);
 
                 Bukkit.getPluginManager().callEvent(event);
                 return !event.isCancelled();
             } catch (Throwable t) {
-                // Fallback to classic constructor supported by all silniks/forks (including CraftBukkit/Spigot/Paper)
-                @SuppressWarnings("deprecation")
+                // Fallback to classic constructor supported by all silniks/forks (including
+                // CraftBukkit/Spigot/Paper)
+                @SuppressWarnings("removal")
                 EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
                         player,
                         target,
                         DamageCause.ENTITY_ATTACK,
-                        1.0D
-                );
+                        1.0D);
                 Bukkit.getPluginManager().callEvent(event);
                 return !event.isCancelled();
             }

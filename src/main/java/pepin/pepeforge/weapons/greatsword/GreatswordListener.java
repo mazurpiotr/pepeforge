@@ -425,10 +425,10 @@ public final class GreatswordListener implements Listener {
         }
 
         return candidates.stream()
-                .sorted(Comparator.comparingDouble(AreaCandidate::distanceSquared))
-                .limit(AREA_MAX_TARGETS)
-                .map(AreaCandidate::target)
-                .toList();
+            .sorted(Comparator.comparingDouble(candidate -> candidate.distanceSquared()))
+            .limit(AREA_MAX_TARGETS)
+            .map(candidate -> candidate.target())
+            .toList();
     }
 
     private void applyAreaAttack(

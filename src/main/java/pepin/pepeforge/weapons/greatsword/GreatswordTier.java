@@ -26,8 +26,7 @@ public enum GreatswordTier {
             new NamespacedKey("pepeforge", "iron_greatsword"),
             CustomModelDataIds.IRON_GREATSWORD,
             6.0D,
-            -0.5D
-    ),
+            -0.5D),
     DIAMOND(
             ItemIds.DIAMOND_GREATSWORD,
             "diamond_greatsword",
@@ -41,8 +40,7 @@ public enum GreatswordTier {
             new NamespacedKey("pepeforge", "diamond_greatsword"),
             CustomModelDataIds.DIAMOND_GREATSWORD,
             7.0D,
-            -0.5D
-    ),
+            -0.5D),
     NETHERITE(
             ItemIds.NETHERITE_GREATSWORD,
             "netherite_greatsword",
@@ -56,8 +54,7 @@ public enum GreatswordTier {
             new NamespacedKey("pepeforge", "netherite_greatsword"),
             CustomModelDataIds.NETHERITE_GREATSWORD,
             8.0D,
-            -0.5D
-    );
+            -0.5D);
 
     private static final Map<String, GreatswordTier> BY_ITEM_ID = Arrays.stream(values())
             .collect(Collectors.toUnmodifiableMap(GreatswordTier::itemId, Function.identity()));
@@ -89,8 +86,7 @@ public enum GreatswordTier {
             NamespacedKey modelKey,
             int customModelData,
             double attackDamage,
-            double attackSpeed
-    ) {
+            double attackSpeed) {
         this.itemId = itemId;
         this.langPath = langPath;
         this.translationKeyBase = translationKeyBase;

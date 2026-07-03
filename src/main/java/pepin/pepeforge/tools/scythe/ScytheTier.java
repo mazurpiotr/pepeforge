@@ -25,8 +25,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "iron_scythe"),
             CustomModelDataIds.IRON_SCYTHE,
-            1
-    ),
+            1),
     DIAMOND(
             ItemIds.DIAMOND_SCYTHE,
             "diamond_scythe",
@@ -39,8 +38,7 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "diamond_scythe"),
             CustomModelDataIds.DIAMOND_SCYTHE,
-            2
-    ),
+            2),
     NETHERITE(
             ItemIds.NETHERITE_SCYTHE,
             "netherite_scythe",
@@ -53,12 +51,10 @@ public enum ScytheTier {
             Material.STICK,
             new NamespacedKey("pepeforge", "netherite_scythe"),
             CustomModelDataIds.NETHERITE_SCYTHE,
-            3
-    );
+            3);
 
     private static final Map<String, ScytheTier> BY_ITEM_ID = Arrays.stream(values())
-        .collect(Collectors.toUnmodifiableMap(ScytheTier::itemId, Function.identity()));
-
+            .collect(Collectors.toUnmodifiableMap(ScytheTier::itemId, Function.identity()));
 
     private final String itemId;
     private final String langPath;
@@ -85,8 +81,7 @@ public enum ScytheTier {
             Material handleMaterial,
             NamespacedKey modelKey,
             int customModelData,
-            int radius
-    ) {
+            int radius) {
         this.itemId = itemId;
         this.langPath = langPath;
         this.translationKeyBase = translationKeyBase;

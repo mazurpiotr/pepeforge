@@ -29,8 +29,7 @@ public enum WindBladeTier {
             2.1,
             false,
             0,
-            40
-    ),
+            40),
     DIAMOND(
             ItemIds.DIAMOND_WIND_BLADE,
             "diamond_wind_blade",
@@ -47,8 +46,7 @@ public enum WindBladeTier {
             2.2,
             true,
             0,
-            0
-    ),
+            0),
     NETHERITE(
             ItemIds.NETHERITE_WIND_BLADE,
             "netherite_wind_blade",
@@ -65,11 +63,12 @@ public enum WindBladeTier {
             2.2,
             true,
             1,
-            60
-    );
+            60);
 
     private static final Map<String, WindBladeTier> BY_ITEM_ID = Arrays.stream(values())
-            .collect(Collectors.toUnmodifiableMap(WindBladeTier::itemId, Function.identity()));
+            .collect(Collectors.toUnmodifiableMap(
+                    tier -> tier.itemId(),
+                    Function.identity()));
 
     private final String itemId;
     private final String langPath;
@@ -104,8 +103,7 @@ public enum WindBladeTier {
             double attackSpeed,
             boolean grantsHoldingSpeed,
             int hitSpeedAmplifier,
-            int hitSpeedDurationTicks
-    ) {
+            int hitSpeedDurationTicks) {
         this.itemId = itemId;
         this.langPath = langPath;
         this.translationKeyBase = translationKeyBase;
