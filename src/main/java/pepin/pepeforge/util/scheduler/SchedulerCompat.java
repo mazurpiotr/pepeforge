@@ -204,4 +204,29 @@ public final class SchedulerCompat {
         );
         return task::cancel;
     }
+
+    public static ScheduledTaskCompat runLaterForEntity(
+            org.bukkit.entity.Entity entity,
+            JavaPlugin plugin,
+            Runnable runnable,
+            long delayTicks
+    ) {
+        if (isRegionized()) {
+            long foliaDelay = Math.max(1L, delayTicks);
+            var task = entity.getScheduler().runDelayed(
+                    plugin,
+                    taskRef -> runnable.run(),
+                    null,
+                    foliaDelay
+            );
+            return task != null ? task::cancel : () -> {};
+        }
+
+        var task = Bukkit.getScheduler().runTaskLater(
+                plugin,
+                runnable,
+                delayTicks
+        );
+        return task::cancel;
+    }
 }

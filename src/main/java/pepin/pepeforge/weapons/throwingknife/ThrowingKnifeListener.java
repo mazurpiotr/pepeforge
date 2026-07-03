@@ -34,12 +34,14 @@ public final class ThrowingKnifeListener implements Listener {
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final CooldownManager cooldownManager;
+    private final NamespacedKey projectileKey;
     private final Set<ItemDisplay> activeDisplays = ConcurrentHashMap.newKeySet();
 
     public ThrowingKnifeListener(JavaPlugin plugin, ItemFactory itemFactory, CooldownManager cooldownManager) {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.cooldownManager = cooldownManager;
+        this.projectileKey = new NamespacedKey(plugin, "throwing_knife_projectile");
     }
 
     public void cleanup() {
@@ -87,7 +89,6 @@ public final class ThrowingKnifeListener implements Listener {
             item.setAmount(item.getAmount() - 1);
         }
 
-        NamespacedKey projectileKey = new NamespacedKey(plugin, "throwing_knife_projectile");
         Location eyeLoc = player.getEyeLocation();
 
         Snowball snowball = player.getWorld().spawn(eyeLoc, Snowball.class, sb -> {
@@ -128,7 +129,7 @@ public final class ThrowingKnifeListener implements Listener {
         activeDisplays.add(itemDisplay);
 
         // Schedule timeout cleanup in case entity despawns abnormally
-        SchedulerCompat.runLater(plugin, () -> {
+        SchedulerCompat.runLaterForEntity(itemDisplay, plugin, () -> {
             if (itemDisplay.isValid()) {
                 itemDisplay.remove();
             }
@@ -151,7 +152,6 @@ public final class ThrowingKnifeListener implements Listener {
         if (!(event.getEntity() instanceof Snowball snowball)) {
             return;
         }
-        NamespacedKey projectileKey = new NamespacedKey(plugin, "throwing_knife_projectile");
         if (!snowball.getPersistentDataContainer().has(projectileKey, PersistentDataType.BYTE)) {
             return;
         }

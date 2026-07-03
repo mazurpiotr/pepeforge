@@ -66,9 +66,7 @@ public enum WindBladeTier {
             60);
 
     private static final Map<String, WindBladeTier> BY_ITEM_ID = Arrays.stream(values())
-            .collect(Collectors.toUnmodifiableMap(
-                    tier -> tier.itemId(),
-                    Function.identity()));
+            .collect(Collectors.toUnmodifiableMap(WindBladeTier::itemId, Function.identity()));
 
     private final String itemId;
     private final String langPath;
