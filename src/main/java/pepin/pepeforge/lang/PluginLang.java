@@ -57,7 +57,11 @@ public final class PluginLang {
         loadLanguageFromResource(plugin, "pl_pl");
 
         // Load from langDir if files exist
-        for (File file : langDir.listFiles()) {
+        File[] files = langDir.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
             if (file.getName().endsWith(".yml")) {
                 String lang = file.getName().replace(".yml", "");
                 langFiles.put(lang, YamlConfiguration.loadConfiguration(file));

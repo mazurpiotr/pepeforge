@@ -230,6 +230,8 @@ public final class PepeForgePlugin extends JavaPlugin {
         lang = new PluginLang(this);
         crimsonSwordManager = new CrimsonSwordManager(this, lang);
         itemFactory = new ItemFactory(this, lang, crimsonSwordManager);
+        cooldownManager = new CooldownManager(this);
+        bossBarManager = new pepin.pepeforge.util.ui.BossBarManager(this);
 
         boolean migrationEnabled = getConfig().getBoolean("migration.enabled", true);
         pepin.pepeforge.item.ItemMigrator itemMigrator = new pepin.pepeforge.item.ItemMigrator(this, itemFactory, migrationEnabled);
