@@ -6,7 +6,7 @@ Detailed item and recipe reference for the current Pepe's Forge item set.
 - [Chisel](#-chisel)
 - [Scythe](#-scythe)
 - [Wind Blade](#️-wind-blade)
-- [Greatsword](#️-greatsword)Folia
+- [Greatsword](#️-greatsword)
 - [Crescent Bow](#-crescent-bow)
 - [Crescent Spear](#-crescent-spear)
 - [Katana](#️-katana)
