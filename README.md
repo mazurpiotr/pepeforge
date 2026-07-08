@@ -2,10 +2,10 @@
    
 # Pepe's Forge
 ![License](https://img.shields.io/github/license/mazurpiotr/pepeforge?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-1.2-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.3.1-blue?style=for-the-badge)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11+-brightgreen?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge)
-![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Purpur%20%7C%20Spigot-fuchsia?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Purpur%20%7C%20Folia-fuchsia?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active_Development-yellow?style=for-the-badge)
 
 A Spigot/Paper plugin adding custom weapons and tools to Minecraft servers.
