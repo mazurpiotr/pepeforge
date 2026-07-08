@@ -6,7 +6,7 @@ Detailed item and recipe reference for the current Pepe's Forge item set.
 - [Chisel](#-chisel)
 - [Scythe](#-scythe)
 - [Wind Blade](#️-wind-blade)
-- [Greatsword](#️-greatsword)
+- [Greatsword](#️-greatsword)Folia
 - [Crescent Bow](#-crescent-bow)
 - [Crescent Spear](#-crescent-spear)
 - [Katana](#️-katana)
@@ -210,11 +210,11 @@ A consumable ranged weapon that's perfect for finishing off fleeing enemies or o
 
 ![Throwing Knife](media/receipes/pepeforge_throwing_knife.png)
 
-```
 ## Give Names
 
 Available internal item names for `/pepeforge give`:
 
+```
 - `crescent_bow`
 - `crescent_spear`
 - `chisel`
