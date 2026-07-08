@@ -103,10 +103,11 @@ public final class SolarShieldListener implements Listener {
                     if (activeShield != null) {
                         int charges = getCharges(activeShield);
                         double progress = activeProgress.getOrDefault(playerId, 0.0);
+                        double intensity = SolarPower.getSolarIntensity(player);
 
-                        if (SolarPower.isSunlit(player)) {
+                        if (intensity > 0.0) {
                             if (charges < SolarShieldDefinition.MAX_CHARGES) {
-                                progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                                progress += (2.0 / SolarShieldDefinition.CHARGE_TICKS) * intensity;
 
                                 if (progress >= 1.0) {
                                     progress -= 1.0;
@@ -132,7 +133,7 @@ public final class SolarShieldListener implements Listener {
                                 }
                             } else {
                                 if (progress < SolarShieldDefinition.OVERCHARGE_BUFFER) {
-                                    progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                                    progress += (2.0 / SolarShieldDefinition.CHARGE_TICKS) * intensity;
                                     progress = Math.min(progress, SolarShieldDefinition.OVERCHARGE_BUFFER);
                                     activeProgress.put(playerId, progress);
                                 }
@@ -340,10 +341,11 @@ public final class SolarShieldListener implements Listener {
                     ItemStack shield = itemEntity.getItemStack();
                     int charges = getCharges(shield);
                     boolean updated = false;
+                    double intensity = SolarPower.getSolarIntensity(itemEntity.getLocation());
 
-                    if (SolarPower.isSunlit(itemEntity.getLocation())) {
+                    if (intensity > 0.0) {
                         if (charges < SolarShieldDefinition.MAX_CHARGES) {
-                            progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                            progress += (2.0 / SolarShieldDefinition.CHARGE_TICKS) * intensity;
                             if (progress >= 1.0) {
                                 progress -= 1.0;
                                 charges++;
@@ -354,7 +356,7 @@ public final class SolarShieldListener implements Listener {
                             }
                         } else {
                             if (progress < SolarShieldDefinition.OVERCHARGE_BUFFER) {
-                                progress += 2.0 / SolarShieldDefinition.CHARGE_TICKS;
+                                progress += (2.0 / SolarShieldDefinition.CHARGE_TICKS) * intensity;
                                 progress = Math.min(progress, SolarShieldDefinition.OVERCHARGE_BUFFER);
                             }
                         }
