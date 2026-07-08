@@ -191,19 +191,12 @@ A heavy, slow-swinging marine weapon with crowd-control capability and a grappli
 
 | Feature | Details |
 |---------|---------|
-| **Snare (LPM)** | Melee attacks temporarily lock the target in place and prevent jumping, wrapping their feet in a visual coral display. |
-| **Hook (PPM)** | Right-click launches the anchor as a projectile. Hitting a block pulls you to it, while hitting a living entity pulls you and the target together to meet in the middle. |
+| **Snare** | Melee attacks temporarily lock the target in place and prevent jumping, wrapping their feet in a visual coral display. |
+| **Hook** | Right-click launches the anchor as a projectile. Hitting a block pulls you to it, while hitting a living entity pulls you and the target together to meet in the middle. |
 
 **Crafting** (Shaped Recipe):
-- `I` = Iron Ingot
-- `B` = Iron Block
-- `R` = Lead
 
-```
-[Iron Ingot] [Iron Block] [Iron Ingot]
-[          ] [Iron Ingot] [          ]
-[          ] [Iron Ingot] [Lead      ]
-```
+![Anchor](media/receipes/pepeforge_anchor.png)
 
 ## 🗡️ Throwing Knife
 
@@ -214,16 +207,10 @@ A consumable ranged weapon that's perfect for finishing off fleeing enemies or o
 | **Throwing** | Can be thrown rapidly with a short cooldown. |
 
 **Crafting** (Shaped Recipe):
-- `I` = Iron Ingot
-- `S` = Stick
 
-Result: **4x Throwing Knife**
+![Throwing Knife](media/receipes/pepeforge_throwing_knife.png)
 
 ```
-[          ] [Iron Ingot]
-[Stick     ] [          ]
-```
-
 ## Give Names
 
 Available internal item names for `/pepeforge give`:
