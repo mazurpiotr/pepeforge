@@ -19,6 +19,20 @@ import java.util.Locale;
 
 public final class CrimsonSwordManager {
 
+    private static final CrimsonSwordFormatter FORMATTER;
+
+    static {
+        CrimsonSwordFormatter temp = null;
+        if (pepin.pepeforge.util.env.ServerEnv.hasDataComponentApi() && pepin.pepeforge.util.env.AdventureReflect.isSupported()) {
+            try {
+                temp = (CrimsonSwordFormatter) Class.forName("pepin.pepeforge.weapons.crimsonsword.CrimsonSwordKyoriFormatterImpl")
+                        .getDeclaredConstructor().newInstance();
+            } catch (Throwable ignored) {
+            }
+        }
+        FORMATTER = temp != null ? temp : new FallbackCrimsonSwordFormatterImpl();
+    }
+
     private final JavaPlugin plugin;
     private final PluginLang lang;
     private final NamespacedKey xpKey;
@@ -58,7 +72,8 @@ public final class CrimsonSwordManager {
             return;
         }
         PersistentDataContainer data = meta.getPersistentDataContainer();
-        int clampedLevel = Math.max(CrimsonSwordDefinition.MIN_LEVEL, Math.min(level, CrimsonSwordDefinition.MAX_LEVEL));
+        int clampedLevel = Math.max(CrimsonSwordDefinition.MIN_LEVEL,
+                Math.min(level, CrimsonSwordDefinition.MAX_LEVEL));
         data.set(levelKey, PersistentDataType.INTEGER, clampedLevel);
         data.set(xpKey, PersistentDataType.DOUBLE, 0.0D);
         item.setItemMeta(meta);
@@ -109,7 +124,8 @@ public final class CrimsonSwordManager {
     }
 
     public double requiredXpForLevel(int level) {
-        int clampedLevel = Math.max(CrimsonSwordDefinition.MIN_LEVEL, Math.min(level, CrimsonSwordDefinition.MAX_LEVEL));
+        int clampedLevel = Math.max(CrimsonSwordDefinition.MIN_LEVEL,
+                Math.min(level, CrimsonSwordDefinition.MAX_LEVEL));
         return Math.floor(CrimsonSwordDefinition.BASE_XP
                 * Math.pow(CrimsonSwordDefinition.XP_CURVE_MULTIPLIER, clampedLevel - 1));
     }
@@ -126,7 +142,7 @@ public final class CrimsonSwordManager {
         double requiredXp = level >= CrimsonSwordDefinition.MAX_LEVEL ? 0.0D : requiredXpForLevel(level);
 
         if (useClientSideTranslations()) {
-            CrimsonSwordKyoriFormatter.applyTranslatedText(item, this, level, xp, requiredXp);
+            FORMATTER.applyTranslatedText(item, this, level, xp, requiredXp);
         } else {
             String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
             String displayName = fallbackName(serverLang, level);
@@ -149,8 +165,7 @@ public final class CrimsonSwordManager {
 
         features.add(ColorUtil.translate(
                 lang.text("items.crimson_sword.features.edge")
-                        .replace("{percent}", String.valueOf(damageBonusPercent(level)))
-        ));
+                        .replace("{percent}", String.valueOf(damageBonusPercent(level)))));
 
         addLifestealFeature(level, features);
         addAuraFeature(level, features);
@@ -166,7 +181,7 @@ public final class CrimsonSwordManager {
 
         int nextLevel = nextLifestealUnlockLevel(level);
         double nextPercent = nextLifestealPercent(nextLevel);
-        
+
         String line = nextLevel > level && nextPercent > lifesteal
                 ? lang.text("items.crimson_sword.features.lifesteal_next")
                 : lang.text("items.crimson_sword.features.lifesteal");
@@ -174,8 +189,7 @@ public final class CrimsonSwordManager {
         features.add(ColorUtil.translate(line
                 .replace("{percent}", formatPercent(lifesteal * 100))
                 .replace("{next_level}", String.valueOf(nextLevel))
-                .replace("{next_percent}", formatPercent(nextPercent * 100))
-        ));
+                .replace("{next_percent}", formatPercent(nextPercent * 100))));
     }
 
     private void addAuraFeature(int level, List<String> features) {
@@ -201,13 +215,11 @@ public final class CrimsonSwordManager {
                 .replace("{radius}", radius)
                 .replace("{next_level}", String.valueOf(nextLevel))
                 .replace("{next_seconds}", nextSeconds)
-                .replace("{next_drain}", nextDrain)
-        ));
+                .replace("{next_drain}", nextDrain)));
     }
 
     private List<String> buildFallbackLore(String serverLang, int level, double xp, double requiredXp) {
-        List<String> loreLines =
-                new ArrayList<>(lang.getItemLoreForLang(CrimsonSwordDefinition.LANG_PATH, serverLang));
+        List<String> loreLines = new ArrayList<>(lang.getItemLoreForLang(CrimsonSwordDefinition.LANG_PATH, serverLang));
 
         List<String> result = new ArrayList<>();
         List<String> features = fallbackFeatures(level);
@@ -224,7 +236,7 @@ public final class CrimsonSwordManager {
                 if (features.isEmpty()) {
                     result.add(ColorUtil.translate(line.replace("{features}", "-")));
                 } else {
-                    for(String f : features) {
+                    for (String f : features) {
                         result.add(ColorUtil.translate(line.replace("{features}", "") + f));
                     }
                 }
@@ -323,7 +335,8 @@ public final class CrimsonSwordManager {
             return;
         }
 
-        org.bukkit.attribute.AttributeInstance maxHealthAttribute = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        org.bukkit.attribute.AttributeInstance maxHealthAttribute = player
+                .getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
         double maxHealth = maxHealthAttribute == null ? 20.0D : maxHealthAttribute.getValue();
         player.setHealth(Math.min(maxHealth, player.getHealth() + amount));
     }

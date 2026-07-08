@@ -3,53 +3,48 @@ package pepin.pepeforge.util.itemmeta;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.inventory.meta.ItemMeta;
+import pepin.pepeforge.util.env.AdventureReflect;
 import pepin.pepeforge.util.env.ServerEnv;
 
 import java.util.List;
 
 public final class ItemMetaManager {
 
+    private static final ItemMetaAdapter ADAPTER;
+
+    static {
+        ItemMetaAdapter temp = null;
+        if (ServerEnv.hasDataComponentApi() && AdventureReflect.isSupported()) {
+            try {
+                temp = (ItemMetaAdapter) Class.forName("pepin.pepeforge.util.itemmeta.PaperItemMetaAdapterImpl")
+                        .getDeclaredConstructor().newInstance();
+            } catch (Throwable ignored) {
+            }
+        }
+        ADAPTER = temp != null ? temp : new SpigotItemMetaAdapterImpl();
+    }
+
     private ItemMetaManager() {
     }
 
     public static void setDisplayName(ItemMeta meta, String name) {
-        if (ServerEnv.hasDataComponentApi()) {
-            PaperItemMetaAdapter.setDisplayName(meta, name);
-        } else {
-            ItemMetaCompat.setDisplayName(meta, name);
-        }
+        ADAPTER.setDisplayName(meta, name);
     }
 
     public static void setItemName(ItemMeta meta, String name) {
-        if (ServerEnv.hasDataComponentApi()) {
-            PaperItemMetaAdapter.setItemName(meta, name);
-        } else {
-            ItemMetaCompat.setItemName(meta, name);
-        }
+        ADAPTER.setItemName(meta, name);
     }
 
     public static String getDisplayName(ItemMeta meta) {
-        if (ServerEnv.hasDataComponentApi()) {
-            return PaperItemMetaAdapter.getDisplayName(meta);
-        } else {
-            return ItemMetaCompat.getDisplayName(meta);
-        }
+        return ADAPTER.getDisplayName(meta);
     }
 
     public static String getItemName(ItemMeta meta) {
-        if (ServerEnv.hasDataComponentApi()) {
-            return PaperItemMetaAdapter.getItemName(meta);
-        } else {
-            return ItemMetaCompat.getItemName(meta);
-        }
+        return ADAPTER.getItemName(meta);
     }
 
     public static void setStringLore(ItemMeta meta, List<String> lore) {
-        if (ServerEnv.hasDataComponentApi()) {
-            PaperItemMetaAdapter.setLore(meta, lore);
-        } else {
-            ItemMetaCompat.setStringLore(meta, lore);
-        }
+        ADAPTER.setLore(meta, lore);
     }
 
     public static void setCustomModelData(ItemMeta meta, int value) {

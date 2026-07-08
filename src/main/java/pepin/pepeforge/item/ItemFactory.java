@@ -12,6 +12,7 @@ import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.tools.chisel.ChiselDefinition;
 import pepin.pepeforge.tools.scythe.ScytheTier;
 import pepin.pepeforge.util.itemmeta.ItemMetaManager;
+import pepin.pepeforge.util.itemmeta.DataComponentManager;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowDefinition;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
@@ -309,12 +310,12 @@ public final class ItemFactory {
 
         if (pepin.pepeforge.util.env.ServerEnv.hasDataComponentApi()) {
             if (spec.itemId().equals(ItemIds.THROWING_KNIFE)) {
-                pepin.pepeforge.util.itemmeta.PaperDataComponentAdapter.applyMaxStackSize(item, 16);
+                DataComponentManager.applyMaxStackSize(item, 16);
             }
         }
 
         if (clientSideTranslations) {
-            pepin.pepeforge.util.itemmeta.PaperDataComponentAdapter.applyTranslatableItemTextData(
+            DataComponentManager.applyTranslatableItemTextData(
                     item,
                     spec.translationKeyBase() + ".name",
                     spec.nameColor().colorName(),
