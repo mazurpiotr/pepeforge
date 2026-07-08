@@ -83,6 +83,8 @@ This helps guide the future development of the plugin. You can opt-out at any ti
 ## Commands
 
 - `/pepeforge items` - Opens a menu to preview all items
+- `/pepeforge config` - Opens an in-game GUI menu to toggle items and recipes
+- `/pepeforge reload` - Reloads the plugin configuration
 - `/pepeforge give <item> <player>` - Gives an item to a player
 - `/pepeforge setlevel <level>` - Sets the level of the Crimson Sword in your main hand (for debugging / testing)
 
@@ -90,6 +92,8 @@ This helps guide the future development of the plugin. You can opt-out at any ti
 
 - `pepeforge.give` - Use `/pepeforge give` (OP by default)
 - `pepeforge.items` - Use `/pepeforge items` (OP by default)
+- `pepeforge.config` - Use `/pepeforge config` (OP by default)
+- `pepeforge.reload` - Use `/pepeforge reload` (OP by default)
 - `pepeforge.setlevel` - Use `/pepeforge setlevel <level>` (OP by default)
 
 ## Issues & Support
