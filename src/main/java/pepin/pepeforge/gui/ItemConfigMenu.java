@@ -53,7 +53,20 @@ public final class ItemConfigMenu {
             }
             inventory.setItem(18, resetBtn);
 
-            // Slot 19: Hook Cooldown (Clock)
+            // Slot 19: Hook Ability (Tripwire Hook)
+            ItemStack hookEnabledBtn = new ItemStack(Material.TRIPWIRE_HOOK);
+            ItemMeta hookEnabledMeta = hookEnabledBtn.getItemMeta();
+            if (hookEnabledMeta != null) {
+                boolean hookEnabled = plugin.getConfig().getBoolean("items.anchor.hook_enabled", true);
+                hookEnabledMeta.setDisplayName(ColorUtil.GOLD + "Hook Ability: " + (hookEnabled ? ColorUtil.GREEN + "ENABLED" : ColorUtil.RED + "DISABLED"));
+                hookEnabledMeta.setLore(List.of(
+                    ColorUtil.GRAY + "Click to toggle active ability"
+                ));
+                hookEnabledBtn.setItemMeta(hookEnabledMeta);
+            }
+            inventory.setItem(19, hookEnabledBtn);
+
+            // Slot 20: Hook Cooldown (Clock)
             ItemStack hookCdBtn = new ItemStack(Material.CLOCK);
             ItemMeta hookCdMeta = hookCdBtn.getItemMeta();
             if (hookCdMeta != null) {
@@ -65,38 +78,9 @@ public final class ItemConfigMenu {
                 ));
                 hookCdBtn.setItemMeta(hookCdMeta);
             }
-            inventory.setItem(19, hookCdBtn);
+            inventory.setItem(20, hookCdBtn);
 
-            // Slot 21: Snare Duration (Cobweb)
-            ItemStack snareDurBtn = new ItemStack(Material.COBWEB);
-            ItemMeta snareDurMeta = snareDurBtn.getItemMeta();
-            if (snareDurMeta != null) {
-                int snareDur = plugin.getConfig().getInt("items.anchor.snare_duration", 40);
-                double snareDurSec = snareDur / 20.0;
-                snareDurMeta.setDisplayName(ColorUtil.GOLD + "Snare Duration: " + ColorUtil.GREEN + snareDurSec + "s (" + snareDur + " ticks)");
-                snareDurMeta.setLore(List.of(
-                    ColorUtil.GRAY + "Left-Click: -0.5s (-10 ticks)",
-                    ColorUtil.GRAY + "Right-Click: +0.5s (+10 ticks)"
-                ));
-                snareDurBtn.setItemMeta(snareDurMeta);
-            }
-            inventory.setItem(21, snareDurBtn);
-
-            // Slot 23: Snare Cooldown (Repeater)
-            ItemStack snareCdBtn = new ItemStack(Material.REPEATER);
-            ItemMeta snareCdMeta = snareCdBtn.getItemMeta();
-            if (snareCdMeta != null) {
-                double snareCd = plugin.getConfig().getLong("items.anchor.snare_cooldown", 5000L) / 1000.0;
-                snareCdMeta.setDisplayName(ColorUtil.GOLD + "Snare Cooldown: " + ColorUtil.GREEN + snareCd + "s");
-                snareCdMeta.setLore(List.of(
-                    ColorUtil.GRAY + "Left-Click: -1.0s",
-                    ColorUtil.GRAY + "Right-Click: +1.0s"
-                ));
-                snareCdBtn.setItemMeta(snareCdMeta);
-            }
-            inventory.setItem(23, snareCdBtn);
-
-            // Slot 25: Range (Spyglass)
+            // Slot 21: Range (Spyglass)
             ItemStack rangeBtn = new ItemStack(Material.SPYGLASS);
             ItemMeta rangeMeta = rangeBtn.getItemMeta();
             if (rangeMeta != null) {
@@ -108,7 +92,58 @@ public final class ItemConfigMenu {
                 ));
                 rangeBtn.setItemMeta(rangeMeta);
             }
-            inventory.setItem(25, rangeBtn);
+            inventory.setItem(21, rangeBtn);
+
+            // Slot 22: Separator (Gray Stained Glass Pane)
+            ItemStack separator = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta separatorMeta = separator.getItemMeta();
+            if (separatorMeta != null) {
+                separatorMeta.setDisplayName(" ");
+                separator.setItemMeta(separatorMeta);
+            }
+            inventory.setItem(22, separator);
+
+            // Slot 23: Snare Passive (Cobweb)
+            ItemStack snareEnabledBtn = new ItemStack(Material.COBWEB);
+            ItemMeta snareEnabledMeta = snareEnabledBtn.getItemMeta();
+            if (snareEnabledMeta != null) {
+                boolean snareEnabled = plugin.getConfig().getBoolean("items.anchor.snare_enabled", true);
+                snareEnabledMeta.setDisplayName(ColorUtil.GOLD + "Snare Passive: " + (snareEnabled ? ColorUtil.GREEN + "ENABLED" : ColorUtil.RED + "DISABLED"));
+                snareEnabledMeta.setLore(List.of(
+                    ColorUtil.GRAY + "Click to toggle basic hit snare"
+                ));
+                snareEnabledBtn.setItemMeta(snareEnabledMeta);
+            }
+            inventory.setItem(23, snareEnabledBtn);
+
+            // Slot 24: Snare Duration (Repeater)
+            ItemStack snareDurBtn = new ItemStack(Material.REPEATER);
+            ItemMeta snareDurMeta = snareDurBtn.getItemMeta();
+            if (snareDurMeta != null) {
+                int snareDur = plugin.getConfig().getInt("items.anchor.snare_duration", 40);
+                double snareDurSec = snareDur / 20.0;
+                snareDurMeta.setDisplayName(ColorUtil.GOLD + "Snare Duration: " + ColorUtil.GREEN + snareDurSec + "s (" + snareDur + " ticks)");
+                snareDurMeta.setLore(List.of(
+                    ColorUtil.GRAY + "Left-Click: -0.5s (-10 ticks)",
+                    ColorUtil.GRAY + "Right-Click: +0.5s (+10 ticks)"
+                ));
+                snareDurBtn.setItemMeta(snareDurMeta);
+            }
+            inventory.setItem(24, snareDurBtn);
+
+            // Slot 25: Snare Cooldown (Clock)
+            ItemStack snareCdBtn = new ItemStack(Material.CLOCK);
+            ItemMeta snareCdMeta = snareCdBtn.getItemMeta();
+            if (snareCdMeta != null) {
+                double snareCd = plugin.getConfig().getLong("items.anchor.snare_cooldown", 5000L) / 1000.0;
+                snareCdMeta.setDisplayName(ColorUtil.GOLD + "Snare Cooldown: " + ColorUtil.GREEN + snareCd + "s");
+                snareCdMeta.setLore(List.of(
+                    ColorUtil.GRAY + "Left-Click: -1.0s",
+                    ColorUtil.GRAY + "Right-Click: +1.0s"
+                ));
+                snareCdBtn.setItemMeta(snareCdMeta);
+            }
+            inventory.setItem(25, snareCdBtn);
         }
 
         ItemStack backBtn = new ItemStack(Material.ARROW);

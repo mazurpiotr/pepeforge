@@ -80,6 +80,14 @@ public final class AnchorListener implements Listener {
         return plugin.getConfig().getDouble("items.anchor.ability_range", 20.0D);
     }
 
+    private boolean isSnareEnabled() {
+        return plugin.getConfig().getBoolean("items.anchor.snare_enabled", true);
+    }
+
+    private boolean isHookEnabled() {
+        return plugin.getConfig().getBoolean("items.anchor.hook_enabled", true);
+    }
+
     public void cleanup() {
         for (ScheduledTaskCompat task : activeTasks) {
             task.cancel();
@@ -139,6 +147,10 @@ public final class AnchorListener implements Listener {
         }
 
         if (!itemFactory.isAnchor(player.getInventory().getItemInMainHand())) {
+            return;
+        }
+
+        if (!isSnareEnabled()) {
             return;
         }
 
@@ -221,6 +233,10 @@ public final class AnchorListener implements Listener {
         Player player = event.getPlayer();
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
         if (!itemFactory.isAnchor(mainHandItem)) {
+            return;
+        }
+
+        if (!isHookEnabled()) {
             return;
         }
 
