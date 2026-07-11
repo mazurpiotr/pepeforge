@@ -100,7 +100,7 @@ public final class ConfigMenuListener implements Listener {
 
         String itemId = itemFactory.getItemId(clicked);
         if (itemId != null) {
-            player.openInventory(ItemConfigMenu.create(itemId, itemFactory));
+            player.openInventory(ItemConfigMenu.create(itemId, itemFactory, plugin));
         }
     }
 
@@ -137,12 +137,70 @@ public final class ConfigMenuListener implements Listener {
             plugin.saveConfig();
             pendingReload.add(player.getUniqueId());
             refresh = true;
-        } else if (event.getSlot() == 26) {
+        } else if ("anchor".equals(itemId)) {
+            if (event.getSlot() == 18) {
+                plugin.getConfig().set(configPath + ".ability_cooldown", 5000L);
+                plugin.getConfig().set(configPath + ".snare_duration", 40);
+                plugin.getConfig().set(configPath + ".snare_cooldown", 5000L);
+                plugin.getConfig().set(configPath + ".ability_range", 20.0D);
+                plugin.getConfig().set(configPath + ".snare_enabled", true);
+                plugin.getConfig().set(configPath + ".hook_enabled", true);
+                plugin.saveConfig();
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            } else if (event.getSlot() == 19) {
+                boolean current = plugin.getConfig().getBoolean(configPath + ".hook_enabled", true);
+                plugin.getConfig().set(configPath + ".hook_enabled", !current);
+                plugin.saveConfig();
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            } else if (event.getSlot() == 20) {
+                long current = plugin.getConfig().getLong(configPath + ".ability_cooldown", 5000L);
+                long change = event.isLeftClick() ? -500L : 500L;
+                long newValue = Math.max(500L, Math.min(30000L, current + change));
+                plugin.getConfig().set(configPath + ".ability_cooldown", newValue);
+                plugin.saveConfig();
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            } else if (event.getSlot() == 21) {
+                double current = plugin.getConfig().getDouble(configPath + ".ability_range", 20.0D);
+                double change = event.isLeftClick() ? -1.0D : 1.0D;
+                double newValue = Math.max(5.0D, Math.min(50.0D, current + change));
+                plugin.getConfig().set(configPath + ".ability_range", newValue);
+                plugin.saveConfig();
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            } else if (event.getSlot() == 23) {
+                boolean current = plugin.getConfig().getBoolean(configPath + ".snare_enabled", true);
+                plugin.getConfig().set(configPath + ".snare_enabled", !current);
+                plugin.saveConfig();
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            } else if (event.getSlot() == 24) {
+                int current = plugin.getConfig().getInt(configPath + ".snare_duration", 40);
+                int change = event.isLeftClick() ? -10 : 10;
+                int newValue = Math.max(10, Math.min(200, current + change));
+                plugin.getConfig().set(configPath + ".snare_duration", newValue);
+                plugin.saveConfig();
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            } else if (event.getSlot() == 25) {
+                long current = plugin.getConfig().getLong(configPath + ".snare_cooldown", 5000L);
+                long change = event.isLeftClick() ? -1000L : 1000L;
+                long newValue = Math.max(1000L, Math.min(60000L, current + change));
+                plugin.getConfig().set(configPath + ".snare_cooldown", newValue);
+                plugin.saveConfig();
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            }
+        }
+
+        if (event.getSlot() == 26) {
             player.openInventory(ConfigMenu.create(itemFactory));
         }
 
         if (refresh) {
-            player.openInventory(ItemConfigMenu.create(itemId, itemFactory));
+            player.openInventory(ItemConfigMenu.create(itemId, itemFactory, plugin));
         }
     }
 }

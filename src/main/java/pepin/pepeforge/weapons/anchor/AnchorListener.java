@@ -64,6 +64,30 @@ public final class AnchorListener implements Listener {
         this.cooldownKey = new NamespacedKey(plugin, "anchor_snare_cooldown");
     }
 
+    private long getAbilityCooldownMillis() {
+        return plugin.getConfig().getLong("items.anchor.ability_cooldown", 5000L);
+    }
+
+    private int getSnareDurationTicks() {
+        return plugin.getConfig().getInt("items.anchor.snare_duration", 40);
+    }
+
+    private long getSnareCooldownMillis() {
+        return plugin.getConfig().getLong("items.anchor.snare_cooldown", 5000L);
+    }
+
+    private double getAbilityRange() {
+        return plugin.getConfig().getDouble("items.anchor.ability_range", 20.0D);
+    }
+
+    private boolean isSnareEnabled() {
+        return plugin.getConfig().getBoolean("items.anchor.snare_enabled", true);
+    }
+
+    private boolean isHookEnabled() {
+        return plugin.getConfig().getBoolean("items.anchor.hook_enabled", true);
+    }
+
     public void cleanup() {
         for (ScheduledTaskCompat task : activeTasks) {
             task.cancel();
@@ -126,20 +150,21 @@ public final class AnchorListener implements Listener {
             return;
         }
 
+        if (!isSnareEnabled()) {
+            return;
+        }
+
         PersistentDataContainer pdc = target.getPersistentDataContainer();
         long now = System.currentTimeMillis();
         Long cooldownUntil = pdc.get(cooldownKey, PersistentDataType.LONG);
 
         if (cooldownUntil == null || now >= cooldownUntil) {
-            // Apply Snare (SLOWNESS 10 + JUMP_BOOST 250) for the configured duration (e.g.
-            // 40 ticks = 2s)
-            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, AnchorDefinition.SNARE_DURATION_TICKS, 9,
+            // Apply Snare (SLOWNESS 10) for the configured duration
+            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, getSnareDurationTicks(), 9,
                     false, false, true));
-            target.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, AnchorDefinition.SNARE_DURATION_TICKS,
-                    249, false, false, false));
 
             // Set per-target cooldown
-            pdc.set(cooldownKey, PersistentDataType.LONG, now + AnchorDefinition.SNARE_COOLDOWN_MILLIS);
+            pdc.set(cooldownKey, PersistentDataType.LONG, now + getSnareCooldownMillis());
 
             // Audio-Visual feedback
             target.getWorld().playSound(target.getLocation(), Sound.BLOCK_ANVIL_LAND, 1.0f, 1.0f);
@@ -163,10 +188,14 @@ public final class AnchorListener implements Listener {
                 @Override
                 public void run() {
                     tick++;
-                    if (!target.isValid() || target.isDead() || tick > AnchorDefinition.SNARE_DURATION_TICKS) {
+                    if (!target.isValid() || target.isDead() || tick > getSnareDurationTicks()) {
                         cleanup();
                         return;
                     }
+
+                    // Lock horizontal movement while preserving vertical Y velocity
+                    Vector v = target.getVelocity();
+                    target.setVelocity(new Vector(0.0, v.getY(), 0.0));
 
                     Location loc = target.getLocation().add(0, 0.1, 0);
                     SchedulerCompat.teleport(coral, loc);
@@ -207,6 +236,10 @@ public final class AnchorListener implements Listener {
             return;
         }
 
+        if (!isHookEnabled()) {
+            return;
+        }
+
         if (action == Action.RIGHT_CLICK_BLOCK
                 && event.getClickedBlock() != null
                 && event.getClickedBlock().getType().isInteractable()
@@ -222,7 +255,7 @@ public final class AnchorListener implements Listener {
             return;
         }
 
-        cooldownManager.setCooldown(player, ABILITY_COOLDOWN_KEY, AnchorDefinition.ABILITY_COOLDOWN_MILLIS);
+        cooldownManager.setCooldown(player, ABILITY_COOLDOWN_KEY, getAbilityCooldownMillis());
         player.setCooldown(mainHandItem.getType(), 20);
         player.swingMainHand();
 
@@ -269,8 +302,8 @@ public final class AnchorListener implements Listener {
                     return;
                 }
 
-                // Capped by ability range (10 blocks)
-                if (currentLoc.distance(startLoc) > AnchorDefinition.ABILITY_RANGE) {
+                // Capped by ability range
+                if (currentLoc.distance(startLoc) > getAbilityRange()) {
                     cleanup();
                     return;
                 }
@@ -461,7 +494,7 @@ public final class AnchorListener implements Listener {
     private void showCooldownActionBar(Player player, long remainingMillis) {
         double seconds = remainingMillis / 1000.0D;
         double progress = Math.max(0.0D,
-                Math.min(1.0D, 1.0D - ((double) remainingMillis / AnchorDefinition.ABILITY_COOLDOWN_MILLIS)));
+                Math.min(1.0D, 1.0D - ((double) remainingMillis / getAbilityCooldownMillis())));
         String bar = ActionBarHelper.buildProgressBar(progress);
         String message = lang.text("messages.anchor.cooldown")
                 .replace("{bar}", bar)

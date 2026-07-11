@@ -68,6 +68,12 @@ items:
   anchor:
     enabled: true
     recipe_enabled: true
+    ability_cooldown: 5000
+    snare_duration: 40
+    snare_cooldown: 5000
+    ability_range: 20.0
+    snare_enabled: true
+    hook_enabled: true
   throwing_knife:
     enabled: true
     recipe_enabled: true
