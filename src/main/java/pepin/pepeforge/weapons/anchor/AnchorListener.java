@@ -131,12 +131,9 @@ public final class AnchorListener implements Listener {
         Long cooldownUntil = pdc.get(cooldownKey, PersistentDataType.LONG);
 
         if (cooldownUntil == null || now >= cooldownUntil) {
-            // Apply Snare (SLOWNESS 10 + JUMP_BOOST 250) for the configured duration (e.g.
-            // 40 ticks = 2s)
+            // Apply Snare (SLOWNESS 10) for the configured duration (e.g. 40 ticks = 2s)
             target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, AnchorDefinition.SNARE_DURATION_TICKS, 9,
                     false, false, true));
-            target.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, AnchorDefinition.SNARE_DURATION_TICKS,
-                    249, false, false, false));
 
             // Set per-target cooldown
             pdc.set(cooldownKey, PersistentDataType.LONG, now + AnchorDefinition.SNARE_COOLDOWN_MILLIS);
@@ -167,6 +164,10 @@ public final class AnchorListener implements Listener {
                         cleanup();
                         return;
                     }
+
+                    // Lock horizontal movement while preserving vertical Y velocity
+                    Vector v = target.getVelocity();
+                    target.setVelocity(new Vector(0.0, v.getY(), 0.0));
 
                     Location loc = target.getLocation().add(0, 0.1, 0);
                     SchedulerCompat.teleport(coral, loc);
