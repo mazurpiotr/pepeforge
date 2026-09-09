@@ -16,6 +16,24 @@ translations:
   # Server language if client-side translation is disabled or unsupported.
   server_language: "en_us"
 
+# Shared Wind Blade family settings.
+mechanics:
+  wind_blade:
+    dash_cooldown: 5000
+    dash_strength: 1.5
+    dash_while_gliding: false
+  anchor:
+    ability_cooldown: 5000
+    snare_duration: 40
+    snare_cooldown: 5000
+    ability_range: 20.0
+    snare_enabled: true
+    hook_enabled: true
+  stormcleaver:
+    charges_required: 5
+    jump_velocity_multiplier: 1.5
+    charge_decay_interval: 40
+
 # Item availability settings
 # enabled: hard on/off switch for the item itself
 # recipe_enabled: controls crafting separately and must be set explicitly
@@ -68,13 +86,9 @@ items:
   anchor:
     enabled: true
     recipe_enabled: true
-    ability_cooldown: 5000
-    snare_duration: 40
-    snare_cooldown: 5000
-    ability_range: 20.0
-    snare_enabled: true
-    hook_enabled: true
+  stormcleaver:
+    enabled: true
+    recipe_enabled: true
   throwing_knife:
     enabled: true
     recipe_enabled: true
-

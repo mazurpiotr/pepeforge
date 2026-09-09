@@ -54,6 +54,7 @@ public final class AnchorListener implements Listener {
     private final Set<ScheduledTaskCompat> activeTasks = ConcurrentHashMap.newKeySet();
 
     private static final String ABILITY_COOLDOWN_KEY = "anchor:hook";
+    private static final String CONFIG_PATH = "mechanics.anchor";
 
     public AnchorListener(JavaPlugin plugin, ItemFactory itemFactory, CooldownManager cooldownManager,
             PluginLang lang) {
@@ -65,27 +66,27 @@ public final class AnchorListener implements Listener {
     }
 
     private long getAbilityCooldownMillis() {
-        return plugin.getConfig().getLong("items.anchor.ability_cooldown", 5000L);
+        return plugin.getConfig().getLong(CONFIG_PATH + ".ability_cooldown", 5000L);
     }
 
     private int getSnareDurationTicks() {
-        return plugin.getConfig().getInt("items.anchor.snare_duration", 40);
+        return plugin.getConfig().getInt(CONFIG_PATH + ".snare_duration", 40);
     }
 
     private long getSnareCooldownMillis() {
-        return plugin.getConfig().getLong("items.anchor.snare_cooldown", 5000L);
+        return plugin.getConfig().getLong(CONFIG_PATH + ".snare_cooldown", 5000L);
     }
 
     private double getAbilityRange() {
-        return plugin.getConfig().getDouble("items.anchor.ability_range", 20.0D);
+        return plugin.getConfig().getDouble(CONFIG_PATH + ".ability_range", 20.0D);
     }
 
     private boolean isSnareEnabled() {
-        return plugin.getConfig().getBoolean("items.anchor.snare_enabled", true);
+        return plugin.getConfig().getBoolean(CONFIG_PATH + ".snare_enabled", true);
     }
 
     private boolean isHookEnabled() {
-        return plugin.getConfig().getBoolean("items.anchor.hook_enabled", true);
+        return plugin.getConfig().getBoolean(CONFIG_PATH + ".hook_enabled", true);
     }
 
     public void cleanup() {

@@ -133,5 +133,14 @@
   "item.pepeforge.throwing_knife.lore.3": "§3LPM rzuca nożem.",
   "item.pepeforge.throwing_knife.lore.4": "§3Chybione noże można podnieść z ziemi.",
   "item.pepeforge.throwing_knife.lore.5": "Pospolita",
-  "item.pepeforge.throwing_knife.lore.6": "§6---------------"
+  "item.pepeforge.throwing_knife.lore.6": "§6---------------",
+  "item.pepeforge.stormcleaver.name": "Rozcinacz Burz",
+  "item.pepeforge.stormcleaver.lore.1": "§6---------------",
+  "item.pepeforge.stormcleaver.lore.2": "§eUmiejętność: §bNurkujące Uderzenie",
+  "item.pepeforge.stormcleaver.lore.3": "§3Trafienia ładują elektryczne ładunki (maks. 5).",
+  "item.pepeforge.stormcleaver.lore.4": "§3Przy pełnym naładowaniu PPM w powietrzu rozpoczyna nurkowanie.",
+  "item.pepeforge.stormcleaver.lore.5": "§3Uderzenie tworzy błyskawiczną falę uderzeniową.",
+  "item.pepeforge.stormcleaver.lore.6": "§7Dwuręczna",
+  "item.pepeforge.stormcleaver.lore.7": "Legendarna",
+  "item.pepeforge.stormcleaver.lore.8": "§6---------------"
 }

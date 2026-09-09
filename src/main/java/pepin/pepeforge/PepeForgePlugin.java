@@ -32,6 +32,8 @@ import pepin.pepeforge.weapons.solarshield.SolarShieldModule;
 import pepin.pepeforge.weapons.windblade.WindBladeModule;
 import pepin.pepeforge.weapons.anchor.AnchorModule;
 import pepin.pepeforge.weapons.throwingknife.ThrowingKnifeModule;
+import pepin.pepeforge.weapons.stormcleaver.StormcleaverModule;
+import pepin.pepeforge.weapons.stormcleaver.StormcleaverAuraEffect;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,7 @@ public final class PepeForgePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        migrateAnchorMechanicConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
         
@@ -122,6 +125,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         bossBarManager = new pepin.pepeforge.util.ui.BossBarManager(this);
         auraManager = new AuraManager(this);
         auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
+        auraManager.registerPassiveAura(new StormcleaverAuraEffect(this, itemFactory));
 
         auraManager.startTask();
         
@@ -179,6 +183,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         modules.add(new SolarShieldModule(this, itemFactory, lang, bossBarManager));
         modules.add(new AnchorModule(this, itemFactory, cooldownManager, lang));
         modules.add(new ThrowingKnifeModule(this, itemFactory, cooldownManager));
+        modules.add(new StormcleaverModule(this, itemFactory, lang));
 
         for (ItemModule module : modules) {
             module.onEnable();
@@ -225,6 +230,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         modules.clear();
 
         reloadConfig();
+        migrateAnchorMechanicConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
 
         pepin.pepeforge.util.protection.ProtectionUtil.initialize(this);
         lang = new PluginLang(this);
@@ -262,5 +270,35 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
 
         recipeDiscoveryRefresher.refreshAllOnlinePlayers();
+    }
+
+    private void migrateAnchorMechanicConfig() {
+        String[] keys = {
+                "ability_cooldown",
+                "snare_duration",
+                "snare_cooldown",
+                "ability_range",
+                "snare_enabled",
+                "hook_enabled"
+        };
+
+        boolean changed = false;
+        for (String key : keys) {
+            String oldPath = "items.anchor." + key;
+            String newPath = "mechanics.anchor." + key;
+            if (!getConfig().isSet(oldPath)) {
+                continue;
+            }
+
+            if (!getConfig().isSet(newPath)) {
+                getConfig().set(newPath, getConfig().get(oldPath));
+            }
+            getConfig().set(oldPath, null);
+            changed = true;
+        }
+
+        if (changed) {
+            saveConfig();
+        }
     }
 }

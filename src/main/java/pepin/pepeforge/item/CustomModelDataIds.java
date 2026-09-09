@@ -34,6 +34,9 @@ public final class CustomModelDataIds {
     // SNOWBALL family in the resource pack (vanilla base item grouping, not gameplay grouping)
     public static final int THROWING_KNIFE = 261001;
 
+    // MACE family in the resource pack (vanilla base item grouping, not gameplay grouping)
+    public static final int STORMCLEAVER = 271001;
+
     private CustomModelDataIds() {
     }
 }

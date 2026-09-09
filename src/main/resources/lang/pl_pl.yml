@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cTylko gracze mogą użyć tej komendy."
     no_permission: "&cNie masz uprawnień do użycia tej komendy."
-    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife> <player> lub /pepeforge items"
+    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife|stormcleaver> <player> lub /pepeforge items"
     unknown_subcommand: "&cNieznana podkomenda."
     unknown_item: "&cNieznany przedmiot: {item}"
     item_disabled: "&cTen przedmiot jest obecnie wyłączony: {item}"
@@ -33,6 +33,8 @@ messages:
     rhythm: "&6Rytm {bar} &f{stage}/{max_stage}"
   anchor:
     cooldown: "&cPrzyciągnięcie ładuje się... {bar} &7{seconds}s"
+  stormcleaver:
+    charge: "&bŁadunek elektryczny {bar} &7[{charges}/{required}]"
   config:
     reloaded: "&aPepeForge przeładowano pomyślnie."
     reload_reminder: "&eKonfiguracja zapisana. Użyj przycisku &6Reload Plugin &elub &6/pepeforge reload &eaby zastosować zmiany."
@@ -208,4 +210,15 @@ items:
       - "&3LPM rzuca nożem."
       - "&3Chybione noże można podnieść z ziemi."
       - "&#A0AEC0Pospolita"
+      - "&6---------------"
+  stormcleaver:
+    fallback_name: "&#66D9EFRozcinacz Burz"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &bNurkujące Uderzenie"
+      - "&3Trafienia ładują elektryczne ładunki (maks. 5)."
+      - "&3Przy pełnym naładowaniu PPM w powietrzu rozpoczyna nurkowanie."
+      - "&3Uderzenie tworzy błyskawiczną falę uderzeniową."
+      - "&7Dwuręczna"
+      - "&#805AD5Legendarny"
       - "&6---------------"

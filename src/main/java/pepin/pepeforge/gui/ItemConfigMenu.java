@@ -42,7 +42,7 @@ public final class ItemConfigMenu {
         // Anchor-specific config buttons
         if ("anchor".equals(itemId)) {
             // Slot 18: Reset to Defaults (Redstone Block)
-            ItemStack resetBtn = new ItemStack(Material.REDSTONE_BLOCK);
+            ItemStack resetBtn = new ItemStack(ConfigIconography.RESET);
             ItemMeta resetMeta = resetBtn.getItemMeta();
             if (resetMeta != null) {
                 resetMeta.setDisplayName(ColorUtil.RED + "Reset to Defaults");
@@ -54,10 +54,10 @@ public final class ItemConfigMenu {
             inventory.setItem(18, resetBtn);
 
             // Slot 19: Hook Ability (Tripwire Hook)
-            ItemStack hookEnabledBtn = new ItemStack(Material.TRIPWIRE_HOOK);
+            ItemStack hookEnabledBtn = new ItemStack(ConfigIconography.TOGGLE);
             ItemMeta hookEnabledMeta = hookEnabledBtn.getItemMeta();
             if (hookEnabledMeta != null) {
-                boolean hookEnabled = plugin.getConfig().getBoolean("items.anchor.hook_enabled", true);
+                boolean hookEnabled = plugin.getConfig().getBoolean("mechanics.anchor.hook_enabled", true);
                 hookEnabledMeta.setDisplayName(ColorUtil.GOLD + "Hook Ability: " + (hookEnabled ? ColorUtil.GREEN + "ENABLED" : ColorUtil.RED + "DISABLED"));
                 hookEnabledMeta.setLore(List.of(
                     ColorUtil.GRAY + "Click to toggle active ability"
@@ -67,10 +67,10 @@ public final class ItemConfigMenu {
             inventory.setItem(19, hookEnabledBtn);
 
             // Slot 20: Hook Cooldown (Clock)
-            ItemStack hookCdBtn = new ItemStack(Material.CLOCK);
+            ItemStack hookCdBtn = new ItemStack(ConfigIconography.COOLDOWN);
             ItemMeta hookCdMeta = hookCdBtn.getItemMeta();
             if (hookCdMeta != null) {
-                double hookCd = plugin.getConfig().getLong("items.anchor.ability_cooldown", 5000L) / 1000.0;
+                double hookCd = plugin.getConfig().getLong("mechanics.anchor.ability_cooldown", 5000L) / 1000.0;
                 hookCdMeta.setDisplayName(ColorUtil.GOLD + "Hook Cooldown: " + ColorUtil.GREEN + hookCd + "s");
                 hookCdMeta.setLore(List.of(
                     ColorUtil.GRAY + "Left-Click: -0.5s",
@@ -81,10 +81,10 @@ public final class ItemConfigMenu {
             inventory.setItem(20, hookCdBtn);
 
             // Slot 21: Range (Spyglass)
-            ItemStack rangeBtn = new ItemStack(Material.SPYGLASS);
+            ItemStack rangeBtn = new ItemStack(ConfigIconography.RANGE);
             ItemMeta rangeMeta = rangeBtn.getItemMeta();
             if (rangeMeta != null) {
-                double range = plugin.getConfig().getDouble("items.anchor.ability_range", 20.0);
+                double range = plugin.getConfig().getDouble("mechanics.anchor.ability_range", 20.0);
                 rangeMeta.setDisplayName(ColorUtil.GOLD + "Range: " + ColorUtil.GREEN + range + " blocks");
                 rangeMeta.setLore(List.of(
                     ColorUtil.GRAY + "Left-Click: -1.0 block",
@@ -107,7 +107,7 @@ public final class ItemConfigMenu {
             ItemStack snareEnabledBtn = new ItemStack(Material.COBWEB);
             ItemMeta snareEnabledMeta = snareEnabledBtn.getItemMeta();
             if (snareEnabledMeta != null) {
-                boolean snareEnabled = plugin.getConfig().getBoolean("items.anchor.snare_enabled", true);
+                boolean snareEnabled = plugin.getConfig().getBoolean("mechanics.anchor.snare_enabled", true);
                 snareEnabledMeta.setDisplayName(ColorUtil.GOLD + "Snare Passive: " + (snareEnabled ? ColorUtil.GREEN + "ENABLED" : ColorUtil.RED + "DISABLED"));
                 snareEnabledMeta.setLore(List.of(
                     ColorUtil.GRAY + "Click to toggle basic hit snare"
@@ -117,10 +117,10 @@ public final class ItemConfigMenu {
             inventory.setItem(23, snareEnabledBtn);
 
             // Slot 24: Snare Duration (Repeater)
-            ItemStack snareDurBtn = new ItemStack(Material.REPEATER);
+            ItemStack snareDurBtn = new ItemStack(ConfigIconography.DURATION);
             ItemMeta snareDurMeta = snareDurBtn.getItemMeta();
             if (snareDurMeta != null) {
-                int snareDur = plugin.getConfig().getInt("items.anchor.snare_duration", 40);
+                int snareDur = plugin.getConfig().getInt("mechanics.anchor.snare_duration", 40);
                 double snareDurSec = snareDur / 20.0;
                 snareDurMeta.setDisplayName(ColorUtil.GOLD + "Snare Duration: " + ColorUtil.GREEN + snareDurSec + "s (" + snareDur + " ticks)");
                 snareDurMeta.setLore(List.of(
@@ -132,10 +132,10 @@ public final class ItemConfigMenu {
             inventory.setItem(24, snareDurBtn);
 
             // Slot 25: Snare Cooldown (Clock)
-            ItemStack snareCdBtn = new ItemStack(Material.CLOCK);
+            ItemStack snareCdBtn = new ItemStack(ConfigIconography.COOLDOWN);
             ItemMeta snareCdMeta = snareCdBtn.getItemMeta();
             if (snareCdMeta != null) {
-                double snareCd = plugin.getConfig().getLong("items.anchor.snare_cooldown", 5000L) / 1000.0;
+                double snareCd = plugin.getConfig().getLong("mechanics.anchor.snare_cooldown", 5000L) / 1000.0;
                 snareCdMeta.setDisplayName(ColorUtil.GOLD + "Snare Cooldown: " + ColorUtil.GREEN + snareCd + "s");
                 snareCdMeta.setLore(List.of(
                     ColorUtil.GRAY + "Left-Click: -1.0s",
@@ -144,6 +144,105 @@ public final class ItemConfigMenu {
                 snareCdBtn.setItemMeta(snareCdMeta);
             }
             inventory.setItem(25, snareCdBtn);
+        }
+
+        if (isWindBlade(itemId)) {
+            ItemStack resetBtn = new ItemStack(ConfigIconography.RESET);
+            ItemMeta resetMeta = resetBtn.getItemMeta();
+            if (resetMeta != null) {
+                resetMeta.setDisplayName(ColorUtil.RED + "Reset Wind Blade Defaults");
+                resetMeta.setLore(List.of(ColorUtil.GRAY + "Reset shared dash settings"));
+                resetBtn.setItemMeta(resetMeta);
+            }
+            inventory.setItem(18, resetBtn);
+
+            ItemStack cooldownBtn = new ItemStack(ConfigIconography.COOLDOWN);
+            ItemMeta cooldownMeta = cooldownBtn.getItemMeta();
+            if (cooldownMeta != null) {
+                double cooldown = plugin.getConfig().getLong("mechanics.wind_blade.dash_cooldown", 5000L) / 1000.0D;
+                cooldownMeta.setDisplayName(ColorUtil.GOLD + "Dash Cooldown: " + ColorUtil.GREEN + cooldown + "s");
+                cooldownMeta.setLore(List.of(
+                        ColorUtil.GRAY + "Left-Click: -0.5s",
+                        ColorUtil.GRAY + "Right-Click: +0.5s"
+                ));
+                cooldownBtn.setItemMeta(cooldownMeta);
+            }
+            inventory.setItem(19, cooldownBtn);
+
+            ItemStack strengthBtn = new ItemStack(ConfigIconography.STRENGTH);
+            ItemMeta strengthMeta = strengthBtn.getItemMeta();
+            if (strengthMeta != null) {
+                double strength = plugin.getConfig().getDouble("mechanics.wind_blade.dash_strength", 1.5D);
+                strengthMeta.setDisplayName(ColorUtil.GOLD + "Dash Strength: " + ColorUtil.GREEN + strength);
+                strengthMeta.setLore(List.of(
+                        ColorUtil.GRAY + "Left-Click: -0.1",
+                        ColorUtil.GRAY + "Right-Click: +0.1"
+                ));
+                strengthBtn.setItemMeta(strengthMeta);
+            }
+            inventory.setItem(20, strengthBtn);
+
+            ItemStack glidingBtn = new ItemStack(ConfigIconography.TOGGLE);
+            ItemMeta glidingMeta = glidingBtn.getItemMeta();
+            if (glidingMeta != null) {
+                boolean enabled = plugin.getConfig().getBoolean("mechanics.wind_blade.dash_while_gliding", false);
+                glidingMeta.setDisplayName(ColorUtil.GOLD + "Dash While Gliding: "
+                        + (enabled ? ColorUtil.GREEN + "ENABLED" : ColorUtil.RED + "DISABLED"));
+                glidingMeta.setLore(List.of(ColorUtil.GRAY + "Click to toggle Elytra dashing"));
+                glidingBtn.setItemMeta(glidingMeta);
+            }
+            inventory.setItem(21, glidingBtn);
+        }
+
+        if ("stormcleaver".equals(itemId)) {
+            ItemStack resetBtn = new ItemStack(ConfigIconography.RESET);
+            ItemMeta resetMeta = resetBtn.getItemMeta();
+            if (resetMeta != null) {
+                resetMeta.setDisplayName(ColorUtil.RED + "Reset Stormcleaver Defaults");
+                resetMeta.setLore(List.of(ColorUtil.GRAY + "Reset shared dive settings"));
+                resetBtn.setItemMeta(resetMeta);
+            }
+            inventory.setItem(18, resetBtn);
+
+            ItemStack chargesBtn = new ItemStack(ConfigIconography.CHARGES);
+            ItemMeta chargesMeta = chargesBtn.getItemMeta();
+            if (chargesMeta != null) {
+                int charges = plugin.getConfig().getInt("mechanics.stormcleaver.charges_required", 5);
+                chargesMeta.setDisplayName(ColorUtil.GOLD + "Required Charges: " + ColorUtil.GREEN + charges);
+                chargesMeta.setLore(List.of(
+                        ColorUtil.GRAY + "Left-Click: -1",
+                        ColorUtil.GRAY + "Right-Click: +1"
+                ));
+                chargesBtn.setItemMeta(chargesMeta);
+            }
+            inventory.setItem(19, chargesBtn);
+
+            ItemStack multiplierBtn = new ItemStack(ConfigIconography.STRENGTH);
+            ItemMeta multiplierMeta = multiplierBtn.getItemMeta();
+            if (multiplierMeta != null) {
+                double multiplier = plugin.getConfig().getDouble("mechanics.stormcleaver.jump_velocity_multiplier", 1.5D);
+                multiplierMeta.setDisplayName(ColorUtil.GOLD + "Jump Multiplier: " + ColorUtil.GREEN + multiplier);
+                multiplierMeta.setLore(List.of(
+                        ColorUtil.GRAY + "Left-Click: -0.1",
+                        ColorUtil.GRAY + "Right-Click: +0.1"
+                ));
+                multiplierBtn.setItemMeta(multiplierMeta);
+            }
+            inventory.setItem(20, multiplierBtn);
+
+            ItemStack decayBtn = new ItemStack(ConfigIconography.DECAY);
+            ItemMeta decayMeta = decayBtn.getItemMeta();
+            if (decayMeta != null) {
+                int decay = plugin.getConfig().getInt("mechanics.stormcleaver.charge_decay_interval", 40);
+                decayMeta.setDisplayName(ColorUtil.GOLD + "Charge Decay: " + ColorUtil.GREEN
+                        + (decay / 20.0D) + "s (" + decay + " ticks)");
+                decayMeta.setLore(List.of(
+                        ColorUtil.GRAY + "Left-Click: -0.5s (-10 ticks)",
+                        ColorUtil.GRAY + "Right-Click: +0.5s (+10 ticks)"
+                ));
+                decayBtn.setItemMeta(decayMeta);
+            }
+            inventory.setItem(21, decayBtn);
         }
 
         ItemStack backBtn = new ItemStack(Material.ARROW);
@@ -166,6 +265,12 @@ public final class ItemConfigMenu {
             return holder.itemId;
         }
         return null;
+    }
+
+    public static boolean isWindBlade(String itemId) {
+        return "iron_wind_blade".equals(itemId)
+                || "diamond_wind_blade".equals(itemId)
+                || "netherite_wind_blade".equals(itemId);
     }
 
     private static final class Holder implements InventoryHolder {

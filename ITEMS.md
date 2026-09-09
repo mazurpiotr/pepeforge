@@ -14,6 +14,7 @@ Detailed item and recipe reference for the current Pepe's Forge item set.
 - [Crimson Sword](#-crimson-sword)
 - [Anchor](#-anchor)
 - [Throwing Knife](#-throwing-knife)
+- [Stormcleaver](#-stormcleaver)
 - [Give Names](#give-names)
 
 
@@ -210,6 +211,24 @@ A consumable ranged weapon that's perfect for finishing off fleeing enemies or o
 
 ![Throwing Knife](media/receipes/pepeforge_throwing_knife.png)
 
+## ⚡ Stormcleaver
+
+A legendary two-handed mace with an aggressive charge-and-dive combat loop.
+
+| Feature | Details |
+|---|---|
+| **Static Charge** | Melee hits build up to five charges. Reaching full charge launches the wielder upward and enables the dive. |
+| **Dive Slam** | Right-click while airborne at full charge to dive toward the ground. Landing creates a knockback shockwave and cosmetic lightning strikes. |
+| **Protection** | Shockwave damage respects region and PvP protection and never ignites blocks. |
+
+**Crafting** (Shaped Recipe):
+
+```text
+[ Iron Block ] [ Conduit ] [ Iron Block ]
+[      -     ] [  Stick  ] [      -     ]
+[      -     ] [  Stick  ] [      -     ]
+```
+
 ## Give Names
 
 Available internal item names for `/pepeforge give`:
@@ -232,4 +251,4 @@ Available internal item names for `/pepeforge give`:
 - `solar_shield`
 - `anchor`
 - `throwing_knife`
-
+- `stormcleaver`

@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cOnly players can use this command."
     no_permission: "&cYou do not have permission to use this command."
-    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife> <player> or /pepeforge items"
+    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife|stormcleaver> <player> or /pepeforge items"
     unknown_subcommand: "&cUnknown subcommand."
     unknown_item: "&cUnknown item: {item}"
     item_disabled: "&cThat item is currently disabled: {item}"
@@ -33,6 +33,8 @@ messages:
     rhythm: "&6Rhythm {bar} &f{stage}/{max_stage}"
   anchor:
     cooldown: "&cAnchor hook recharging... {bar} &7{seconds}s"
+  stormcleaver:
+    charge: "&bStatic Charge {bar} &7[{charges}/{required}]"
   config:
     reloaded: "&aPepeForge reloaded successfully."
     reload_reminder: "&eConfiguration saved. Use the &6Reload Plugin &ebutton or &6/pepeforge reload &eto apply changes."
@@ -208,4 +210,15 @@ items:
       - "&3Left-click to throw the knife."
       - "&3Missed knives can be picked up from the ground."
       - "&#A0AEC0Common"
+      - "&6---------------"
+  stormcleaver:
+    fallback_name: "&#66D9EFStormcleaver"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &bDive Slam"
+      - "&3Melee hits build Static Charges (up to 5)."
+      - "&3At full charge, airborne right-click starts a dive."
+      - "&3Impact creates a lightning shockwave."
+      - "&7Two-Handed"
+      - "&#805AD5Legendary"
       - "&6---------------"

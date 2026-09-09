@@ -136,5 +136,14 @@
   "item.pepeforge.throwing_knife.lore.3": "§3Left-click to throw the knife.",
   "item.pepeforge.throwing_knife.lore.4": "§3Missed knives can be picked up from the ground.",
   "item.pepeforge.throwing_knife.lore.5": "Common",
-  "item.pepeforge.throwing_knife.lore.6": "§6---------------"
+  "item.pepeforge.throwing_knife.lore.6": "§6---------------",
+  "item.pepeforge.stormcleaver.name": "Stormcleaver",
+  "item.pepeforge.stormcleaver.lore.1": "§6---------------",
+  "item.pepeforge.stormcleaver.lore.2": "§eAbility: §bDive Slam",
+  "item.pepeforge.stormcleaver.lore.3": "§3Melee hits build Static Charges (up to 5).",
+  "item.pepeforge.stormcleaver.lore.4": "§3At full charge, airborne right-click starts a dive.",
+  "item.pepeforge.stormcleaver.lore.5": "§3Impact creates a lightning shockwave.",
+  "item.pepeforge.stormcleaver.lore.6": "§7Two-Handed",
+  "item.pepeforge.stormcleaver.lore.7": "Legendary",
+  "item.pepeforge.stormcleaver.lore.8": "§6---------------"
 }

@@ -23,6 +23,7 @@ import pepin.pepeforge.weapons.solarshield.SolarShieldDefinition;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
 import pepin.pepeforge.weapons.anchor.AnchorDefinition;
 import pepin.pepeforge.weapons.throwingknife.ThrowingKnifeDefinition;
+import pepin.pepeforge.weapons.stormcleaver.StormcleaverDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,8 @@ public final class ItemFactory {
             ItemIds.CRIMSON_SWORD,
             ItemIds.SOLAR_SHIELD,
             ItemIds.ANCHOR,
-            ItemIds.THROWING_KNIFE);
+            ItemIds.THROWING_KNIFE,
+            ItemIds.STORMCLEAVER);
 
     private final NamespacedKey itemIdKey;
     private final JavaPlugin plugin;
@@ -248,6 +250,22 @@ public final class ItemFactory {
         return ItemIds.THROWING_KNIFE.equals(getItemId(item)) && isItemEnabled(ItemIds.THROWING_KNIFE);
     }
 
+    public ItemStack createStormcleaver() {
+        return createItem(new ItemSpec(
+                StormcleaverDefinition.ITEM_ID,
+                StormcleaverDefinition.BASE_MATERIAL,
+                StormcleaverDefinition.LANG_PATH,
+                StormcleaverDefinition.TRANSLATION_KEY_BASE,
+                StormcleaverDefinition.LORE_LINE_COUNT,
+                StormcleaverDefinition.RARITY,
+                StormcleaverDefinition.NAME_COLOR,
+                StormcleaverDefinition.CUSTOM_MODEL_DATA,
+                StormcleaverDefinition.MODEL_KEY,
+                List.of(
+                        new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", StormcleaverDefinition.ATTACK_DAMAGE),
+                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", StormcleaverDefinition.ATTACK_SPEED))));
+    }
+
     public void updateSolarShieldVisuals(ItemStack item, int charges) {
         if (item == null || !isSolarShield(item) || !item.hasItemMeta()) {
             return;
@@ -353,6 +371,7 @@ public final class ItemFactory {
             case ItemIds.SOLAR_SHIELD -> createSolarShield();
             case ItemIds.ANCHOR -> createAnchor();
             case ItemIds.THROWING_KNIFE -> createThrowingKnife();
+            case ItemIds.STORMCLEAVER -> createStormcleaver();
             default -> null;
         };
     }
@@ -431,6 +450,10 @@ public final class ItemFactory {
 
     public boolean isAnchor(ItemStack item) {
         return ItemIds.ANCHOR.equals(getItemId(item)) && isItemEnabled(ItemIds.ANCHOR);
+    }
+
+    public boolean isStormcleaver(ItemStack item) {
+        return ItemIds.STORMCLEAVER.equals(getItemId(item)) && isItemEnabled(ItemIds.STORMCLEAVER);
     }
 
     public void setKatanaParryVisual(ItemStack item, boolean active) {
@@ -559,6 +582,7 @@ public final class ItemFactory {
             case ItemIds.SOLAR_SHIELD -> lang.itemFallbackName(SolarShieldDefinition.LANG_PATH);
             case ItemIds.ANCHOR -> lang.itemFallbackName(AnchorDefinition.LANG_PATH);
             case ItemIds.THROWING_KNIFE -> lang.itemFallbackName(ThrowingKnifeDefinition.LANG_PATH);
+            case ItemIds.STORMCLEAVER -> lang.itemFallbackName(StormcleaverDefinition.LANG_PATH);
             default -> null;
         };
     }

@@ -9,8 +9,8 @@ description: Adds custom weapons, tools and gameplay mechanics to Minecraft serv
 
 commands:
   pepeforge:
-    description: Gives or opens custom PepeForge items.
-    usage: /pepeforge <give|items>
+    description: Manages custom PepeForge items and plugin settings.
+    usage: /pepeforge <give|items|setlevel|migration|config|reload>
     aliases: [pf]
 
 permissions:
@@ -19,4 +19,16 @@ permissions:
     default: op
   pepeforge.items:
     description: Allows opening the custom PepeForge items menu.
+    default: op
+  pepeforge.setlevel:
+    description: Allows setting the level of a held Crimson Sword.
+    default: op
+  pepeforge.migration:
+    description: Allows managing lazy custom-item migration.
+    default: op
+  pepeforge.config:
+    description: Allows opening the PepeForge configuration menu.
+    default: op
+  pepeforge.reload:
+    description: Allows reloading PepeForge configuration and modules.
     default: op
