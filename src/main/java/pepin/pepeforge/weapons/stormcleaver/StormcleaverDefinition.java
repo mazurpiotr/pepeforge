@@ -25,13 +25,14 @@ public final class StormcleaverDefinition {
     public static final String ACTIVE_DIVE_KEY_STRING = "stormcleaver_active_dive";
     public static final int DEFAULT_CHARGES_REQUIRED = 5;
     public static final double DEFAULT_JUMP_VELOCITY_MULTIPLIER = 1.5D;
+    public static final int DEFAULT_CHARGE_DECAY_INTERVAL = 40;
     public static final double CHARGE_JUMP_VELOCITY = 0.42D;
     public static final double DIVE_HORIZONTAL_SPEED = 0.45D;
     public static final double DIVE_VERTICAL_SPEED = -1.35D;
     public static final int DIVE_ARMING_TICKS = 2;
-    public static final double SHOCKWAVE_RADIUS = 4.0D;
+    public static final double SHOCKWAVE_RADIUS = 8.0D;
     public static final double SHOCKWAVE_DAMAGE = 6.0D;
-    public static final double SHOCKWAVE_KNOCKBACK = 1.1D;
+    public static final double SHOCKWAVE_KNOCKBACK = 2.0D;
     public static final double SHOCKWAVE_LIFT = 0.35D;
 
     private StormcleaverDefinition() {

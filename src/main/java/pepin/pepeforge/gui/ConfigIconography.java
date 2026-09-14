@@ -4,6 +4,9 @@ import org.bukkit.Material;
 
 public final class ConfigIconography {
 
+    public static final Material ENABLED = Material.LIME_DYE;
+    public static final Material DISABLED = Material.RED_DYE;
+
     public static final Material RESET = Material.REDSTONE_BLOCK;
     public static final Material TOGGLE = Material.LEVER;
     public static final Material COOLDOWN = Material.CLOCK;

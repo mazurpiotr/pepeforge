@@ -29,6 +29,9 @@ mechanics:
     ability_range: 20.0
     snare_enabled: true
     hook_enabled: true
+  crescent_spear:
+    charges_required: 5
+    active_hit_count: 2
   stormcleaver:
     charges_required: 5
     jump_velocity_multiplier: 1.5

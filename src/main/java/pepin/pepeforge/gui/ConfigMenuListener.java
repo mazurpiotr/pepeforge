@@ -8,6 +8,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.PepeForgePlugin;
+import pepin.pepeforge.gui.itemconfig.anchor.AnchorConfigListener;
+import pepin.pepeforge.gui.itemconfig.windblade.WindBladeConfigListener;
+import pepin.pepeforge.gui.itemconfig.stormcleaver.StormcleaverConfigListener;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 
@@ -21,6 +24,12 @@ public final class ConfigMenuListener implements Listener {
     private final ItemFactory itemFactory;
     private final PluginLang lang;
 
+    // Listeners for specific item config menus
+    private final AnchorConfigListener anchorConfigListener;
+    private final WindBladeConfigListener windBladeConfigListener;
+    private final StormcleaverConfigListener stormcleaverConfigListener;
+
+
     /** Players who changed at least one setting since opening the config menu. */
     private final Set<UUID> pendingReload = ConcurrentHashMap.newKeySet();
 
@@ -28,6 +37,9 @@ public final class ConfigMenuListener implements Listener {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.lang = lang;
+        this.anchorConfigListener = new AnchorConfigListener(plugin);
+        this.windBladeConfigListener = new WindBladeConfigListener(plugin);
+        this.stormcleaverConfigListener = new StormcleaverConfigListener(plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -138,122 +150,17 @@ public final class ConfigMenuListener implements Listener {
             pendingReload.add(player.getUniqueId());
             refresh = true;
         } else if ("anchor".equals(itemId)) {
-            if (event.getSlot() == 18) {
-                plugin.getConfig().set("mechanics.anchor.ability_cooldown", 5000L);
-                plugin.getConfig().set("mechanics.anchor.snare_duration", 40);
-                plugin.getConfig().set("mechanics.anchor.snare_cooldown", 5000L);
-                plugin.getConfig().set("mechanics.anchor.ability_range", 20.0D);
-                plugin.getConfig().set("mechanics.anchor.snare_enabled", true);
-                plugin.getConfig().set("mechanics.anchor.hook_enabled", true);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 19) {
-                boolean current = plugin.getConfig().getBoolean("mechanics.anchor.hook_enabled", true);
-                plugin.getConfig().set("mechanics.anchor.hook_enabled", !current);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 20) {
-                long current = plugin.getConfig().getLong("mechanics.anchor.ability_cooldown", 5000L);
-                long change = event.isLeftClick() ? -500L : 500L;
-                long newValue = Math.max(500L, Math.min(30000L, current + change));
-                plugin.getConfig().set("mechanics.anchor.ability_cooldown", newValue);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 21) {
-                double current = plugin.getConfig().getDouble("mechanics.anchor.ability_range", 20.0D);
-                double change = event.isLeftClick() ? -1.0D : 1.0D;
-                double newValue = Math.max(5.0D, Math.min(50.0D, current + change));
-                plugin.getConfig().set("mechanics.anchor.ability_range", newValue);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 23) {
-                boolean current = plugin.getConfig().getBoolean("mechanics.anchor.snare_enabled", true);
-                plugin.getConfig().set("mechanics.anchor.snare_enabled", !current);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 24) {
-                int current = plugin.getConfig().getInt("mechanics.anchor.snare_duration", 40);
-                int change = event.isLeftClick() ? -10 : 10;
-                int newValue = Math.max(10, Math.min(200, current + change));
-                plugin.getConfig().set("mechanics.anchor.snare_duration", newValue);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 25) {
-                long current = plugin.getConfig().getLong("mechanics.anchor.snare_cooldown", 5000L);
-                long change = event.isLeftClick() ? -1000L : 1000L;
-                long newValue = Math.max(1000L, Math.min(60000L, current + change));
-                plugin.getConfig().set("mechanics.anchor.snare_cooldown", newValue);
-                plugin.saveConfig();
+            if (anchorConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
             }
         } else if (ItemConfigMenu.isWindBlade(itemId)) {
-            if (event.getSlot() == 18) {
-                plugin.getConfig().set("mechanics.wind_blade.dash_cooldown", 5000L);
-                plugin.getConfig().set("mechanics.wind_blade.dash_strength", 1.5D);
-                plugin.getConfig().set("mechanics.wind_blade.dash_while_gliding", false);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 19) {
-                long current = plugin.getConfig().getLong("mechanics.wind_blade.dash_cooldown", 5000L);
-                long change = event.isLeftClick() ? -500L : 500L;
-                long newValue = Math.max(500L, Math.min(30000L, current + change));
-                plugin.getConfig().set("mechanics.wind_blade.dash_cooldown", newValue);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 20) {
-                double current = plugin.getConfig().getDouble("mechanics.wind_blade.dash_strength", 1.5D);
-                double change = event.isLeftClick() ? -0.1D : 0.1D;
-                double newValue = Math.max(0.1D, Math.min(5.0D, current + change));
-                plugin.getConfig().set("mechanics.wind_blade.dash_strength", newValue);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 21) {
-                boolean current = plugin.getConfig().getBoolean("mechanics.wind_blade.dash_while_gliding", false);
-                plugin.getConfig().set("mechanics.wind_blade.dash_while_gliding", !current);
-                plugin.saveConfig();
+            if (windBladeConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
             }
         } else if ("stormcleaver".equals(itemId)) {
-            if (event.getSlot() == 18) {
-                plugin.getConfig().set("mechanics.stormcleaver.charges_required", 5);
-                plugin.getConfig().set("mechanics.stormcleaver.jump_velocity_multiplier", 1.5D);
-                plugin.getConfig().set("mechanics.stormcleaver.charge_decay_interval", 40);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 19) {
-                int current = plugin.getConfig().getInt("mechanics.stormcleaver.charges_required", 5);
-                int change = event.isLeftClick() ? -1 : 1;
-                int newValue = Math.max(1, Math.min(10, current + change));
-                plugin.getConfig().set("mechanics.stormcleaver.charges_required", newValue);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 20) {
-                double current = plugin.getConfig().getDouble("mechanics.stormcleaver.jump_velocity_multiplier", 1.5D);
-                double change = event.isLeftClick() ? -0.1D : 0.1D;
-                double newValue = Math.max(0.1D, Math.min(5.0D, current + change));
-                plugin.getConfig().set("mechanics.stormcleaver.jump_velocity_multiplier", newValue);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 21) {
-                int current = plugin.getConfig().getInt("mechanics.stormcleaver.charge_decay_interval", 40);
-                int change = event.isLeftClick() ? -10 : 10;
-                int newValue = Math.max(10, Math.min(1200, current + change));
-                plugin.getConfig().set("mechanics.stormcleaver.charge_decay_interval", newValue);
-                plugin.saveConfig();
+           if (stormcleaverConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
             }

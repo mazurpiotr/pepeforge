@@ -20,17 +20,22 @@ public final class CrescentSpearDefinition {
     public static final NamespacedKey MODEL_KEY = new NamespacedKey("pepeforge", "crescent_spear");
     public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.CRESCENT_SPEAR;
 
-    public static final int CHARGE_MAX = 100;
-    public static final int CHARGE_PER_HIT = 20;
+    public static final int DEFAULT_CHARGES_REQUIRED = 5;
+    public static final int DEFAULT_ACTIVE_HIT_COUNT = 2;
+
     public static final int CHARGE_DECAY_PER_INTERVAL = 1;
     public static final int CHARGE_DECAY_DELAY_TICKS = 2 * 20;
     public static final int STATUS_INTERVAL_TICKS = 5;
 
-    public static final int ACTIVE_HIT_COUNT = 2;
     public static final int ACTIVE_FIRST_HIT_DELAY_TICKS = 4;
     public static final int ACTIVE_HIT_INTERVAL_TICKS = 5;
     public static final double ACTIVE_TARGET_RANGE = 4.5D;
     public static final double ACTIVE_PARTICLE_DISTANCE = 1.5D;
+    public static final double ACTIVE_LAST_HIT_KNOCKBACK = 0.25D;
+    public static final double ACTIVE_LAST_HIT_LIFT = 0.18D;
+
+    // Mechanics adjustable in config.yml are intentionally kept out of this item
+    // definition.
 
     private CrescentSpearDefinition() {
     }

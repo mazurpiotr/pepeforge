@@ -21,15 +21,16 @@ public final class AnchorDefinition {
     public static final double ATTACK_DAMAGE = 8.0D;
     public static final double ATTACK_SPEED = -3.0D;
 
-    public static final long SNARE_COOLDOWN_MILLIS = 5_000L;
-    public static final int SNARE_DURATION_TICKS = 40;
-
-    public static final long ABILITY_COOLDOWN_MILLIS = 5_000L;
-    public static final double ABILITY_RANGE = 20.0D;
     public static final double PULL_FORCE = 1.2D;
     public static final double PULL_LIFT = 0.35D;
-    public static final int FLIGHT_SPEED_TICKS = 10;
     public static final double THROW_SPEED = 1.25D;
+
+    public static final long DEFAULT_ABILITY_COOLDOWN_MILLIS = 5_000L;
+    public static final int DEFAULT_SNARE_DURATION_TICKS = 40;
+    public static final long DEFAULT_SNARE_COOLDOWN_MILLIS = 5_000L;
+    public static final double DEFAULT_ABILITY_RANGE = 20.0D;
+    public static final boolean DEFAULT_SNARE_ENABLED = true;
+    public static final boolean DEFAULT_HOOK_ENABLED = true;
 
     private AnchorDefinition() {
     }

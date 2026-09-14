@@ -33,6 +33,7 @@ import java.util.UUID;
 public final class CrescentSpearListener implements Listener {
 
     private static final double ACTIVE_FRONT_ARC_DOT = 0.5D;
+    private static final String CONFIG_PATH = "mechanics.crescent_spear";
 
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
@@ -47,6 +48,16 @@ public final class CrescentSpearListener implements Listener {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.lang = lang;
+    }
+
+    private int getChargesRequired() {
+        return Math.max(1, Math.min(100, plugin.getConfig().getInt(
+                CONFIG_PATH + ".charges_required", CrescentSpearDefinition.DEFAULT_CHARGES_REQUIRED)));
+    }
+
+    private int getActiveHitCount() {
+        return Math.max(1, Math.min(20, plugin.getConfig().getInt(
+                CONFIG_PATH + ".active_hit_count", CrescentSpearDefinition.DEFAULT_ACTIVE_HIT_COUNT)));
     }
 
     private ScheduledTaskCompat statusTask;
@@ -140,12 +151,13 @@ public final class CrescentSpearListener implements Listener {
 
         lastCountedTick.put(playerId, currentTick);
         lastChargeGainTick.put(playerId, currentTick);
+        int chargesRequired = getChargesRequired();
         int nextCharge = Math.min(
-                CrescentSpearDefinition.CHARGE_MAX,
-                charge.getOrDefault(playerId, 0) + CrescentSpearDefinition.CHARGE_PER_HIT);
+            chargesRequired,
+            charge.getOrDefault(playerId, 0) + 1);
         charge.put(playerId, nextCharge);
 
-        if (nextCharge >= CrescentSpearDefinition.CHARGE_MAX) {
+        if (nextCharge >= chargesRequired) {
             armedPlayers.add(playerId);
             showReadyActionBar(player);
         } else {
@@ -170,15 +182,17 @@ public final class CrescentSpearListener implements Listener {
         playSpecialEffects(player.getWorld(), effectPoint);
 
         UUID playerId = player.getUniqueId();
+        int activeHitCount = getActiveHitCount();
         specialAttackUntilTick.put(
                 playerId,
                 player.getWorld().getGameTime()
                         + CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS
-                        + (long) ((CrescentSpearDefinition.ACTIVE_HIT_COUNT - 1)
+                + (long) ((activeHitCount - 1)
                                 * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS));
 
         double hitDamage = resolveActiveHitDamage(player);
-        for (int i = 0; i < CrescentSpearDefinition.ACTIVE_HIT_COUNT; i++) {
+        for (int i = 0; i < activeHitCount; i++) {
+            int hitIndex = i;
             SchedulerCompat.runLaterForPlayer(player, plugin, () -> {
                 if (!player.isOnline()) {
                     return;
@@ -196,9 +210,28 @@ public final class CrescentSpearListener implements Listener {
                 playSpecialEffects(player.getWorld(), target.getLocation().add(0.0D, 1.0D, 0.0D));
                 target.setNoDamageTicks(0);
                 target.damage(hitDamage, player);
+                if (hitIndex == activeHitCount - 1) {
+                    applyLastHitKnockback(player, target);
+                }
             }, CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS
-                    + (long) i * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS);
+                    + (long) hitIndex * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS);
         }
+    }
+
+    private void applyLastHitKnockback(Player player, LivingEntity target) {
+        Vector push = target.getLocation().toVector().subtract(player.getLocation().toVector());
+        push.setY(0.0D);
+        if (push.lengthSquared() < 0.001D) {
+            push = player.getLocation().getDirection().setY(0.0D);
+        }
+        if (push.lengthSquared() < 0.001D) {
+            return;
+        }
+
+        Vector velocity = target.getVelocity().add(push.normalize().multiply(
+                CrescentSpearDefinition.ACTIVE_LAST_HIT_KNOCKBACK));
+        velocity.setY(Math.max(velocity.getY(), CrescentSpearDefinition.ACTIVE_LAST_HIT_LIFT));
+        target.setVelocity(velocity);
     }
 
     private LivingEntity findActiveTarget(Player player) {
@@ -287,7 +320,7 @@ public final class CrescentSpearListener implements Listener {
     }
 
     private void showChargeActionBar(Player player, int currentCharge) {
-        double progress = Math.max(0.0D, Math.min(1.0D, (double) currentCharge / CrescentSpearDefinition.CHARGE_MAX));
+        double progress = Math.max(0.0D, Math.min(1.0D, (double) currentCharge / getChargesRequired()));
         String message = lang.text("messages.crescent_spear.charge")
                 .replace("{bar}", ActionBarHelper.buildProgressBar(progress));
         ActionBarHelper.showActionBar(player, message);

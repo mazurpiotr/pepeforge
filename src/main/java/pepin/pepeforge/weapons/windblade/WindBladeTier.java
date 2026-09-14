@@ -65,6 +65,10 @@ public enum WindBladeTier {
             1,
             60);
 
+            public static final long DEFAULT_DASH_COOLDOWN_MILLIS = 5_000L;
+            public static final double DEFAULT_DASH_STRENGTH = 1.5D;
+            public static final boolean DEFAULT_DASH_WHILE_GLIDING = false;
+
     private static final Map<String, WindBladeTier> BY_ITEM_ID = Arrays.stream(values())
             .collect(Collectors.toUnmodifiableMap(WindBladeTier::itemId, Function.identity()));
 

@@ -66,27 +66,33 @@ public final class AnchorListener implements Listener {
     }
 
     private long getAbilityCooldownMillis() {
-        return plugin.getConfig().getLong(CONFIG_PATH + ".ability_cooldown", 5000L);
+        return Math.max(500L, Math.min(30_000L, plugin.getConfig().getLong(
+                CONFIG_PATH + ".ability_cooldown", AnchorDefinition.DEFAULT_ABILITY_COOLDOWN_MILLIS)));
     }
 
     private int getSnareDurationTicks() {
-        return plugin.getConfig().getInt(CONFIG_PATH + ".snare_duration", 40);
+        return Math.max(1, Math.min(200, plugin.getConfig().getInt(
+                CONFIG_PATH + ".snare_duration", AnchorDefinition.DEFAULT_SNARE_DURATION_TICKS)));
     }
 
     private long getSnareCooldownMillis() {
-        return plugin.getConfig().getLong(CONFIG_PATH + ".snare_cooldown", 5000L);
+        return Math.max(1_000L, Math.min(60_000L, plugin.getConfig().getLong(
+                CONFIG_PATH + ".snare_cooldown", AnchorDefinition.DEFAULT_SNARE_COOLDOWN_MILLIS)));
     }
 
     private double getAbilityRange() {
-        return plugin.getConfig().getDouble(CONFIG_PATH + ".ability_range", 20.0D);
+        double configured = plugin.getConfig().getDouble(
+                CONFIG_PATH + ".ability_range", AnchorDefinition.DEFAULT_ABILITY_RANGE);
+        return Double.isFinite(configured) ? Math.max(5.0D, Math.min(50.0D, configured))
+                : AnchorDefinition.DEFAULT_ABILITY_RANGE;
     }
 
     private boolean isSnareEnabled() {
-        return plugin.getConfig().getBoolean(CONFIG_PATH + ".snare_enabled", true);
+        return plugin.getConfig().getBoolean(CONFIG_PATH + ".snare_enabled", AnchorDefinition.DEFAULT_SNARE_ENABLED);
     }
 
     private boolean isHookEnabled() {
-        return plugin.getConfig().getBoolean(CONFIG_PATH + ".hook_enabled", true);
+        return plugin.getConfig().getBoolean(CONFIG_PATH + ".hook_enabled", AnchorDefinition.DEFAULT_HOOK_ENABLED);
     }
 
     public void cleanup() {
@@ -107,26 +113,8 @@ public final class AnchorListener implements Listener {
             ItemStack stored = activeThrows.remove(uuid);
             if (stored != null) {
                 Player player = plugin.getServer().getPlayer(uuid);
-                if (player != null && player.isOnline() && !player.isDead()) {
-                    ItemStack hand = player.getInventory().getItemInMainHand();
-                    if (hand == null || hand.getType().isAir()) {
-                        player.getInventory().setItemInMainHand(stored);
-                    } else {
-                        HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(stored);
-                        if (!remaining.isEmpty()) {
-                            for (ItemStack rest : remaining.values()) {
-                                player.getWorld().dropItemNaturally(player.getLocation(), rest);
-                            }
-                        }
-                    }
-                } else if (player != null) {
-                    try {
-                        Location loc = player.getLocation();
-                        if (loc != null && loc.getWorld() != null) {
-                            loc.getWorld().dropItemNaturally(loc, stored);
-                        }
-                    } catch (Exception ignored) {
-                    }
+                if (player != null) {
+                    returnItemToPlayer(player, stored, player.getLocation());
                 }
             }
         }
@@ -461,21 +449,7 @@ public final class AnchorListener implements Listener {
 
                 ItemStack stored = activeThrows.remove(player.getUniqueId());
                 if (stored != null) {
-                    if (player.isOnline() && !player.isDead()) {
-                        ItemStack hand = player.getInventory().getItemInMainHand();
-                        if (hand == null || hand.getType().isAir()) {
-                            player.getInventory().setItemInMainHand(stored);
-                        } else {
-                            HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(stored);
-                            if (!remaining.isEmpty()) {
-                                for (ItemStack rest : remaining.values()) {
-                                    player.getWorld().dropItemNaturally(player.getLocation(), rest);
-                                }
-                            }
-                        }
-                    } else {
-                        player.getWorld().dropItemNaturally(currentLoc, stored);
-                    }
+                    returnItemToPlayer(player, stored, currentLoc);
                 }
             }
         }
@@ -508,17 +482,31 @@ public final class AnchorListener implements Listener {
         Player player = event.getPlayer();
         ItemStack stored = activeThrows.remove(player.getUniqueId());
         if (stored != null) {
+            returnItemToPlayer(player, stored, player.getLocation());
+        }
+    }
+
+    private void returnItemToPlayer(Player player, ItemStack item, Location dropLocation) {
+        if (player.isOnline() && !player.isDead()) {
             ItemStack hand = player.getInventory().getItemInMainHand();
             if (hand == null || hand.getType().isAir()) {
-                player.getInventory().setItemInMainHand(stored);
-            } else {
-                HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(stored);
-                if (!remaining.isEmpty()) {
-                    for (ItemStack rest : remaining.values()) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), rest);
-                    }
-                }
+                player.getInventory().setItemInMainHand(item);
+                return;
             }
+
+            HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(item);
+            if (remaining.isEmpty()) {
+                return;
+            }
+
+            for (ItemStack rest : remaining.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), rest);
+            }
+            return;
+        }
+
+        if (dropLocation != null && dropLocation.getWorld() != null) {
+            dropLocation.getWorld().dropItemNaturally(dropLocation, item);
         }
     }
 

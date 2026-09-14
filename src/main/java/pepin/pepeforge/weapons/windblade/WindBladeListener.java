@@ -35,8 +35,6 @@ public final class WindBladeListener implements Listener {
     private static final String DASH_COOLDOWN_CONFIG_PATH = "mechanics.wind_blade.dash_cooldown";
     private static final String DASH_STRENGTH_CONFIG_PATH = "mechanics.wind_blade.dash_strength";
     private static final String DASH_WHILE_GLIDING_CONFIG_PATH = "mechanics.wind_blade.dash_while_gliding";
-    private static final long DEFAULT_DASH_COOLDOWN_MILLIS = 5_000L;
-    private static final double DEFAULT_DASH_STRENGTH = 1.5D;
     private static final double DASH_LIFT = 0.3D;
     private static final PotionEffect HOLDING_SPEED_EFFECT = new PotionEffect(
             PotionEffectType.SPEED,
@@ -216,16 +214,20 @@ public final class WindBladeListener implements Listener {
 
     private long getDashCooldownMillis() {
         return Math.max(500L, Math.min(30_000L,
-                plugin.getConfig().getLong(DASH_COOLDOWN_CONFIG_PATH, DEFAULT_DASH_COOLDOWN_MILLIS)));
+            plugin.getConfig().getLong(DASH_COOLDOWN_CONFIG_PATH,
+                WindBladeTier.DEFAULT_DASH_COOLDOWN_MILLIS)));
     }
 
     private double getDashStrength() {
-        return Math.max(0.1D, Math.min(5.0D,
-                plugin.getConfig().getDouble(DASH_STRENGTH_CONFIG_PATH, DEFAULT_DASH_STRENGTH)));
+        double configured = plugin.getConfig().getDouble(DASH_STRENGTH_CONFIG_PATH,
+            WindBladeTier.DEFAULT_DASH_STRENGTH);
+        return Double.isFinite(configured) ? Math.max(0.1D, Math.min(5.0D, configured))
+            : WindBladeTier.DEFAULT_DASH_STRENGTH;
     }
 
     private boolean isDashWhileGlidingEnabled() {
-        return plugin.getConfig().getBoolean(DASH_WHILE_GLIDING_CONFIG_PATH, false);
+        return plugin.getConfig().getBoolean(DASH_WHILE_GLIDING_CONFIG_PATH,
+            WindBladeTier.DEFAULT_DASH_WHILE_GLIDING);
     }
 
 }

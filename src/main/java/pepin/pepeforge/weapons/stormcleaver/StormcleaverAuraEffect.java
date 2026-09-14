@@ -30,8 +30,9 @@ public final class StormcleaverAuraEffect implements AuraEffect {
     public void tick(Player player) {
         ItemStack held = player.getInventory().getItemInMainHand();
         ItemStack offHand = player.getInventory().getItemInOffHand();
-        int requiredCharges = Math.max(1, Math.min(10, plugin.getConfig().getInt(
-                "mechanics.stormcleaver.charges_required", StormcleaverDefinition.DEFAULT_CHARGES_REQUIRED)));
+        int configuredCharges = plugin.getConfig().getInt(
+            "mechanics.stormcleaver.charges_required", StormcleaverDefinition.DEFAULT_CHARGES_REQUIRED);
+        int requiredCharges = Math.max(1, Math.min(10, configuredCharges));
         int charges = player.getPersistentDataContainer().getOrDefault(
                 chargesKey, PersistentDataType.INTEGER, 0);
 

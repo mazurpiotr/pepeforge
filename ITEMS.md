@@ -123,8 +123,8 @@ Moon-themed melee weapon with an armed follow-up burst.
 
 | Feature | Details |
 |---------|---------|
-| Charge | Each successful hit adds 20% charge, while the meter slowly decays between attacks |
-| Active | The next melee hit at full charge triggers 3 rapid follow-up attacks |
+| Charge | Each successful hit adds one charge toward the configured requirement, while the meter slowly decays between attacks |
+| Active | The next melee hit at full charge triggers rapid follow-up attacks; the final hit lightly knocks the target back and upward |
 | Day | Deals 1 less damage during the day |
 | Moonlight | Deals 2 bonus damage at night under open sky |
 | Visual | Subtly shimmers under moonlight |

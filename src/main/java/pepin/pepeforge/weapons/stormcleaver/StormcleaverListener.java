@@ -330,7 +330,8 @@ public final class StormcleaverListener implements Listener {
     }
 
     private int getChargeDecayInterval() {
-        return Math.max(1, Math.min(1200, plugin.getConfig().getInt(CHARGE_DECAY_INTERVAL_CONFIG_PATH, 40)));
+        return Math.max(1, Math.min(1200, plugin.getConfig().getInt(CHARGE_DECAY_INTERVAL_CONFIG_PATH,
+                StormcleaverDefinition.DEFAULT_CHARGE_DECAY_INTERVAL)));
     }
 
     private boolean hasEmptyOffHand(Player player) {
