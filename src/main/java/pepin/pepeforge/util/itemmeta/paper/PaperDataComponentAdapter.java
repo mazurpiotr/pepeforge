@@ -1,4 +1,4 @@
-package pepin.pepeforge.util.itemmeta;
+package pepin.pepeforge.util.itemmeta.paper;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -6,67 +6,62 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
+import pepin.pepeforge.util.itemmeta.DataComponentAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public final class PaperDataComponentAdapter {
+public final class PaperDataComponentAdapter implements DataComponentAdapter {
 
-    private PaperDataComponentAdapter() {
-    }
-
-
-    public static void applyTranslatableItemTextData(ItemStack item, String nameTranslationKey, String nameColorName, List<String> loreTranslationKeys, List<String> loreColorNames) {
+    @Override
+    @SuppressWarnings("null")
+    public void applyTranslatableItemTextData(ItemStack item, String nameTranslationKey, String nameColorName,
+                                              List<String> loreTranslationKeys, List<String> loreColorNames) {
         Component nameComponent = createTranslatableComponent(nameTranslationKey, nameColorName);
         if (nameComponent != null) {
             item.setData(DataComponentTypes.ITEM_NAME, nameComponent);
         }
-
         if (loreTranslationKeys == null || loreTranslationKeys.isEmpty()) {
             return;
         }
-
         List<Component> loreComponents = new ArrayList<>();
         for (int i = 0; i < loreTranslationKeys.size(); i++) {
-            String translationKey = loreTranslationKeys.get(i);
             String colorName = loreColorNames != null && i < loreColorNames.size() ? loreColorNames.get(i) : null;
-            Component component = createTranslatableComponent(translationKey, colorName);
+            Component component = createTranslatableComponent(loreTranslationKeys.get(i), colorName);
             if (component != null) {
                 loreComponents.add(component);
             }
         }
-
-        item.setData(DataComponentTypes.LORE, ItemLore.lore(loreComponents));
+        @NonNull ItemLore itemLore = Objects.requireNonNull(ItemLore.lore(loreComponents));
+        item.setData(DataComponentTypes.LORE, itemLore);
     }
 
+    @SuppressWarnings("null")
     public static void applyRawComponents(ItemStack item, Component name, List<Component> lore) {
         if (name != null) {
             item.setData(DataComponentTypes.ITEM_NAME, name);
         }
         if (lore != null) {
-            item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+            @NonNull ItemLore itemLore = Objects.requireNonNull(ItemLore.lore(lore));
+            item.setData(DataComponentTypes.LORE, itemLore);
         }
+    }
+
+    @Override
+    public void applyMaxStackSize(ItemStack item, int maxStackSize) {
+        item.setData(DataComponentTypes.MAX_STACK_SIZE, maxStackSize);
     }
 
     private static Component createTranslatableComponent(String key, String colorName) {
-        Component component = Component.translatable(key);
+        Component component = Component.translatable(Objects.requireNonNull(key));
         if (colorName == null || colorName.isBlank()) {
             return component;
         }
-
-        TextColor color;
-        if (colorName.startsWith("#")) {
-            color = TextColor.fromHexString(colorName);
-        } else {
-            color = NamedTextColor.NAMES.value(colorName);
-        }
-        if (color != null) {
-            component = component.color(color);
-        }
-        return component;
-    }
-
-    public static void applyMaxStackSize(ItemStack item, int maxStackSize) {
-        item.setData(DataComponentTypes.MAX_STACK_SIZE, maxStackSize);
+        TextColor color = colorName.startsWith("#")
+                ? TextColor.fromHexString(colorName)
+                : NamedTextColor.NAMES.value(colorName);
+        return color == null ? component : component.color(color);
     }
 }

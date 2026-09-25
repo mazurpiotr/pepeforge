@@ -1,51 +1,43 @@
 package pepin.pepeforge.util.itemmeta;
 
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
+import pepin.pepeforge.util.env.AdventureReflect;
+import pepin.pepeforge.util.env.ServerEnv;
 
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
 
 public final class ItemMetaCompat {
+
+    private static final ItemMetaAdapter ADAPTER = createAdapter();
 
     private ItemMetaCompat() {
     }
 
-    @Deprecated
     public static void setDisplayName(ItemMeta meta, String name) {
-        meta.setDisplayName(name);
+        ADAPTER.setDisplayName(meta, name);
     }
 
 
-    @Deprecated
     public static void setItemName(ItemMeta meta, String name) {
-        meta.setItemName(name);
+        ADAPTER.setItemName(meta, name);
     }
 
 
-    @Deprecated
     public static String getDisplayName(ItemMeta meta) {
-        return meta.getDisplayName();
+        return ADAPTER.getDisplayName(meta);
     }
 
 
-    @Deprecated
     public static String getItemName(ItemMeta meta) {
-        return meta.getItemName();
+        return ADAPTER.getItemName(meta);
     }
 
 
-    @Deprecated
-    public static void setStringLore(ItemMeta meta, List<String> lore) {
-        meta.setLore(lore);
+    public static void setLore(ItemMeta meta, List<String> lore) {
+        ADAPTER.setLore(meta, lore);
     }
 
 
@@ -81,7 +73,7 @@ public final class ItemMetaCompat {
     public static void addMainHandAttribute(ItemMeta meta, Attribute attribute, String name, double amount) {
         meta.addAttributeModifier(
                 attribute,
-                createMainHandAttributeModifier(name, amount)
+                AttributeModifierCompat.createMainHandAttributeModifier(name, amount)
         );
     }
 
@@ -89,47 +81,15 @@ public final class ItemMetaCompat {
         meta.setItemModel(itemModelKey);
     }
 
-    private static AttributeModifier createMainHandAttributeModifier(String name, double amount) {
-        NamespacedKey key = NamespacedKey.fromString("pepeforge:" + normalizeKey(name));
-        if (key != null) {
+    private static ItemMetaAdapter createAdapter() {
+        if (ServerEnv.hasDataComponentApi() && AdventureReflect.isSupported()) {
             try {
-                Constructor<AttributeModifier> constructor = AttributeModifier.class.getConstructor(
-                        NamespacedKey.class,
-                        double.class,
-                        AttributeModifier.Operation.class,
-                        EquipmentSlotGroup.class
-                );
-                return constructor.newInstance(
-                        key,
-                        amount,
-                        AttributeModifier.Operation.ADD_NUMBER,
-                        EquipmentSlotGroup.MAINHAND
-                );
-            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ignored) {
+                return (ItemMetaAdapter) Class.forName(
+                        "pepin.pepeforge.util.itemmeta.paper.PaperItemMetaAdapter"
+                ).getDeclaredConstructor().newInstance();
+            } catch (ReflectiveOperationException | LinkageError ignored) {
             }
         }
-
-        try {
-            Constructor<AttributeModifier> constructor = AttributeModifier.class.getConstructor(
-                    UUID.class,
-                    String.class,
-                    double.class,
-                    AttributeModifier.Operation.class,
-                    EquipmentSlotGroup.class
-            );
-            return constructor.newInstance(
-                    UUID.nameUUIDFromBytes(name.getBytes()),
-                    name,
-                    amount,
-                    AttributeModifier.Operation.ADD_NUMBER,
-                    EquipmentSlotGroup.MAINHAND
-            );
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException exception) {
-            throw new IllegalStateException("Unable to create attribute modifier for " + name, exception);
-        }
-    }
-
-    private static String normalizeKey(String name) {
-        return name.toLowerCase(Locale.ROOT).replace(' ', '_');
+        return new pepin.pepeforge.util.itemmeta.spigot.SpigotItemMetaAdapter();
     }
 }

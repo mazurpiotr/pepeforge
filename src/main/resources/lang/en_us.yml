@@ -215,10 +215,10 @@ items:
     fallback_name: "&#66D9EFStormcleaver"
     lore:
       - "&6---------------"
-      - "&eAbility: &bDive Slam"
+      - "&eAbility: &bThunder Leap"
       - "&3Melee hits build Static Charges (up to 5)."
-      - "&3At full charge, airborne right-click starts a dive."
-      - "&3Impact creates a lightning shockwave."
+      - "&3At full charge, right-click launches a thunder leap."
+      - "&3Landing creates a protected lightning shockwave."
       - "&7Two-Handed"
       - "&#805AD5Legendary"
       - "&6---------------"

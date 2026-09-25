@@ -12,10 +12,21 @@
         <directory>src/main/resources</directory>
       </resource>
     </resources>
+    <finalName>${project.artifactId}-${project.version}-mc${minecraft.version}</finalName>
     <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.14.1</version>
+        <configuration>
+          <release>${maven.compiler.release}</release>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
+        <configuration>
+          <argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/5.23.0/mockito-core-5.23.0.jar</argLine>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
@@ -29,7 +40,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.6.2</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -59,8 +70,52 @@
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.21.11-R0.1-SNAPSHOT</version>
+      <version>26.2.build.124-stable</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockbukkit.mockbukkit</groupId>
+      <artifactId>mockbukkit-v1.21</artifactId>
+      <version>4.110.0</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>junit-jupiter-api</artifactId>
+          <groupId>org.junit.jupiter</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hamcrest</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>adventure-platform-bungeecord</artifactId>
+          <groupId>net.kyori</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>byte-buddy</artifactId>
+          <groupId>net.bytebuddy</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.23.0</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>byte-buddy-agent</artifactId>
+          <groupId>net.bytebuddy</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>objenesis</artifactId>
+          <groupId>org.objenesis</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>byte-buddy</artifactId>
+          <groupId>net.bytebuddy</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -112,8 +167,9 @@
     </dependency>
   </dependencies>
   <properties>
+    <maven.compiler.release>25</maven.compiler.release>
+    <minecraft.version>26.2</minecraft.version>
+    <paper.version>26.2.build.124-stable</paper.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.target>21</maven.compiler.target>
-    <maven.compiler.source>21</maven.compiler.source>
   </properties>
 </project>

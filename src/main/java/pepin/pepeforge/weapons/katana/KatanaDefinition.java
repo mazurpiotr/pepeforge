@@ -38,6 +38,7 @@ public final class KatanaDefinition {
     public static final double PROJECTILE_TOWARD_PLAYER_DOT_THRESHOLD = 0.45D;
     public static final double REFLECT_MIN_SPEED = 1.6D;
     public static final double MELEE_KNOCKBACK_STRENGTH = 0.75D;
+    public static final double COUNTERATTACK_DAMAGE = 1.0D;
 
     private KatanaDefinition() {
     }

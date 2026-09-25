@@ -1,5 +1,9 @@
 package pepin.pepeforge.gui;
 
+import java.util.Objects;
+
+import org.jspecify.annotations.NonNull;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -14,8 +18,12 @@ public final class ConfigMenu {
     private ConfigMenu() {
     }
 
-    public static Inventory create(ItemFactory itemFactory) {
-        Inventory inventory = Bukkit.createInventory(new Holder(), 54, ColorUtil.DARK_GRAY + "Configuration");
+    public static @NonNull Inventory create(ItemFactory itemFactory) {
+        Inventory inventory = Objects.requireNonNull(Bukkit.createInventory(
+                new Holder(),
+                54,
+                ColorUtil.DARK_GRAY + "Configuration"));
+
         int slot = 0;
         for (String itemId : itemFactory.getAllCanonicalIds()) {
             ItemStack item = itemFactory.createByName(itemId);

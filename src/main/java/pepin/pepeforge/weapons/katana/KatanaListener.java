@@ -33,6 +33,7 @@ import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.combat.CombatUtils;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.util.ui.ActionBarHelper;
 import pepin.pepeforge.util.cooldown.CooldownManager;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
@@ -212,6 +213,11 @@ public final class KatanaListener implements Listener {
             return;
         }
 
+        if (!SchedulerCompat.isOwnedByCurrentRegion(player)
+                || !SchedulerCompat.isOwnedByCurrentRegion(event.getDamager())) {
+            return;
+        }
+
         long now = System.currentTimeMillis();
         if (!isParryActive(player, now) || !CombatUtils.hasEmptyOffHand(player)) {
             return;
@@ -238,8 +244,16 @@ public final class KatanaListener implements Listener {
         }
 
         event.setCancelled(true);
-        knockBackAttacker(player, attacker);
-        playMeleeParryEffects(player.getWorld(), player.getLocation());
+        World parryWorld = player.getWorld();
+        Location parryLocation = player.getLocation();
+        if (!DamageFlow.isCounterattack(event)
+                && DamageFlow.counterattack(attacker, KatanaDefinition.COUNTERATTACK_DAMAGE, player).accepted()
+                && SchedulerCompat.isOwnedByCurrentRegion(player) && SchedulerCompat.isOwnedByCurrentRegion(attacker)
+                && player.isOnline() && !player.isDead() && attacker.isValid() && !attacker.isDead()
+                && player.getWorld() == attacker.getWorld()) {
+            knockBackAttacker(player, attacker);
+        }
+        playMeleeParryEffects(parryWorld, parryLocation);
     }
 
     @EventHandler
@@ -308,6 +322,9 @@ public final class KatanaListener implements Listener {
     }
 
     private boolean isProjectileReflectable(Player player, Projectile projectile, long now) {
+        if (!SchedulerCompat.isOwnedByCurrentRegion(projectile)) {
+            return false;
+        }
         if (!projectile.isValid() || projectile.isDead()) {
             return false;
         }

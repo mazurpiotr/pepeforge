@@ -9,6 +9,7 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.recipe.RecipeDiscoveryRefresher;
 import pepin.pepeforge.util.aura.AuraManager;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.util.cooldown.CooldownManager;
 import pepin.pepeforge.weapons.crescent.CrescentAuraEffect;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
@@ -114,7 +115,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         crimsonSwordManager = new CrimsonSwordManager(this, lang);
         itemFactory = new ItemFactory(this, lang, crimsonSwordManager);
         statsManager = new StatisticsManager(this);
-        pepin.pepeforge.util.protection.ProtectionUtil.initialize(this);
+        getServer().getPluginManager().registerEvents(new DamageFlow(), this);
         getServer().getPluginManager().registerEvents(new StatisticsListener(statsManager, itemFactory), this);
 
         boolean migrationEnabled = getConfig().getBoolean("migration.enabled", true);
@@ -234,7 +235,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveConfig();
 
-        pepin.pepeforge.util.protection.ProtectionUtil.initialize(this);
+        getServer().getPluginManager().registerEvents(new DamageFlow(), this);
         lang = new PluginLang(this);
         crimsonSwordManager = new CrimsonSwordManager(this, lang);
         itemFactory = new ItemFactory(this, lang, crimsonSwordManager);

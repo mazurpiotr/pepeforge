@@ -15,16 +15,15 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
-import pepin.pepeforge.util.protection.ProtectionUtil;
+import pepin.pepeforge.util.charge.ChargeManager;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 import pepin.pepeforge.util.ui.ActionBarHelper;
@@ -40,16 +39,17 @@ public final class StormcleaverListener implements Listener {
     private static final String JUMP_MULTIPLIER_CONFIG_PATH = "mechanics.stormcleaver.jump_velocity_multiplier";
     private static final String CHARGE_DECAY_INTERVAL_CONFIG_PATH = "mechanics.stormcleaver.charge_decay_interval";
     private static final int STATUS_INTERVAL_TICKS = 5;
-    private static final int MAX_DIVE_TICKS = 80;
+    private static final int MAX_LEAP_TICKS = 80;
+    private static final int LEAP_ARMING_TICKS = 2;
+    private static final int MAX_LEAP_CLEARANCE_BLOCKS = 8;
 
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final PluginLang lang;
-    private final org.bukkit.NamespacedKey chargesKey;
-    private final Map<UUID, DiveState> activeDives = new ConcurrentHashMap<>();
-    private final Map<UUID, ScheduledTaskCompat> diveTasks = new ConcurrentHashMap<>();
+    private final ChargeManager chargeManager;
+    private final Map<UUID, LeapState> activeLeaps = new ConcurrentHashMap<>();
+    private final Map<UUID, ScheduledTaskCompat> leapTasks = new ConcurrentHashMap<>();
     private final Map<UUID, Long> fallDamageSuppression = new ConcurrentHashMap<>();
-    private final Map<UUID, Long> lastChargeChangeTick = new ConcurrentHashMap<>();
     private final Set<UUID> suppressedChargePlayers = ConcurrentHashMap.newKeySet();
     private ScheduledTaskCompat statusTask;
 
@@ -57,7 +57,8 @@ public final class StormcleaverListener implements Listener {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.lang = lang;
-        this.chargesKey = new org.bukkit.NamespacedKey(plugin, StormcleaverDefinition.CHARGES_KEY_STRING);
+        this.chargeManager = new ChargeManager(
+            new org.bukkit.NamespacedKey(plugin, StormcleaverDefinition.CHARGES_KEY_STRING));
     }
 
     public void startStatusTask() {
@@ -73,36 +74,22 @@ public final class StormcleaverListener implements Listener {
             statusTask.cancel();
             statusTask = null;
         }
-        lastChargeChangeTick.clear();
+        chargeManager.clear();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)
                 || !(event.getEntity() instanceof LivingEntity target)
                 || target == player
                 || !itemFactory.isStormcleaver(player.getInventory().getItemInMainHand())
                 || !hasEmptyOffHand(player)
+                || DamageFlow.isSecondaryDamage(event)
                 || suppressedChargePlayers.contains(player.getUniqueId())) {
             return;
         }
 
         addCharge(player);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onJump(PlayerJumpEvent event) {
-        Player player = event.getPlayer();
-        if (getCharges(player) < getRequiredCharges()
-                || !itemFactory.isStormcleaver(player.getInventory().getItemInMainHand())
-                || !hasEmptyOffHand(player)) {
-            return;
-        }
-
-        Vector velocity = player.getVelocity();
-        velocity.setY(Math.max(velocity.getY(), StormcleaverDefinition.CHARGE_JUMP_VELOCITY
-                * getJumpVelocityMultiplier()));
-        player.setVelocity(velocity);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -114,19 +101,26 @@ public final class StormcleaverListener implements Listener {
         }
 
         Player player = event.getPlayer();
+        if (activeLeaps.containsKey(player.getUniqueId())) {
+            return;
+        }
         ItemStack item = player.getInventory().getItemInMainHand();
-        if (!itemFactory.isStormcleaver(item) || !hasEmptyOffHand(player) || player.isOnGround()) {
+        if (!itemFactory.isStormcleaver(item) || !hasEmptyOffHand(player) || !player.isOnGround()) {
             return;
         }
 
         int requiredCharges = getRequiredCharges();
-        if (getCharges(player) < requiredCharges) {
+        if (chargeManager.getCharges(player) < requiredCharges) {
             return;
         }
 
         denyInteraction(event);
-        setCharges(player, 0);
-        startDive(player);
+        chargeManager.reset(player);
+        if (hasLeapClearance(player)) {
+            startLeap(player);
+        } else {
+            triggerImpact(player);
+        }
         player.setCooldown(item.getType(), 10);
     }
 
@@ -138,7 +132,7 @@ public final class StormcleaverListener implements Listener {
         }
 
         UUID playerId = player.getUniqueId();
-        if (activeDives.containsKey(playerId) || fallDamageSuppression.containsKey(playerId)) {
+        if (activeLeaps.containsKey(playerId) || fallDamageSuppression.containsKey(playerId)) {
             event.setCancelled(true);
             player.setFallDistance(0.0F);
         }
@@ -156,26 +150,24 @@ public final class StormcleaverListener implements Listener {
 
     public void cleanup() {
         stop();
-        for (UUID playerId : activeDives.keySet()) {
+        for (UUID playerId : activeLeaps.keySet()) {
             cleanupPlayer(playerId);
         }
-        activeDives.clear();
+        activeLeaps.clear();
         fallDamageSuppression.clear();
-        lastChargeChangeTick.clear();
+        chargeManager.clear();
         suppressedChargePlayers.clear();
     }
 
     private void addCharge(Player player) {
         int requiredCharges = getRequiredCharges();
-        int currentCharges = getCharges(player);
+        int currentCharges = chargeManager.getCharges(player);
         if (currentCharges >= requiredCharges) {
             showCharge(player, currentCharges, requiredCharges);
             return;
         }
 
-        int nextCharges = Math.min(requiredCharges, currentCharges + 1);
-        setCharges(player, nextCharges);
-        lastChargeChangeTick.put(player.getUniqueId(), player.getWorld().getGameTime());
+        int nextCharges = chargeManager.addCharge(player, requiredCharges, player.getWorld().getGameTime());
         showCharge(player, nextCharges, requiredCharges);
 
         if (currentCharges < requiredCharges && nextCharges == requiredCharges) {
@@ -188,20 +180,13 @@ public final class StormcleaverListener implements Listener {
             return;
         }
 
-        UUID playerId = player.getUniqueId();
-        int charges = getCharges(player);
+        int charges = chargeManager.getCharges(player);
         if (charges <= 0) {
-            lastChargeChangeTick.remove(playerId);
             return;
         }
 
         long currentTick = player.getWorld().getGameTime();
-        long lastChangeTick = lastChargeChangeTick.computeIfAbsent(playerId, ignored -> currentTick);
-        if (currentTick - lastChangeTick >= getChargeDecayInterval()) {
-            charges--;
-            setCharges(player, charges);
-            lastChargeChangeTick.put(playerId, currentTick);
-        }
+        charges = chargeManager.decay(player, currentTick, getChargeDecayInterval(), 1);
 
         if (itemFactory.isStormcleaver(player.getInventory().getItemInMainHand()) && charges > 0) {
             showCharge(player, charges, getRequiredCharges());
@@ -219,7 +204,7 @@ public final class StormcleaverListener implements Listener {
                 0.55D, 0.08D, 0.55D, 0.12D);
     }
 
-    private void startDive(Player player) {
+    private void startLeap(Player player) {
         UUID playerId = player.getUniqueId();
         cleanupPlayer(playerId);
 
@@ -227,33 +212,53 @@ public final class StormcleaverListener implements Listener {
         if (direction.lengthSquared() > 0.001D) {
             direction.normalize();
         }
-        player.setVelocity(direction.multiply(StormcleaverDefinition.DIVE_HORIZONTAL_SPEED)
-                .setY(StormcleaverDefinition.DIVE_VERTICAL_SPEED));
+        player.setVelocity(direction.multiply(StormcleaverDefinition.LEAP_HORIZONTAL_SPEED)
+                .setY(StormcleaverDefinition.CHARGE_JUMP_VELOCITY * getJumpVelocityMultiplier()));
         player.setFallDistance(0.0F);
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 0.8f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.8f, 1.2f);
 
-        DiveState state = new DiveState(player, 0);
-        activeDives.put(playerId, state);
-        ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, () -> tickDive(state), 1L, 1L);
-        diveTasks.put(playerId, task);
+        LeapState state = new LeapState(player, 0);
+        activeLeaps.put(playerId, state);
+        ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, () -> tickLeap(state), 1L, 1L);
+        leapTasks.put(playerId, task);
     }
 
-    private void tickDive(DiveState state) {
+    private void tickLeap(LeapState state) {
         Player player = state.player();
         UUID playerId = player.getUniqueId();
         int tick = state.tick() + 1;
         state.setTick(tick);
 
-        if (!player.isOnline() || player.isDead() || tick > MAX_DIVE_TICKS) {
+        if (!player.isOnline() || player.isDead() || tick > MAX_LEAP_TICKS) {
             cleanupPlayer(playerId);
             return;
         }
 
         player.setFallDistance(0.0F);
-        if (tick > StormcleaverDefinition.DIVE_ARMING_TICKS && player.isOnGround()) {
+        if (tick > LEAP_ARMING_TICKS && player.isOnGround()) {
             triggerImpact(player);
-            stopDive(playerId);
+            stopLeap(playerId);
         }
+    }
+
+    private boolean hasLeapClearance(Player player) {
+        var bounds = player.getBoundingBox();
+        int minX = (int) Math.floor(bounds.getMinX());
+        int maxX = (int) Math.floor(bounds.getMaxX());
+        int minZ = (int) Math.floor(bounds.getMinZ());
+        int maxZ = (int) Math.floor(bounds.getMaxZ());
+        int baseY = (int) Math.floor(bounds.getMinY());
+
+        for (int y = baseY + 1; y <= baseY + MAX_LEAP_CLEARANCE_BLOCKS; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    if (!player.getWorld().getBlockAt(x, y, z).isPassable()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private void triggerImpact(Player player) {
@@ -274,13 +279,18 @@ public final class StormcleaverListener implements Listener {
             }
 
             suppressedChargePlayers.add(player.getUniqueId());
+            DamageFlow.Result result;
             try {
-                if (!ProtectionUtil.canDamage(player, target)) {
-                    continue;
-                }
-                target.damage(StormcleaverDefinition.SHOCKWAVE_DAMAGE, player);
+                result = DamageFlow.damage(target, StormcleaverDefinition.SHOCKWAVE_DAMAGE, player);
             } finally {
                 suppressedChargePlayers.remove(player.getUniqueId());
+            }
+
+            if (!result.accepted()
+                    || !SchedulerCompat.isOwnedByCurrentRegion(target)
+                    || target.isDead()
+                    || !target.isValid()) {
+                continue;
             }
 
             Vector push = target.getLocation().toVector().subtract(impact.toVector());
@@ -311,14 +321,6 @@ public final class StormcleaverListener implements Listener {
         ActionBarHelper.showActionBar(player, message);
     }
 
-    private int getCharges(Player player) {
-        return player.getPersistentDataContainer().getOrDefault(chargesKey, PersistentDataType.INTEGER, 0);
-    }
-
-    private void setCharges(Player player, int charges) {
-        player.getPersistentDataContainer().set(chargesKey, PersistentDataType.INTEGER, Math.max(0, charges));
-    }
-
     private int getRequiredCharges() {
         return Math.max(1, Math.min(10, plugin.getConfig().getInt(CHARGES_CONFIG_PATH,
                 StormcleaverDefinition.DEFAULT_CHARGES_REQUIRED)));
@@ -346,24 +348,24 @@ public final class StormcleaverListener implements Listener {
     }
 
     private void cleanupPlayer(UUID playerId) {
-        stopDive(playerId);
+        stopLeap(playerId);
         fallDamageSuppression.remove(playerId);
-        lastChargeChangeTick.remove(playerId);
+        chargeManager.clearTransientState(playerId);
     }
 
-    private void stopDive(UUID playerId) {
-        ScheduledTaskCompat task = diveTasks.remove(playerId);
+    private void stopLeap(UUID playerId) {
+        ScheduledTaskCompat task = leapTasks.remove(playerId);
         if (task != null) {
             task.cancel();
         }
-        activeDives.remove(playerId);
+        activeLeaps.remove(playerId);
     }
 
-    private static final class DiveState {
+    private static final class LeapState {
         private final Player player;
         private int tick;
 
-        private DiveState(Player player, int tick) {
+        private LeapState(Player player, int tick) {
             this.player = player;
             this.tick = tick;
         }

@@ -10,6 +10,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.util.aura.AuraManager;
+import pepin.pepeforge.util.combat.DamageFlow;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
@@ -56,7 +57,7 @@ public final class CrimsonSwordListener implements Listener {
         if (!(event.getDamager() instanceof Player player)) {
             return;
         }
-        if (auraDrainingPlayers.contains(player.getUniqueId())) {
+        if (DamageFlow.isSecondaryDamage(event) || auraDrainingPlayers.contains(player.getUniqueId())) {
             return;
         }
         if (!(event.getEntity() instanceof LivingEntity target) || target == player) {
@@ -74,10 +75,36 @@ public final class CrimsonSwordListener implements Listener {
         }
 
         event.setDamage(event.getDamage() * (1.0D + damageBonus(level)));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSuccessfulDamage(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player player)) {
+            return;
+        }
+        if (DamageFlow.isSecondaryDamage(event) || auraDrainingPlayers.contains(player.getUniqueId())) {
+            return;
+        }
+        if (!(event.getEntity() instanceof LivingEntity target) || target == player) {
+            return;
+        }
+
+        ItemStack weapon = player.getInventory().getItemInMainHand();
+        if (!itemFactory.isCrimsonSword(weapon)) {
+            return;
+        }
+
+        int level = manager.getLevel(weapon);
+        if (level <= 0) {
+            return;
+        }
+
         double finalDamage = event.getFinalDamage();
-        double effectiveDamage = Math.min(finalDamage, target.getHealth());
+        double effectiveDamage = Math.max(0.0D, Math.min(finalDamage, target.getHealth()));
+        if (effectiveDamage <= 0.0D) {
+            return;
+        }
         
-        // This is handled in CrimsonAuraEffect for drain, but lifesteal on hit is here
         if (manager.lifesteal(level) > 0.0D) {
             manager.heal(player, effectiveDamage * manager.lifesteal(level));
         }

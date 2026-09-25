@@ -215,10 +215,10 @@ items:
     fallback_name: "&#66D9EFRozcinacz Burz"
     lore:
       - "&6---------------"
-      - "&eUmiejętność: &bNurkujące Uderzenie"
+      - "&eUmiejętność: &bPiorunujący Skok"
       - "&3Trafienia ładują elektryczne ładunki (maks. 5)."
-      - "&3Przy pełnym naładowaniu PPM w powietrzu rozpoczyna nurkowanie."
-      - "&3Uderzenie tworzy błyskawiczną falę uderzeniową."
+      - "&3Przy pełnym naładowaniu PPM wybija gracza w górę."
+      - "&3Lądowanie tworzy chronioną błyskawiczną falę uderzeniową."
       - "&7Dwuręczna"
       - "&#805AD5Legendarny"
       - "&6---------------"

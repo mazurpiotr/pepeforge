@@ -1,6 +1,7 @@
 package pepin.pepeforge.weapons.crescentspear;
 
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -18,9 +19,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.charge.ChargeManager;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
-import pepin.pepeforge.util.protection.ProtectionUtil;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.util.ui.ActionBarHelper;
 import pepin.pepeforge.weapons.crescent.CrescentMoonPower;
 
@@ -38,8 +40,7 @@ public final class CrescentSpearListener implements Listener {
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final PluginLang lang;
-    private final Map<UUID, Integer> charge = new ConcurrentHashMap<>();
-    private final Map<UUID, Long> lastChargeGainTick = new ConcurrentHashMap<>();
+    private final ChargeManager chargeManager;
     private final Map<UUID, Long> lastCountedTick = new ConcurrentHashMap<>();
     private final Map<UUID, Long> specialAttackUntilTick = new ConcurrentHashMap<>();
     private final Set<UUID> armedPlayers = ConcurrentHashMap.newKeySet();
@@ -48,6 +49,8 @@ public final class CrescentSpearListener implements Listener {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.lang = lang;
+        this.chargeManager = new ChargeManager(
+            new NamespacedKey(plugin, CrescentSpearDefinition.CHARGES_KEY_STRING));
     }
 
     private int getChargesRequired() {
@@ -66,11 +69,11 @@ public final class CrescentSpearListener implements Listener {
         statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 SchedulerCompat.runForPlayer(player, plugin, () -> {
-                    if (!player.isOnline()) {
+                    if (player == null || !player.isOnline()) {
                         return;
                     }
                     UUID playerId = player.getUniqueId();
-                    int currentCharge = charge.getOrDefault(playerId, 0);
+                    int currentCharge = chargeManager.getCharges(player);
                     boolean armed = armedPlayers.contains(playerId);
                     boolean holdingSpear = itemFactory.isCrescentSpear(player.getInventory().getItemInMainHand());
                     if (holdingSpear) {
@@ -83,19 +86,9 @@ public final class CrescentSpearListener implements Listener {
 
                     if (currentCharge > 0 && !armed) {
                         long currentTick = player.getWorld().getGameTime();
-                        long lastGainTick = lastChargeGainTick.getOrDefault(playerId, Long.MIN_VALUE);
-                        if (currentTick - lastGainTick < CrescentSpearDefinition.CHARGE_DECAY_DELAY_TICKS) {
-                            return;
-                        }
-
-                        int decayedCharge = Math.max(0,
-                                currentCharge - CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL);
-                        if (decayedCharge == 0) {
-                            charge.remove(playerId);
-                            lastChargeGainTick.remove(playerId);
-                        } else {
-                            charge.put(playerId, decayedCharge);
-                        }
+                        chargeManager.decay(player, currentTick,
+                                CrescentSpearDefinition.CHARGE_DECAY_DELAY_TICKS,
+                                CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL);
                     }
                 });
             }
@@ -107,11 +100,12 @@ public final class CrescentSpearListener implements Listener {
             statusTask.cancel();
             statusTask = null;
         }
+        chargeManager.clear();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player player)) {
+        if (DamageFlow.isSecondaryDamage(event) || !(event.getDamager() instanceof Player player)) {
             return;
         }
 
@@ -126,6 +120,24 @@ public final class CrescentSpearListener implements Listener {
         }
 
         event.setDamage(Math.max(0.0D, event.getDamage() + CrescentMoonPower.getDamageModifier(player)));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSuccessfulDamage(EntityDamageByEntityEvent event) {
+        if (DamageFlow.isSecondaryDamage(event) || !(event.getDamager() instanceof Player player)) {
+            return;
+        }
+
+        ItemStack weapon = player.getInventory().getItemInMainHand();
+        if (!itemFactory.isCrescentSpear(weapon)) {
+            return;
+        }
+
+        Entity target = event.getEntity();
+        if (!(target instanceof LivingEntity) || target == player) {
+            return;
+        }
+
 
         UUID playerId = player.getUniqueId();
         long currentTick = player.getWorld().getGameTime();
@@ -136,8 +148,7 @@ public final class CrescentSpearListener implements Listener {
         specialAttackUntilTick.remove(playerId);
 
         if (armedPlayers.remove(playerId)) {
-            charge.remove(playerId);
-            lastChargeGainTick.remove(playerId);
+            chargeManager.reset(player);
             triggerActiveSkill(player);
             return;
         }
@@ -150,12 +161,8 @@ public final class CrescentSpearListener implements Listener {
         }
 
         lastCountedTick.put(playerId, currentTick);
-        lastChargeGainTick.put(playerId, currentTick);
         int chargesRequired = getChargesRequired();
-        int nextCharge = Math.min(
-            chargesRequired,
-            charge.getOrDefault(playerId, 0) + 1);
-        charge.put(playerId, nextCharge);
+        int nextCharge = chargeManager.addCharge(player, chargesRequired, currentTick);
 
         if (nextCharge >= chargesRequired) {
             armedPlayers.add(playerId);
@@ -168,8 +175,7 @@ public final class CrescentSpearListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
-        charge.remove(playerId);
-        lastChargeGainTick.remove(playerId);
+        chargeManager.clearTransientState(playerId);
         lastCountedTick.remove(playerId);
         specialAttackUntilTick.remove(playerId);
         armedPlayers.remove(playerId);
@@ -203,13 +209,10 @@ public final class CrescentSpearListener implements Listener {
                 if (target == null || target.isDead() || !target.isValid()) {
                     return;
                 }
-                if (!ProtectionUtil.canDamage(player, target)) {
+                if (!DamageFlow.damage(target, hitDamage, player, true).accepted()) {
                     return;
                 }
-
                 playSpecialEffects(player.getWorld(), target.getLocation().add(0.0D, 1.0D, 0.0D));
-                target.setNoDamageTicks(0);
-                target.damage(hitDamage, player);
                 if (hitIndex == activeHitCount - 1) {
                     applyLastHitKnockback(player, target);
                 }

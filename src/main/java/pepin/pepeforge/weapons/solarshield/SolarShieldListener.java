@@ -1,5 +1,6 @@
 package pepin.pepeforge.weapons.solarshield;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -22,12 +23,14 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.entity.Item;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,7 +47,7 @@ public final class SolarShieldListener implements Listener {
 
     private ScheduledTaskCompat statusTask;
     private final pepin.pepeforge.util.ui.BossBarManager bossBarManager;
-    private final org.bukkit.NamespacedKey chargesKey;
+    private final @NonNull NamespacedKey chargesKey;
 
     public SolarShieldListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang,
             pepin.pepeforge.util.ui.BossBarManager bossBarManager) {
@@ -60,6 +63,9 @@ public final class SolarShieldListener implements Listener {
         statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    if (player == null || !player.isOnline()) {
+                        return;
+                    }
                     UUID playerId = player.getUniqueId();
 
                     int pTicks = passiveTicks.getOrDefault(playerId, 0) + 2;
@@ -196,7 +202,7 @@ public final class SolarShieldListener implements Listener {
         passiveTicks.clear();
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
             return;
@@ -291,9 +297,11 @@ public final class SolarShieldListener implements Listener {
     private int getCharges(ItemStack item) {
         if (item == null || !item.hasItemMeta())
             return 0;
+        @NonNull PersistentDataType<Integer, Integer> integerType = Objects.requireNonNull(
+                PersistentDataType.INTEGER);
         Integer charges = item.getItemMeta().getPersistentDataContainer().get(
                 chargesKey,
-                PersistentDataType.INTEGER);
+                integerType);
         return charges == null ? 0 : charges;
     }
 

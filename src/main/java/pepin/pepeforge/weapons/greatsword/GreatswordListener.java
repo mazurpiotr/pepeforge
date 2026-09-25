@@ -30,19 +30,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 import pepin.pepeforge.util.combat.CombatUtils;
 import pepin.pepeforge.util.ui.ActionBarHelper;
-import pepin.pepeforge.util.protection.ProtectionUtil;
+import pepin.pepeforge.util.combat.DamageFlow;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -102,6 +104,9 @@ public final class GreatswordListener implements Listener {
         statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    if (player == null || !player.isOnline()) {
+                        return;
+                    }
                     GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
                     if (tier == null) {
                         clearPlayerState(player);
@@ -186,12 +191,12 @@ public final class GreatswordListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) {
             return;
         }
-        if (cleavingPlayers.contains(player.getUniqueId())) {
+        if (DamageFlow.isSecondaryDamage(event) || cleavingPlayers.contains(player.getUniqueId())) {
             return;
         }
 
@@ -447,11 +452,9 @@ public final class GreatswordListener implements Listener {
         cleavingPlayers.add(player.getUniqueId());
         try {
             for (LivingEntity target : targets) {
-                if (!ProtectionUtil.canDamage(player, target)) {
+                if (!DamageFlow.damage(target, areaDamage, player, true).accepted()) {
                     continue;
                 }
-                target.setNoDamageTicks(0);
-                target.damage(areaDamage, player);
                 applyKnockback(player, target, knockbackStrength);
                 playTargetAreaEffects(target.getWorld(), target.getLocation().add(0.0D, 1.0D, 0.0D));
             }
@@ -643,7 +646,8 @@ public final class GreatswordListener implements Listener {
         }
 
         rhythmCueTicks.put(playerId, state.lastSuccessTick());
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, RHYTHM_CUE_VOLUME, RHYTHM_CUE_PITCH);
+        @NonNull Sound rhythmCueSound = Objects.requireNonNull(Sound.BLOCK_NOTE_BLOCK_PLING);
+        player.playSound(player.getLocation(), rhythmCueSound, RHYTHM_CUE_VOLUME, RHYTHM_CUE_PITCH);
     }
 
     private void clearRhythmActionBar(Player player) {

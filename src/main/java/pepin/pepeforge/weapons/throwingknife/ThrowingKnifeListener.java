@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.LivingEntity;
@@ -21,20 +22,25 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Transformation;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.util.cooldown.CooldownManager;
-import pepin.pepeforge.util.protection.ProtectionUtil;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 public final class ThrowingKnifeListener implements Listener {
 
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final CooldownManager cooldownManager;
-    private final NamespacedKey projectileKey;
+    private static final @NonNull PersistentDataType<Byte, Byte> PROJECTILE_DATA_TYPE = Objects.requireNonNull(
+            PersistentDataType.BYTE);
+
+    private final @NonNull NamespacedKey projectileKey;
     private final Set<ItemDisplay> activeDisplays = ConcurrentHashMap.newKeySet();
 
     public ThrowingKnifeListener(JavaPlugin plugin, ItemFactory itemFactory, CooldownManager cooldownManager) {
@@ -91,13 +97,15 @@ public final class ThrowingKnifeListener implements Listener {
 
         Location eyeLoc = player.getEyeLocation();
 
-        Snowball snowball = player.getWorld().spawn(eyeLoc, Snowball.class, sb -> {
-            sb.setShooter(player);
-            sb.setRotation(eyeLoc.getYaw(), eyeLoc.getPitch());
-            sb.setItem(new ItemStack(Material.AIR));
-            sb.setVelocity(eyeLoc.getDirection().multiply(1.6D));
-            sb.getPersistentDataContainer().set(projectileKey, PersistentDataType.BYTE, (byte) 1);
-        });
+        @NonNull World playerWorld = Objects.requireNonNull(player.getWorld());
+        @NonNull Snowball snowball = Objects.requireNonNull(
+                playerWorld.spawn(eyeLoc, Snowball.class, sb -> {
+                    sb.setShooter(player);
+                    sb.setRotation(eyeLoc.getYaw(), eyeLoc.getPitch());
+                    sb.setItem(new ItemStack(Material.AIR));
+                    sb.setVelocity(eyeLoc.getDirection().multiply(1.6D));
+                    sb.getPersistentDataContainer().set(projectileKey, PROJECTILE_DATA_TYPE, (byte) 1);
+                }));
 
         ItemStack visualItem = itemFactory.createThrowingKnife();
         visualItem.setAmount(1);
@@ -107,23 +115,25 @@ public final class ThrowingKnifeListener implements Listener {
         spawnLoc.setPitch(eyeLoc.getPitch());
 
         // Spawn non-billboard ItemDisplay to act as custom projectile model
-        ItemDisplay itemDisplay = snowball.getWorld().spawn(spawnLoc, ItemDisplay.class, display -> {
-            display.setItemStack(visualItem);
-            display.setBillboard(Display.Billboard.FIXED);
-            display.setGravity(false);
-            display.setPersistent(false);
+        @NonNull World snowballWorld = Objects.requireNonNull(snowball.getWorld());
+        @NonNull ItemDisplay itemDisplay = Objects.requireNonNull(
+                snowballWorld.spawn(spawnLoc, ItemDisplay.class, display -> {
+                    display.setItemStack(visualItem);
+                    display.setBillboard(Display.Billboard.FIXED);
+                    display.setGravity(false);
+                    display.setPersistent(false);
 
-            Transformation trans = display.getTransformation();
-            // Offset vertically to center item inside the snowball passenger seat
-            trans.getTranslation().set(0f, -0.2f, 0f);
-            // Rotate local Yaw, Pitch, and Roll based on ThrowingKnifeDefinition configuration
-            trans.getLeftRotation()
-                    .identity()
-                    .rotateY((float) Math.toRadians(ThrowingKnifeDefinition.ROTATION_YAW))
-                    .rotateX((float) Math.toRadians(ThrowingKnifeDefinition.ROTATION_PITCH))
-                    .rotateZ((float) Math.toRadians(ThrowingKnifeDefinition.ROTATION_ROLL));
-            display.setTransformation(trans);
-        });
+                    Transformation trans = display.getTransformation();
+                    // Offset vertically to center item inside the snowball passenger seat
+                    trans.getTranslation().set(0f, -0.2f, 0f);
+                    // Rotate local Yaw, Pitch, and Roll based on ThrowingKnifeDefinition configuration
+                    trans.getLeftRotation()
+                            .identity()
+                            .rotateY((float) Math.toRadians(ThrowingKnifeDefinition.ROTATION_YAW))
+                            .rotateX((float) Math.toRadians(ThrowingKnifeDefinition.ROTATION_PITCH))
+                            .rotateZ((float) Math.toRadians(ThrowingKnifeDefinition.ROTATION_ROLL));
+                    display.setTransformation(trans);
+                }));
 
         snowball.addPassenger(itemDisplay);
         activeDisplays.add(itemDisplay);
@@ -147,12 +157,12 @@ public final class ThrowingKnifeListener implements Listener {
         }, 3L);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onProjectileHit(ProjectileHitEvent event) {
         if (!(event.getEntity() instanceof Snowball snowball)) {
             return;
         }
-        if (!snowball.getPersistentDataContainer().has(projectileKey, PersistentDataType.BYTE)) {
+        if (!snowball.getPersistentDataContainer().has(projectileKey, PROJECTILE_DATA_TYPE)) {
             return;
         }
 
@@ -164,18 +174,19 @@ public final class ThrowingKnifeListener implements Listener {
 
         if (event.getHitEntity() != null) {
             if (event.getHitEntity() instanceof LivingEntity target) {
-                if (snowball.getShooter() instanceof Player shooter) {
-                    if (ProtectionUtil.canDamage(shooter, target)) {
-                        target.damage(ThrowingKnifeDefinition.DAMAGE, snowball);
-                        target.getWorld().playSound(target.getLocation(), Sound.ITEM_TRIDENT_HIT, 1.0f, 1.0f);
+                if (snowball.getShooter() instanceof Player) {
+                    if (DamageFlow.damage(target, ThrowingKnifeDefinition.DAMAGE, snowball).accepted()) {
+                        @NonNull World targetWorld = Objects.requireNonNull(target.getWorld());
+                        targetWorld.playSound(target.getLocation(), Sound.ITEM_TRIDENT_HIT, 1.0f, 1.0f);
                     }
                 }
             }
         } else if (event.getHitBlock() != null) {
             Location hitLoc = snowball.getLocation();
 
-            snowball.getWorld().playSound(hitLoc, Sound.BLOCK_METAL_HIT, 0.5f, 1.8f);
-            snowball.getWorld().dropItemNaturally(hitLoc, itemFactory.createThrowingKnife());
+            @NonNull World projectileWorld = Objects.requireNonNull(snowball.getWorld());
+            projectileWorld.playSound(hitLoc, Sound.BLOCK_METAL_HIT, 0.5f, 1.8f);
+            projectileWorld.dropItemNaturally(hitLoc, itemFactory.createThrowingKnife());
         }
     }
 

@@ -1,5 +1,6 @@
 package pepin.pepeforge.weapons.windblade;
 
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -18,7 +19,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.aura.AuraManager;
 import pepin.pepeforge.util.ui.ActionBarHelper;
@@ -27,6 +30,7 @@ import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public final class WindBladeListener implements Listener {
 
@@ -68,6 +72,9 @@ public final class WindBladeListener implements Listener {
     public void startHoldingTask() {
         holdingTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
+                if (player == null) {
+                    continue;
+                }
                 SchedulerCompat.runForPlayer(player, plugin, () -> {
                     if (!player.isOnline()) {
                         return;
@@ -128,11 +135,15 @@ public final class WindBladeListener implements Listener {
         long dashCooldownMillis = getDashCooldownMillis();
         cooldownManager.setCooldown(player, DASH_COOLDOWN_KEY, dashCooldownMillis);
         dash(player);
-        player.setCooldown(mainHandItem.getType(), 10);
+        @NonNull Material mainHandMaterial = Objects.requireNonNull(mainHandItem.getType());
+        player.setCooldown(mainHandMaterial, 10);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
+        if (DamageFlow.isSecondaryDamage(event)) {
+            return;
+        }
         if (!(event.getDamager() instanceof Player player)) {
             return;
         }

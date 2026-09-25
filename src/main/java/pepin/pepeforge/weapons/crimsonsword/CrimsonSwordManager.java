@@ -11,7 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ColorUtil;
-import pepin.pepeforge.util.itemmeta.ItemMetaManager;
+import pepin.pepeforge.util.itemmeta.ItemMetaCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,9 +148,9 @@ public final class CrimsonSwordManager {
             String displayName = fallbackName(serverLang, level);
             List<String> lore = buildFallbackLore(serverLang, level, xp, requiredXp);
 
-            ItemMetaManager.setItemName(meta, displayName);
-            ItemMetaManager.setDisplayName(meta, displayName);
-            ItemMetaManager.setStringLore(meta, lore);
+            ItemMetaCompat.setItemName(meta, displayName);
+            ItemMetaCompat.setDisplayName(meta, displayName);
+            ItemMetaCompat.setLore(meta, lore);
             item.setItemMeta(meta);
         }
     }

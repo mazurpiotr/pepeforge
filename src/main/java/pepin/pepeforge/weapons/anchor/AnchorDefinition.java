@@ -22,6 +22,7 @@ public final class AnchorDefinition {
     public static final double ATTACK_SPEED = -3.0D;
 
     public static final double PULL_FORCE = 1.2D;
+    public static final double HOOK_DAMAGE = 1.0D;
     public static final double PULL_LIFT = 0.35D;
     public static final double THROW_SPEED = 1.25D;
 

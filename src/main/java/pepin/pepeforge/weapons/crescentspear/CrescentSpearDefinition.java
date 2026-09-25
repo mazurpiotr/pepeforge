@@ -22,6 +22,7 @@ public final class CrescentSpearDefinition {
 
     public static final int DEFAULT_CHARGES_REQUIRED = 5;
     public static final int DEFAULT_ACTIVE_HIT_COUNT = 2;
+    public static final String CHARGES_KEY_STRING = "crescent_spear_charges";
 
     public static final int CHARGE_DECAY_PER_INTERVAL = 1;
     public static final int CHARGE_DECAY_DELAY_TICKS = 2 * 20;

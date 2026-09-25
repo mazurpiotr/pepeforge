@@ -19,17 +19,20 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.NonNull;
+
 import pepin.pepeforge.item.ItemFactory;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public final class ScytheListener implements Listener {
 
-    private static final Map<Material, Material> REPLANT_ITEMS = new EnumMap<>(Material.class);
-    private static final Map<Material, Material> REQUIRED_SOIL = new EnumMap<>(Material.class);
+    private static final @NonNull EnumMap<@NonNull Material, Material> REPLANT_ITEMS = new EnumMap<>(Material.class);
+    private static final @NonNull EnumMap<@NonNull Material, Material> REQUIRED_SOIL = new EnumMap<>(Material.class);
 
     static {
         REPLANT_ITEMS.put(Material.WHEAT, Material.WHEAT_SEEDS);
@@ -93,7 +96,7 @@ public final class ScytheListener implements Listener {
             return;
         }
 
-        Map<Material, Integer> pooledDrops = collectDrops(harvestedBlocks);
+        Map<@NonNull Material, Integer> pooledDrops = collectDrops(harvestedBlocks);
         for (HarvestEntry entry : harvestedBlocks) {
             entry.shouldReplant = shouldReplant(entry, pooledDrops, player);
         }
@@ -117,24 +120,31 @@ public final class ScytheListener implements Listener {
         return new HarvestEntry(block, block.getType(), cloneDrops(block.getDrops(tool, player)));
     }
 
-    private Map<Material, Integer> collectDrops(List<HarvestEntry> harvestedBlocks) {
-        Map<Material, Integer> pooledDrops = new EnumMap<>(Material.class);
+    private @NonNull EnumMap<@NonNull Material, Integer> collectDrops(List<HarvestEntry> harvestedBlocks) {
+        @NonNull
+        EnumMap<@NonNull Material, Integer> pooledDrops = new EnumMap<>(Material.class);
+
         for (HarvestEntry entry : harvestedBlocks) {
             for (ItemStack drop : entry.drops) {
                 if (drop.getAmount() <= 0) {
                     continue;
                 }
-                pooledDrops.merge(drop.getType(), drop.getAmount(), (oldAmount, incomingAmount) -> oldAmount + incomingAmount);
+
+                @NonNull
+                Material material = Objects.requireNonNull(drop.getType());
+
+                pooledDrops.merge(
+                        material,
+                        drop.getAmount(),
+                        (oldAmount, incomingAmount) -> oldAmount + incomingAmount);
             }
         }
+
         return pooledDrops;
     }
 
-    private boolean shouldReplant(HarvestEntry entry, Map<Material, Integer> pooledDrops, Player player) {
-        Material replantItem = REPLANT_ITEMS.get(entry.cropType);
-        if (replantItem == null) {
-            return false;
-        }
+    private boolean shouldReplant(HarvestEntry entry, Map<@NonNull Material, Integer> pooledDrops, Player player) {
+        @NonNull Material replantItem = Objects.requireNonNull(REPLANT_ITEMS.get(entry.cropType));
         if (entry.block.getRelative(0, -1, 0).getType() != requiredSoil(entry.cropType)) {
             return false;
         }
@@ -147,7 +157,8 @@ public final class ScytheListener implements Listener {
         return removeOneFromInventory(player, replantItem);
     }
 
-    private void executeHarvest(List<HarvestEntry> harvestedBlocks, Map<Material, Integer> pooledDrops, Player player) {
+    private void executeHarvest(List<HarvestEntry> harvestedBlocks, Map<@NonNull Material, Integer> pooledDrops,
+            Player player) {
         for (HarvestEntry entry : harvestedBlocks) {
             if (!canBreakBlock(player, entry.block)) {
                 continue;
@@ -160,14 +171,10 @@ public final class ScytheListener implements Listener {
                     20,
                     0.3, 0.3, 0.3,
                     0.0,
-                    entry.cropType.createBlockData()
-            );
+                    entry.cropType.createBlockData());
 
             if (entry.shouldReplant) {
-                Material replantItem = REPLANT_ITEMS.get(entry.cropType);
-                if (replantItem == null) {
-                    continue;
-                }
+                @NonNull Material replantItem = Objects.requireNonNull(REPLANT_ITEMS.get(entry.cropType));
                 if (!canPlaceBlock(player, entry.block, replantItem)) {
                     continue;
                 }
@@ -179,7 +186,7 @@ public final class ScytheListener implements Listener {
             }
         }
 
-        for (Map.Entry<Material, Integer> pooledDrop : pooledDrops.entrySet()) {
+        for (Map.Entry<@NonNull Material, Integer> pooledDrop : pooledDrops.entrySet()) {
             if (pooledDrop.getValue() <= 0) {
                 continue;
             }
@@ -210,7 +217,7 @@ public final class ScytheListener implements Listener {
         return result;
     }
 
-    private boolean consumeOne(Map<Material, Integer> pooledDrops, Material material) {
+    private boolean consumeOne(Map<@NonNull Material, Integer> pooledDrops, @NonNull Material material) {
         Integer amount = pooledDrops.get(material);
         if (amount == null || amount <= 0) {
             return false;
@@ -269,8 +276,7 @@ public final class ScytheListener implements Listener {
                 new ItemStack(material),
                 player,
                 true,
-                EquipmentSlot.HAND
-        );
+                EquipmentSlot.HAND);
         Bukkit.getPluginManager().callEvent(placeEvent);
         return !placeEvent.isCancelled();
     }

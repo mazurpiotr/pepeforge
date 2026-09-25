@@ -1,20 +1,21 @@
 package pepin.pepeforge.gui;
 
 import org.bukkit.Material;
+import org.jspecify.annotations.NonNull;
 
 public final class ConfigIconography {
 
-    public static final Material ENABLED = Material.LIME_DYE;
-    public static final Material DISABLED = Material.RED_DYE;
+    public static final @NonNull Material ENABLED = Material.LIME_DYE;
+    public static final @NonNull Material DISABLED = Material.RED_DYE;
 
-    public static final Material RESET = Material.REDSTONE_BLOCK;
-    public static final Material TOGGLE = Material.LEVER;
-    public static final Material COOLDOWN = Material.CLOCK;
-    public static final Material STRENGTH = Material.FEATHER;
-    public static final Material RANGE = Material.SPYGLASS;
-    public static final Material DURATION = Material.REPEATER;
-    public static final Material CHARGES = Material.LIGHTNING_ROD;
-    public static final Material DECAY = Material.CLOCK;
+    public static final @NonNull Material RESET = Material.REDSTONE_BLOCK;
+    public static final @NonNull Material TOGGLE = Material.LEVER;
+    public static final @NonNull Material COOLDOWN = Material.CLOCK;
+    public static final @NonNull Material STRENGTH = Material.FEATHER;
+    public static final @NonNull Material RANGE = Material.SPYGLASS;
+    public static final @NonNull Material DURATION = Material.REPEATER;
+    public static final @NonNull Material CHARGES = Material.LIGHTNING_ROD;
+    public static final @NonNull Material DECAY = Material.CLOCK;
 
     private ConfigIconography() {
     }

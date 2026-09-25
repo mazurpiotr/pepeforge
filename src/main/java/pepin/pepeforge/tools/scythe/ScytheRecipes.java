@@ -9,6 +9,7 @@ import org.bukkit.inventory.SmithingTransformRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.recipe.RecipeRegistrar;
+import pepin.pepeforge.util.recipe.RecipeChoiceCompat;
 
 public final class ScytheRecipes {
 
@@ -66,7 +67,7 @@ public final class ScytheRecipes {
                 key,
                 result,
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
-                new RecipeChoice.ExactChoice(itemFactory.createScythe(ScytheTier.DIAMOND)),
+                RecipeChoiceCompat.exactChoice(itemFactory.createScythe(ScytheTier.DIAMOND)),
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_INGOT)
         );
         RecipeRegistrar.add(plugin, key, recipe);

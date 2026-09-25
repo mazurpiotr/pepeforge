@@ -26,13 +26,16 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
     private final CrimsonSwordManager crimsonSwordManager;
     private final pepin.pepeforge.stats.StatisticsManager statsManager;
     private final pepin.pepeforge.item.ItemMigrator itemMigrator;
+    private final OnlinePlayerNames onlinePlayerNames;
 
-    public PepeForgeCommand(PluginLang lang, ItemFactory itemFactory, CrimsonSwordManager crimsonSwordManager, pepin.pepeforge.stats.StatisticsManager statsManager, pepin.pepeforge.item.ItemMigrator itemMigrator) {
+    public PepeForgeCommand(PluginLang lang, ItemFactory itemFactory, CrimsonSwordManager crimsonSwordManager,
+            pepin.pepeforge.stats.StatisticsManager statsManager, pepin.pepeforge.item.ItemMigrator itemMigrator) {
         this.lang = lang;
         this.itemFactory = itemFactory;
         this.crimsonSwordManager = crimsonSwordManager;
         this.statsManager = statsManager;
         this.itemMigrator = itemMigrator;
+        this.onlinePlayerNames = new OnlinePlayerNames();
     }
 
     @Override
@@ -102,7 +105,8 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
             try {
                 int level = Integer.parseInt(args[1]);
                 crimsonSwordManager.setLevel(item, level);
-                sender.sendMessage(lang.message("messages.command.setlevel_success", Map.of("level", String.valueOf(level))));
+                sender.sendMessage(
+                        lang.message("messages.command.setlevel_success", Map.of("level", String.valueOf(level))));
             } catch (NumberFormatException e) {
                 sender.sendMessage(lang.message("messages.command.invalid_level"));
             }
@@ -172,10 +176,11 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
         target.getInventory().addItem(item);
         statsManager.incrementGiven(itemFactory.getItemId(item));
         String itemName = itemFactory.getBestName(item);
-        sender.sendMessage(lang.message("messages.command.give_success_sender", Map.of(
-                "item", itemName,
-                "player", target.getName()
-        )));
+        sender.sendMessage(lang.message(
+                "messages.command.give_success_sender",
+                Map.<String, String>of(
+                        "item", itemName,
+                        "player", target.getName())));
         target.sendMessage(lang.message("messages.command.give_success_target", Map.of("item", itemName)));
         return true;
     }
@@ -203,10 +208,7 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
                     .collect(Collectors.toList());
         }
         if (args.length == 3 && "give".equalsIgnoreCase(args[0])) {
-            return Bukkit.getOnlinePlayers().stream()
-                    .map(Player::getName)
-                    .filter(name -> name.toLowerCase().startsWith(args[2].toLowerCase()))
-                    .collect(Collectors.toList());
+            return onlinePlayerNames.matching(args[2]);
         }
         return Collections.emptyList();
     }

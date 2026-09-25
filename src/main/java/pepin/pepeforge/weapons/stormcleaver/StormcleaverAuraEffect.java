@@ -4,10 +4,10 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.util.aura.AuraEffect;
+import pepin.pepeforge.util.persistence.PersistentDataCompat;
 
 public final class StormcleaverAuraEffect implements AuraEffect {
 
@@ -33,8 +33,7 @@ public final class StormcleaverAuraEffect implements AuraEffect {
         int configuredCharges = plugin.getConfig().getInt(
             "mechanics.stormcleaver.charges_required", StormcleaverDefinition.DEFAULT_CHARGES_REQUIRED);
         int requiredCharges = Math.max(1, Math.min(10, configuredCharges));
-        int charges = player.getPersistentDataContainer().getOrDefault(
-                chargesKey, PersistentDataType.INTEGER, 0);
+        int charges = PersistentDataCompat.getInt(player, chargesKey);
 
         if (!itemFactory.isStormcleaver(held)
                 || (offHand != null && !offHand.getType().isAir())

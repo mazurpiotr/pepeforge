@@ -1,23 +1,25 @@
 package pepin.pepeforge.weapons.anchor;
 
+import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import pepin.pepeforge.util.protection.ProtectionUtil;
 import pepin.pepeforge.util.ui.ActionBarHelper;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -29,7 +31,9 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.cooldown.CooldownManager;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
@@ -38,6 +42,7 @@ import pepin.pepeforge.util.scheduler.SchedulerCompat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,7 +53,7 @@ public final class AnchorListener implements Listener {
     private final ItemFactory itemFactory;
     private final CooldownManager cooldownManager;
     private final PluginLang lang;
-    private final NamespacedKey cooldownKey;
+    private final @NonNull NamespacedKey cooldownKey;
     private final Set<ItemDisplay> activeDisplays = ConcurrentHashMap.newKeySet();
     private final Map<UUID, ItemStack> activeThrows = new ConcurrentHashMap<>();
     private final Set<ScheduledTaskCompat> activeTasks = ConcurrentHashMap.newKeySet();
@@ -121,8 +126,11 @@ public final class AnchorListener implements Listener {
         activeThrows.clear();
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageByEntityEvent event) {
+        if (DamageFlow.isSecondaryDamage(event)) {
+            return;
+        }
         if (!(event.getDamager() instanceof Player player)) {
             return;
         }
@@ -145,7 +153,8 @@ public final class AnchorListener implements Listener {
 
         PersistentDataContainer pdc = target.getPersistentDataContainer();
         long now = System.currentTimeMillis();
-        Long cooldownUntil = pdc.get(cooldownKey, PersistentDataType.LONG);
+        @NonNull PersistentDataType<Long, Long> longType = Objects.requireNonNull(PersistentDataType.LONG);
+        Long cooldownUntil = pdc.get(cooldownKey, longType);
 
         if (cooldownUntil == null || now >= cooldownUntil) {
             // Apply Snare (SLOWNESS 10) for the configured duration
@@ -158,16 +167,17 @@ public final class AnchorListener implements Listener {
             // Audio-Visual feedback
             target.getWorld().playSound(target.getLocation(), Sound.BLOCK_ANVIL_LAND, 1.0f, 1.0f);
 
-            // Spawn Tube Coral wrapping the feet
-            ItemDisplay coral = target.getWorld().spawn(target.getLocation().add(0, 0.1, 0), ItemDisplay.class,
-                    entity -> {
-                        entity.setItemStack(new ItemStack(Material.TUBE_CORAL));
+            // Spawn Horn Coral wrapping the feet
+            @NonNull World targetWorld = Objects.requireNonNull(target.getWorld());
+            @NonNull ItemDisplay coral = Objects.requireNonNull(
+                    targetWorld.spawn(target.getLocation().add(0, 0.1, 0), ItemDisplay.class, entity -> {
+                        entity.setItemStack(new ItemStack(Material.HORN_CORAL));
                         entity.setGravity(false);
                         entity.setPersistent(false);
                         Transformation trans = entity.getTransformation();
                         trans.getScale().set(1.3f, 1.3f, 1.3f);
                         entity.setTransformation(trans);
-                    });
+                    }));
             activeDisplays.add(coral);
 
             class SnareEffectTask implements Runnable {
@@ -245,7 +255,8 @@ public final class AnchorListener implements Listener {
         }
 
         cooldownManager.setCooldown(player, ABILITY_COOLDOWN_KEY, getAbilityCooldownMillis());
-        player.setCooldown(mainHandItem.getType(), 20);
+        @NonNull Material mainHandMaterial = Objects.requireNonNull(mainHandItem.getType());
+        player.setCooldown(mainHandMaterial, 20);
         player.swingMainHand();
 
         executeAnchorThrow(player, mainHandItem);
@@ -260,19 +271,21 @@ public final class AnchorListener implements Listener {
         player.getInventory().setItemInMainHand(null);
         activeThrows.put(player.getUniqueId(), anchorItem);
 
-        ItemDisplay display = player.getWorld().spawn(startLoc, ItemDisplay.class, entity -> {
-            entity.setItemStack(anchorItem);
-            entity.setGravity(false);
-            entity.setPersistent(false);
-            // Rotate the model internally by 90 degrees around the Y-axis (yaw) so the
-            // narrow side (handle)
-            // faces the player. This lets the entity's actual pitch rotate correctly along
-            // the flight path.
-            Transformation trans = entity.getTransformation();
-            trans.getLeftRotation().rotateY((float) Math.toRadians(90.0));
-            trans.getScale().set(2.0f, 2.0f, 2.0f);
-            entity.setTransformation(trans);
-        });
+        @NonNull World playerWorld = Objects.requireNonNull(player.getWorld());
+        @NonNull ItemDisplay display = Objects.requireNonNull(
+                playerWorld.spawn(startLoc, ItemDisplay.class, entity -> {
+                    entity.setItemStack(anchorItem);
+                    entity.setGravity(false);
+                    entity.setPersistent(false);
+                    // Rotate the model internally by 90 degrees around the Y-axis (yaw) so the
+                    // narrow side (handle)
+                    // faces the player. This lets the entity's actual pitch rotate correctly along
+                    // the flight path.
+                    Transformation trans = entity.getTransformation();
+                    trans.getLeftRotation().rotateY((float) Math.toRadians(90.0));
+                    trans.getScale().set(2.0f, 2.0f, 2.0f);
+                    entity.setTransformation(trans);
+                }));
 
         activeDisplays.add(display);
 
@@ -286,7 +299,9 @@ public final class AnchorListener implements Listener {
             @Override
             public void run() {
                 tick++;
-                if (!player.isOnline() || player.isDead() || display.isDead() || !display.isValid() || tick > 60) {
+                if (!player.isOnline() || player.isDead() || player.getWorld() != startLoc.getWorld()
+                        || !SchedulerCompat.isOwnedByCurrentRegion(display)
+                        || display.isDead() || !display.isValid() || tick > 60) {
                     cleanup();
                     return;
                 }
@@ -303,6 +318,12 @@ public final class AnchorListener implements Listener {
                 currentLoc.add(velocity);
                 velocity.setY(velocity.getY() - 0.05D); // gravity (0.05 blocks/tick²)
                 velocity.multiply(0.99D); // drag (0.99 multiplier)
+
+                if (SchedulerCompat.isRegionized() && (!Bukkit.isOwnedByCurrentRegion(oldLoc, 1)
+                        || !Bukkit.isOwnedByCurrentRegion(currentLoc, 1))) {
+                    cleanup();
+                    return;
+                }
 
                 // Check collision from old location to new location
                 Vector movement = currentLoc.toVector().subtract(oldLoc.toVector());
@@ -321,8 +342,11 @@ public final class AnchorListener implements Listener {
 
                 if (hit != null && (hit.getHitBlock() != null || hit.getHitEntity() != null)) {
                     Location impactLoc = hit.getHitPosition().toLocation(player.getWorld());
-                    onHit(hit, impactLoc);
-                    cleanup();
+                    try {
+                        onHit(hit, impactLoc);
+                    } finally {
+                        cleanup();
+                    }
                     return;
                 }
 
@@ -338,27 +362,7 @@ public final class AnchorListener implements Listener {
 
             private void onHit(RayTraceResult hit, Location impactLoc) {
                 if (hit.getHitEntity() != null && hit.getHitEntity() instanceof LivingEntity target) {
-                    // Protection PvP/PvE check
-                    if (ProtectionUtil.canDamage(player, target)) {
-                        Vector toTarget = target.getLocation().toVector().subtract(player.getLocation().toVector());
-                        double distance = toTarget.length();
-                        if (distance > 2.2D) { // Only pull if they are outside the 2-block gap
-                            Vector dir = toTarget.clone().normalize();
-
-                            // Each entity covers half of the remaining distance after leaving a 2.0 block
-                            // gap
-                            double pullDistance = (distance - 2.0D) / 2.0D;
-                            double speed = Math.min(AnchorDefinition.PULL_FORCE * 0.7D, pullDistance * 0.35D);
-
-                            Vector playerVel = dir.clone().multiply(speed).setY(AnchorDefinition.PULL_LIFT);
-                            Vector targetVel = dir.clone().multiply(-speed).setY(AnchorDefinition.PULL_LIFT);
-
-                            player.setVelocity(playerVel);
-                            SchedulerCompat.runForEntity(target, plugin, () -> target.setVelocity(targetVel));
-                        }
-                        target.getWorld().playSound(impactLoc, Sound.BLOCK_CHAIN_PLACE, 1.0f, 1.2f);
-                        target.getWorld().playSound(impactLoc, Sound.ITEM_TRIDENT_HIT, 1.0f, 0.8f);
-                    }
+                    hitEntity(player, target, impactLoc);
                 } else if (hit.getHitBlock() != null) {
                     // continuous grapple pull task
                     class PlayerPullTask implements Runnable {
@@ -368,7 +372,8 @@ public final class AnchorListener implements Listener {
                         @Override
                         public void run() {
                             pullTick++;
-                            if (!player.isOnline() || player.isDead() || pullTick > 10) {
+                            if (!player.isOnline() || player.isDead() || player.getWorld() != impactLoc.getWorld()
+                                    || pullTick > 10) {
                                 cleanupPull();
                                 return;
                             }
@@ -444,12 +449,23 @@ public final class AnchorListener implements Listener {
                     taskRef.cancel();
                     activeTasks.remove(taskRef);
                 }
-                display.remove();
+                if (SchedulerCompat.isOwnedByCurrentRegion(display)) {
+                    display.remove();
+                } else {
+                    SchedulerCompat.runForEntity(display, plugin, display::remove);
+                }
                 activeDisplays.remove(display);
 
-                ItemStack stored = activeThrows.remove(player.getUniqueId());
-                if (stored != null) {
-                    returnItemToPlayer(player, stored, currentLoc);
+                Runnable returnAnchor = () -> {
+                    ItemStack stored = activeThrows.remove(player.getUniqueId());
+                    if (stored != null) {
+                        returnItemToPlayer(player, stored, player.getLocation());
+                    }
+                };
+                if (SchedulerCompat.isOwnedByCurrentRegion(player)) {
+                    returnAnchor.run();
+                } else {
+                    SchedulerCompat.runForPlayer(player, plugin, returnAnchor);
                 }
             }
         }
@@ -458,6 +474,39 @@ public final class AnchorListener implements Listener {
         ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, flightTask, 1L, 1L);
         flightTask.taskRef = task;
         activeTasks.add(task);
+    }
+
+    private void hitEntity(Player player, LivingEntity target, Location impactLoc) {
+        if (!SchedulerCompat.isOwnedByCurrentRegion(player) || !SchedulerCompat.isOwnedByCurrentRegion(target)
+                || !player.isOnline() || player.isDead() || !target.isValid() || target.isDead()
+                || player.getWorld() != target.getWorld()) {
+            return;
+        }
+
+        Location playerLocation = player.getLocation();
+        Location targetLocation = target.getLocation();
+        Vector toTarget = targetLocation.toVector().subtract(playerLocation.toVector());
+        double distance = toTarget.length();
+        if (!DamageFlow.damage(target, AnchorDefinition.HOOK_DAMAGE, player).accepted()) {
+            return;
+        }
+
+        // Keep the original hit positions even when this hit kills the target.
+        if (distance > 2.2D) {
+            double pullDistance = (distance - 2.0D) / 2.0D;
+            double speed = Math.min(AnchorDefinition.PULL_FORCE * 0.7D, pullDistance * 0.35D);
+            Vector direction = toTarget.normalize();
+            if (SchedulerCompat.isOwnedByCurrentRegion(player) && player.isOnline() && !player.isDead()
+                    && player.getWorld() == playerLocation.getWorld()) {
+                player.setVelocity(direction.clone().multiply(speed).setY(AnchorDefinition.PULL_LIFT));
+            }
+            if (SchedulerCompat.isOwnedByCurrentRegion(target) && target.isValid() && !target.isDead()
+                    && target.getWorld() == targetLocation.getWorld()) {
+                target.setVelocity(direction.clone().multiply(-speed).setY(AnchorDefinition.PULL_LIFT));
+            }
+        }
+        impactLoc.getWorld().playSound(impactLoc, Sound.BLOCK_CHAIN_PLACE, 1.0f, 1.2f);
+        impactLoc.getWorld().playSound(impactLoc, Sound.ITEM_TRIDENT_HIT, 1.0f, 0.8f);
     }
 
     private void denyInteraction(PlayerInteractEvent event) {

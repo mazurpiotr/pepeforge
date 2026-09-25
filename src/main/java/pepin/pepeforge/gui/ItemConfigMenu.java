@@ -1,5 +1,9 @@
 package pepin.pepeforge.gui;
 
+import java.util.Objects;
+
+import org.jspecify.annotations.NonNull;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -18,8 +22,11 @@ public final class ItemConfigMenu {
     private ItemConfigMenu() {
     }
 
-    public static Inventory create(String itemId, ItemFactory itemFactory, PepeForgePlugin plugin) {
-        Inventory inventory = Bukkit.createInventory(new Holder(itemId), 27, ColorUtil.DARK_GRAY + "Config: " + itemId);
+    public static @NonNull Inventory create(String itemId, ItemFactory itemFactory, PepeForgePlugin plugin) {
+        Inventory inventory = Objects.requireNonNull(Bukkit.createInventory(
+                new Holder(itemId),
+                27,
+                ColorUtil.DARK_GRAY + "Config: " + itemId));
 
         buildCommonButtons(itemId, itemFactory, inventory);
 

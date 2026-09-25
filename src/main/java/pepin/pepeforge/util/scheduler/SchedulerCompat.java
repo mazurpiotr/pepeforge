@@ -35,6 +35,10 @@ public final class SchedulerCompat {
         return REGIONIZED;
     }
 
+    public static boolean isOwnedByCurrentRegion(Entity entity) {
+        return !REGIONIZED || Bukkit.isOwnedByCurrentRegion(entity);
+    }
+
     public static void teleport(Entity entity, Location location) {
         if (teleportAsyncMethod != null) {
             try {

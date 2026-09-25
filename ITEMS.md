@@ -54,7 +54,7 @@ Replant order: Uses harvested seeds first, then inventory fallback.
 
 ![Scythe](media/receipes/pepeforge_scythe.gif)
 
-Netherite upgrade uses Smithing Table with Diamond Greatsword + Netherite Ingot.
+Netherite upgrade uses Smithing Table with Diamond Scythe + Netherite Ingot.
 
 ## ⚔️ Wind Blade
 
@@ -68,7 +68,7 @@ Elemental melee weapons with speed effects.
 
 | Feature | Details |
 |---------|---------|
-| Dash | Right-click to activate a dash ability (5-second cooldown). Available on all tiers. |
+| Dash | Right-click to activate a dash ability (5-second default cooldown). Available on all tiers. |
 
 **Crafting** (Shaped Recipe):
 
@@ -141,6 +141,7 @@ Two-handed parry weapon built around short defensive timing windows.
 |---------|---------|
 | Parry | Right-click enters a brief parry stance |
 | Defense | Blocks melee and reflects projectiles during the active window |
+| Counterattack | A successful melee parry briefly damages and pushes a surviving attacker back. Counterattacks cannot chain into further counterattacks. |
 | Restriction | Requires an empty off-hand for custom mechanics |
 
 **Crafting** (Shaped Recipe):
@@ -149,14 +150,14 @@ Two-handed parry weapon built around short defensive timing windows.
 
 ## ☀️ Solar Shield
 
-A legendary sun-blessed shield that charges passively during the day.
+A legendary sun-blessed shield that charges passively in strong sky light.
 *Ancient Cities were not always shrouded in darkness...*
 
 | Feature | Details |
 |---------|---------|
-| Passive Charging | Automatically gains charges (up to 3) while held under direct sunlight. |
+| Passive Charging | Charges while held in strong daylight. |
 | Retaliation | While blocking, getting hit consumes 1 charge to ignite attackers and trigger a blinding flashbang effect for 2s. |
-| Discharge | Slowly loses charges when held in darkness, and instantly resets to 0 when unequipped. |
+| Discharge | Loses charges in darkness, shade and while the shield is not equipped. |
 | Rarity | Legendary |
 
 **Crafting** (Shaped Recipe):
@@ -193,7 +194,7 @@ A heavy, slow-swinging marine weapon with crowd-control capability and a grappli
 | Feature | Details |
 |---------|---------|
 | **Snare** | Melee attacks temporarily lock the target in place and prevent jumping, wrapping their feet in a visual coral display. |
-| **Hook** | Right-click launches the anchor as a projectile. Hitting a block pulls you to it, while hitting a living entity pulls you and the target together to meet in the middle. |
+| **Hook** | Right-click launches the anchor as a projectile. Hitting a block pulls you to it. Hitting a living entity damages it and can pull you and the target together. Shield blocks still allow pulling. |
 
 **Crafting** (Shaped Recipe):
 
@@ -205,7 +206,7 @@ A consumable ranged weapon that's perfect for finishing off fleeing enemies or o
 
 | Feature | Details |
 |---|---|
-| **Throwing** | Can be thrown rapidly with a short cooldown. |
+| **Throwing** | Right-click to throw one knife from the stack. A short cooldown limits repeated throws. |
 
 **Crafting** (Shaped Recipe):
 
@@ -213,12 +214,12 @@ A consumable ranged weapon that's perfect for finishing off fleeing enemies or o
 
 ## ⚡ Stormcleaver
 
-A legendary two-handed mace with an aggressive charge-and-dive combat loop.
+A legendary two-handed mace with an aggressive charge-and-leap combat loop.
 
 | Feature | Details |
 |---|---|
-| **Static Charge** | Melee hits build up to five charges. Reaching full charge launches the wielder upward and enables the dive. |
-| **Dive Slam** | Right-click while airborne at full charge to dive toward the ground. Landing creates a knockback shockwave and cosmetic lightning strikes. |
+| **Static Charge** | Melee hits build charges toward the configured maximum. |
+| **Thunder Leap** | Right-click while grounded at full charge to launch upward. Landing creates a protected knockback shockwave and cosmetic lightning strikes. A blocked ceiling triggers the impact immediately. |
 | **Protection** | Shockwave damage respects region and PvP protection and never ignites blocks. |
 
 **Crafting** (Shaped Recipe):

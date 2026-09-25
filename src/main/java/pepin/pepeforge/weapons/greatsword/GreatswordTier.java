@@ -2,15 +2,15 @@ package pepin.pepeforge.weapons.greatsword;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public enum GreatswordTier {
     IRON(
@@ -56,10 +56,17 @@ public enum GreatswordTier {
             8.0D,
             -0.5D);
 
-    private static final Map<String, GreatswordTier> BY_ITEM_ID = Arrays.stream(values())
-            .collect(Collectors.toUnmodifiableMap(GreatswordTier::itemId, Function.identity()));
+    private static final @NonNull Map<@NonNull String, @NonNull GreatswordTier> BY_ITEM_ID = createItemIdMap();
 
-    private final String itemId;
+    private static @NonNull Map<@NonNull String, @NonNull GreatswordTier> createItemIdMap() {
+        Map<@NonNull String, @NonNull GreatswordTier> result = new HashMap<>();
+        for (GreatswordTier tier : values()) {
+            result.put(tier.itemId(), tier);
+        }
+        return Objects.requireNonNull(Map.copyOf(result));
+    }
+
+    private final @NonNull String itemId;
     private final String langPath;
     private final String translationKeyBase;
     private final ItemNameColor nameColor;
@@ -74,7 +81,7 @@ public enum GreatswordTier {
     private final double attackSpeed;
 
     GreatswordTier(
-            String itemId,
+            @NonNull String itemId,
             String langPath,
             String translationKeyBase,
             ItemNameColor nameColor,
@@ -109,7 +116,7 @@ public enum GreatswordTier {
         return BY_ITEM_ID.get(itemId);
     }
 
-    public String itemId() {
+    public @NonNull String itemId() {
         return itemId;
     }
 
