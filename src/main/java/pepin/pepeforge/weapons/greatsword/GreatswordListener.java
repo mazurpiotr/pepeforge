@@ -17,15 +17,20 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -52,6 +57,7 @@ import java.util.logging.Level;
 
 public final class GreatswordListener implements Listener {
 
+    private static final int OFF_HAND_INVENTORY_SLOT = 40;
     private static final int COMBO_STAGE_MAX = 5;
     private static final int STATUS_INTERVAL_TICKS = 1;
     private static final int RHYTHM_BAR_SEGMENTS = 21;
@@ -153,7 +159,11 @@ public final class GreatswordListener implements Listener {
 
     public void clearAllPlayerState() {
         for (Player player : plugin.getServer().getOnlinePlayers()) {
-            clearPlayerState(player);
+            if (SchedulerCompat.isOwnedByCurrentRegion(player)) {
+                clearPlayerState(player);
+            } else {
+                SchedulerCompat.runForPlayer(player, plugin, () -> clearPlayerState(player));
+            }
         }
     }
 
@@ -261,6 +271,11 @@ public final class GreatswordListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onInteract(PlayerInteractEvent event) {
+        if (event.getHand() == EquipmentSlot.OFF_HAND
+                && itemFactory.getGreatswordTier(event.getPlayer().getInventory().getItemInMainHand()) != null) {
+            event.setCancelled(true);
+            return;
+        }
         if (event.getHand() != EquipmentSlot.HAND) {
             return;
         }
@@ -285,6 +300,81 @@ public final class GreatswordListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onItemHeld(PlayerItemHeldEvent event) {
         clearPlayerState(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onSwapHands(PlayerSwapHandItemsEvent event) {
+        if (itemFactory.getGreatswordTier(event.getMainHandItem()) != null
+                || itemFactory.getGreatswordTier(event.getOffHandItem()) != null) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        boolean mainHandGreatsword = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null;
+        boolean offHandClick = event.getClick() == ClickType.SWAP_OFFHAND || isPlayerOffHandSlotClick(event);
+        if ((mainHandGreatsword && offHandClick) || isMovingGreatswordToOffHand(event, player)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (mainHandGreatsword && !CombatUtils.hasEmptyOffHand(player)) {
+            SchedulerCompat.runForPlayer(player, plugin,
+                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        boolean dragsGreatswordToOffHand = itemFactory.getGreatswordTier(event.getOldCursor()) != null
+                && event.getRawSlots().stream().anyMatch(rawSlot -> isPlayerOffHandRawSlot(event, rawSlot));
+        if (dragsGreatswordToOffHand) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null
+                && !CombatUtils.hasEmptyOffHand(player)) {
+            SchedulerCompat.runForPlayer(player, plugin,
+                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
+        }
+    }
+
+    private boolean isPlayerOffHandSlotClick(InventoryClickEvent event) {
+        return event.getClickedInventory() instanceof PlayerInventory
+                && event.getSlot() == OFF_HAND_INVENTORY_SLOT;
+    }
+
+    private boolean isMovingGreatswordToOffHand(InventoryClickEvent event, Player player) {
+        if (event.getClick() == ClickType.SWAP_OFFHAND) {
+            return itemFactory.getGreatswordTier(event.getCurrentItem()) != null;
+        }
+
+        if (!isPlayerOffHandSlotClick(event)) {
+            return false;
+        }
+
+        if (itemFactory.getGreatswordTier(event.getCursor()) != null) {
+            return true;
+        }
+
+        return event.getClick() == ClickType.NUMBER_KEY
+                && event.getHotbarButton() >= 0
+                && itemFactory.getGreatswordTier(player.getInventory().getItem(event.getHotbarButton())) != null;
+    }
+
+    private boolean isPlayerOffHandRawSlot(InventoryDragEvent event, int rawSlot) {
+        return event.getView().getInventory(rawSlot) instanceof PlayerInventory
+                && event.getView().convertSlot(rawSlot) == OFF_HAND_INVENTORY_SLOT;
     }
 
     @EventHandler

@@ -8,8 +8,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.bukkit.damage.DamageSource;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -52,6 +54,21 @@ class DamageFlowTest {
 
         assertEquals(new DamageFlow.Result(true, 3), DamageFlow.damage(target, 4, source));
         assertFalse(DamageFlow.isSecondaryDamage(captured.get()));
+    }
+
+    @Test
+    void paperDamageSourcePreservesProjectileEventDamager() {
+        var flow = new DamageFlow();
+        var snowball = mock(Snowball.class);
+        var captured = event(target, snowball);
+        doAnswer(call -> {
+            flow.capture(captured);
+            when(target.getHealth()).thenReturn(18.0D);
+            return null;
+        }).when(target).damage(4.0D, damageSource);
+
+        assertEquals(new DamageFlow.Result(true, 2), DamageFlow.damage(target, 4, snowball, damageSource));
+        verify(target).damage(4.0D, damageSource);
     }
 
     @Test
@@ -135,10 +152,14 @@ class DamageFlowTest {
     }
 
 private EntityDamageByEntityEvent event(LivingEntity victim) {
+    return event(victim, source);
+}
+
+private EntityDamageByEntityEvent event(LivingEntity victim, Entity damager) {
     var event = mock(EntityDamageByEntityEvent.class);
     var cancelled = new AtomicBoolean(false);
 
-    when(event.getDamager()).thenReturn(source);
+    when(event.getDamager()).thenReturn(damager);
     when(event.getEntity()).thenReturn(victim);
     when(event.getCause()).thenReturn(EntityDamageEvent.DamageCause.ENTITY_ATTACK);
     when(event.getDamageSource()).thenReturn(damageSource);

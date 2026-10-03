@@ -1,5 +1,6 @@
 package pepin.pepeforge.util.combat;
 
+import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -32,18 +33,27 @@ public final class DamageFlow implements Listener {
     }
 
     public static Result counterattack(LivingEntity target, double amount, Entity source) {
-        return damage(target, amount, source, false, true);
+        return damage(target, amount, source, null, false, true);
     }
 
     public static Result damage(LivingEntity target, double amount, Entity source) {
-        return damage(target, amount, source, false);
+        return damage(target, amount, source, null, false);
+    }
+
+    public static Result damage(LivingEntity target, double amount, Entity source, DamageSource damageSource) {
+        return damage(target, amount, source, damageSource, false);
     }
 
     public static Result damage(LivingEntity target, double amount, Entity source, boolean resetInvulnerability) {
-        return damage(target, amount, source, resetInvulnerability, false);
+        return damage(target, amount, source, null, resetInvulnerability);
     }
 
     private static Result damage(LivingEntity target, double amount, Entity source,
+            DamageSource damageSource, boolean resetInvulnerability) {
+        return damage(target, amount, source, damageSource, resetInvulnerability, false);
+    }
+
+    private static Result damage(LivingEntity target, double amount, Entity source, DamageSource damageSource,
             boolean resetInvulnerability, boolean counterattack) {
         if (!SchedulerCompat.isOwnedByCurrentRegion(target) || !SchedulerCompat.isOwnedByCurrentRegion(source)) {
             return Result.REJECTED;
@@ -61,7 +71,11 @@ public final class DamageFlow implements Listener {
             if (resetInvulnerability) {
                 target.setNoDamageTicks(0);
             }
-            target.damage(amount, source);
+            if (damageSource == null) {
+                target.damage(amount, source);
+            } else {
+                target.damage(amount, damageSource);
+            }
             accepted = attempt.event != null && !attempt.event.isCancelled();
             return accepted
                     ? new Result(true, SchedulerCompat.isOwnedByCurrentRegion(target)

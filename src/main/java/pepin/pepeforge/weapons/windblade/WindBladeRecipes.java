@@ -55,7 +55,7 @@ public final class WindBladeRecipes {
     }
 
     private void registerNetheriteUpgrade() {
-        if (!itemFactory.isRecipeEnabled(WindBladeTier.NETHERITE.itemId())) {
+        if (!itemFactory.isItemEnabled(WindBladeTier.NETHERITE.itemId())) {
             return;
         }
 

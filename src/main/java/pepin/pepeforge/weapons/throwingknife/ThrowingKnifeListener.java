@@ -6,6 +6,8 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.LivingEntity;
@@ -51,12 +53,25 @@ public final class ThrowingKnifeListener implements Listener {
     }
 
     public void cleanup() {
-        for (ItemDisplay display : activeDisplays) {
-            if (display.isValid()) {
-                display.remove();
+        if (!SchedulerCompat.isServerStopping()) {
+            for (ItemDisplay display : activeDisplays) {
+                removeDisplay(display);
             }
         }
         activeDisplays.clear();
+    }
+
+    private void removeDisplay(ItemDisplay display) {
+        Runnable remove = () -> {
+            if (display.isValid()) {
+                display.remove();
+            }
+        };
+        if (SchedulerCompat.isOwnedByCurrentRegion(display)) {
+            remove.run();
+        } else {
+            SchedulerCompat.runForEntity(display, plugin, remove);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -157,7 +172,7 @@ public final class ThrowingKnifeListener implements Listener {
         }, 3L);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void onProjectileHit(ProjectileHitEvent event) {
         if (!(event.getEntity() instanceof Snowball snowball)) {
             return;
@@ -174,8 +189,13 @@ public final class ThrowingKnifeListener implements Listener {
 
         if (event.getHitEntity() != null) {
             if (event.getHitEntity() instanceof LivingEntity target) {
-                if (snowball.getShooter() instanceof Player) {
-                    if (DamageFlow.damage(target, ThrowingKnifeDefinition.DAMAGE, snowball).accepted()) {
+                if (snowball.getShooter() instanceof Player shooter) {
+                    DamageSource damageSource = DamageSource.builder(DamageType.THROWN)
+                            .withCausingEntity(shooter)
+                            .withDirectEntity(snowball)
+                            .build();
+                    if (DamageFlow.damage(target, ThrowingKnifeDefinition.DAMAGE, snowball, damageSource)
+                            .accepted()) {
                         @NonNull World targetWorld = Objects.requireNonNull(target.getWorld());
                         targetWorld.playSound(target.getLocation(), Sound.ITEM_TRIDENT_HIT, 1.0f, 1.0f);
                     }

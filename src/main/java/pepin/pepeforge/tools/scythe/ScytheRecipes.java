@@ -55,7 +55,7 @@ public final class ScytheRecipes {
     }
 
     private void registerNetheriteUpgrade() {
-        if (!itemFactory.isRecipeEnabled(ScytheTier.NETHERITE.itemId())) {
+        if (!itemFactory.isItemEnabled(ScytheTier.NETHERITE.itemId())) {
             return;
         }
 

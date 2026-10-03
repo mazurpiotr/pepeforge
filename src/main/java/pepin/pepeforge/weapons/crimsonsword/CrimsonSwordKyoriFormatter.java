@@ -13,7 +13,10 @@ public final class CrimsonSwordKyoriFormatter {
 
     public static void applyTranslatedText(ItemStack item, CrimsonSwordManager manager, int level, double xp, double requiredXp) {
         Component name = Component.translatable(CrimsonSwordDefinition.TRANSLATION_KEY_BASE + ".name", NamedTextColor.DARK_RED)
-                .append(Component.text(" [Lv. " + level + "]", NamedTextColor.GRAY));
+                .append(Component.translatable(
+                        CrimsonSwordDefinition.TRANSLATION_KEY_BASE + ".dynamic.level_suffix",
+                        Component.text(String.valueOf(level), NamedTextColor.GRAY)
+                ).color(NamedTextColor.GRAY));
 
         List<Component> features = new ArrayList<>();
         features.add(Component.translatable(
@@ -79,7 +82,9 @@ public final class CrimsonSwordKyoriFormatter {
             Component.text(String.valueOf(level), NamedTextColor.RED),
             Component.text(manager.formatXp(xp), NamedTextColor.GRAY),
             level >= CrimsonSwordDefinition.MAX_LEVEL
-                    ? Component.text("MAX", NamedTextColor.GOLD)
+                    ? Component.translatable(
+                            CrimsonSwordDefinition.TRANSLATION_KEY_BASE + ".dynamic.max_xp"
+                    ).color(NamedTextColor.GOLD)
                     : Component.text(manager.formatXp(requiredXp), NamedTextColor.GRAY)
         ));
         lore.add(Component.translatable(CrimsonSwordDefinition.TRANSLATION_KEY_BASE + ".lore.2"));

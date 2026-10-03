@@ -81,6 +81,9 @@ public final class ScytheListener implements Listener {
         for (int x = -tier.radius(); x <= tier.radius(); x++) {
             for (int z = -tier.radius(); z <= tier.radius(); z++) {
                 Block block = world.getBlockAt(center.getX() + x, center.getY(), center.getZ() + z);
+                if (!isRipeSupportedCrop(block)) {
+                    continue;
+                }
                 if (!canBreakBlock(player, block)) {
                     continue;
                 }
@@ -91,16 +94,13 @@ public final class ScytheListener implements Listener {
             }
         }
 
-        int harvested = harvestedBlocks.size();
-        if (harvested == 0) {
+        harvestedBlocks.removeIf(entry -> entry.block.getType() != entry.cropType
+                || !isRipeSupportedCrop(entry.block));
+        if (harvestedBlocks.isEmpty()) {
             return;
         }
 
         Map<@NonNull Material, Integer> pooledDrops = collectDrops(harvestedBlocks);
-        for (HarvestEntry entry : harvestedBlocks) {
-            entry.shouldReplant = shouldReplant(entry, pooledDrops, player);
-        }
-
         executeHarvest(harvestedBlocks, pooledDrops, player);
 
         world.playSound(center.getLocation(), Sound.BLOCK_GRASS_BREAK, 1.0f, 1.15f);
@@ -108,7 +108,7 @@ public final class ScytheListener implements Listener {
         world.spawnParticle(Particle.SWEEP_ATTACK, player.getLocation().add(0.0, 1.0, 0.0), 3, 0.25, 0.2, 0.25, 0.0);
 
         if (player.getGameMode() != GameMode.CREATIVE) {
-            damageTool(tool, harvested);
+            damageTool(tool, harvestedBlocks.size());
         }
     }
 
@@ -143,27 +143,9 @@ public final class ScytheListener implements Listener {
         return pooledDrops;
     }
 
-    private boolean shouldReplant(HarvestEntry entry, Map<@NonNull Material, Integer> pooledDrops, Player player) {
-        @NonNull Material replantItem = Objects.requireNonNull(REPLANT_ITEMS.get(entry.cropType));
-        if (entry.block.getRelative(0, -1, 0).getType() != requiredSoil(entry.cropType)) {
-            return false;
-        }
-        if (player.getGameMode() == GameMode.CREATIVE) {
-            return true;
-        }
-        if (consumeOne(pooledDrops, replantItem)) {
-            return true;
-        }
-        return removeOneFromInventory(player, replantItem);
-    }
-
     private void executeHarvest(List<HarvestEntry> harvestedBlocks, Map<@NonNull Material, Integer> pooledDrops,
             Player player) {
         for (HarvestEntry entry : harvestedBlocks) {
-            if (!canBreakBlock(player, entry.block)) {
-                continue;
-            }
-
             entry.block.setType(Material.AIR, false);
             entry.block.getWorld().spawnParticle(
                     Particle.BLOCK,
@@ -173,17 +155,7 @@ public final class ScytheListener implements Listener {
                     0.0,
                     entry.cropType.createBlockData());
 
-            if (entry.shouldReplant) {
-                @NonNull Material replantItem = Objects.requireNonNull(REPLANT_ITEMS.get(entry.cropType));
-                if (!canPlaceBlock(player, entry.block, replantItem)) {
-                    continue;
-                }
-                entry.block.setType(entry.cropType, false);
-                if (entry.block.getBlockData() instanceof Ageable ageable) {
-                    ageable.setAge(0);
-                    entry.block.setBlockData(ageable, false);
-                }
-            }
+            replant(entry, pooledDrops, player);
         }
 
         for (Map.Entry<@NonNull Material, Integer> pooledDrop : pooledDrops.entrySet()) {
@@ -196,6 +168,38 @@ public final class ScytheListener implements Listener {
             for (ItemStack leftover : overflow.values()) {
                 player.getWorld().dropItemNaturally(player.getLocation().add(0.0, 0.5, 0.0), leftover);
             }
+        }
+    }
+
+    private void replant(HarvestEntry entry, Map<@NonNull Material, Integer> pooledDrops, Player player) {
+        @NonNull Material replantItem = Objects.requireNonNull(REPLANT_ITEMS.get(entry.cropType));
+        if (entry.block.getRelative(0, -1, 0).getType() != requiredSoil(entry.cropType)) {
+            return;
+        }
+
+        boolean creative = player.getGameMode() == GameMode.CREATIVE;
+        boolean usePooledDrop = !creative && pooledDrops.getOrDefault(replantItem, 0) > 0;
+        boolean useInventory = !creative && !usePooledDrop && hasItem(player, replantItem);
+        if (!creative && !usePooledDrop && !useInventory) {
+            return;
+        }
+
+        if (!canPlaceBlock(player, entry.block, replantItem)) {
+            return;
+        }
+
+        if (usePooledDrop) {
+            if (!consumeOne(pooledDrops, replantItem)) {
+                return;
+            }
+        } else if (useInventory && !removeOneFromInventory(player, replantItem)) {
+            return;
+        }
+
+        entry.block.setType(entry.cropType, false);
+        if (entry.block.getBlockData() instanceof Ageable ageable) {
+            ageable.setAge(0);
+            entry.block.setBlockData(ageable, false);
         }
     }
 
@@ -245,6 +249,15 @@ public final class ScytheListener implements Listener {
         return false;
     }
 
+    private boolean hasItem(Player player, Material material) {
+        for (ItemStack stack : player.getInventory().getContents()) {
+            if (stack != null && stack.getType() == material && stack.getAmount() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private Material requiredSoil(Material cropType) {
         return REQUIRED_SOIL.getOrDefault(cropType, Material.FARMLAND);
     }
@@ -278,7 +291,7 @@ public final class ScytheListener implements Listener {
                 true,
                 EquipmentSlot.HAND);
         Bukkit.getPluginManager().callEvent(placeEvent);
-        return !placeEvent.isCancelled();
+        return !placeEvent.isCancelled() && placeEvent.canBuild();
     }
 
     private void damageTool(ItemStack tool, int amount) {
@@ -302,13 +315,11 @@ public final class ScytheListener implements Listener {
         private final Block block;
         private final Material cropType;
         private final List<ItemStack> drops;
-        private boolean shouldReplant;
 
         private HarvestEntry(Block block, Material cropType, List<ItemStack> drops) {
             this.block = block;
             this.cropType = cropType;
             this.drops = drops;
-            this.shouldReplant = false;
         }
     }
 }

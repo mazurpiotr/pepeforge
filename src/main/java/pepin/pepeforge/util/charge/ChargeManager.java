@@ -29,6 +29,16 @@ public final class ChargeManager {
         return nextCharges;
     }
 
+    public ChargeResult addChargeOncePerTick(Player player, int maximum, long currentTick) {
+        UUID playerId = player.getUniqueId();
+        Long lastGainTick = lastChargeGainTick.get(playerId);
+        if (lastGainTick != null && lastGainTick == currentTick) {
+            return new ChargeResult(getCharges(player), false);
+        }
+
+        return new ChargeResult(addCharge(player, maximum, currentTick), true);
+    }
+
     public void setCharges(Player player, int charges) {
         PersistentDataCompat.setInt(player, chargesKey, Math.max(0, charges));
     }
@@ -60,11 +70,21 @@ public final class ChargeManager {
         return decayedCharges;
     }
 
+    public int decay(Player player, long currentTick, long intervalTicks, int amount, int maximum) {
+        if (getCharges(player) >= Math.max(0, maximum)) {
+            return getCharges(player);
+        }
+        return decay(player, currentTick, intervalTicks, amount);
+    }
+
     public void clearTransientState(UUID playerId) {
         lastChargeGainTick.remove(playerId);
     }
 
     public void clear() {
         lastChargeGainTick.clear();
+    }
+
+    public record ChargeResult(int charges, boolean added) {
     }
 }

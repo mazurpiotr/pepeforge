@@ -56,6 +56,10 @@ public final class AnchorListener implements Listener {
     private final @NonNull NamespacedKey cooldownKey;
     private final Set<ItemDisplay> activeDisplays = ConcurrentHashMap.newKeySet();
     private final Map<UUID, ItemStack> activeThrows = new ConcurrentHashMap<>();
+    private final Map<UUID, Location> throwOrigins = new ConcurrentHashMap<>();
+    private final Map<UUID, ItemDisplay> flightDisplays = new ConcurrentHashMap<>();
+    private final Map<UUID, ScheduledTaskCompat> flightTasks = new ConcurrentHashMap<>();
+    private final Map<UUID, ScheduledTaskCompat> pullTasks = new ConcurrentHashMap<>();
     private final Set<ScheduledTaskCompat> activeTasks = ConcurrentHashMap.newKeySet();
 
     private static final String ABILITY_COOLDOWN_KEY = "anchor:hook";
@@ -105,25 +109,89 @@ public final class AnchorListener implements Listener {
             task.cancel();
         }
         activeTasks.clear();
+        flightTasks.clear();
+        pullTasks.clear();
 
-        for (ItemDisplay display : activeDisplays) {
-            if (display.isValid()) {
-                display.remove();
+        if (!SchedulerCompat.isServerStopping()) {
+            for (ItemDisplay display : activeDisplays) {
+                removeDisplay(display);
             }
         }
         activeDisplays.clear();
+        flightDisplays.clear();
 
-        for (Map.Entry<UUID, ItemStack> entry : activeThrows.entrySet()) {
-            UUID uuid = entry.getKey();
-            ItemStack stored = activeThrows.remove(uuid);
-            if (stored != null) {
-                Player player = plugin.getServer().getPlayer(uuid);
-                if (player != null) {
+        for (UUID uuid : activeThrows.keySet()) {
+            Player player = plugin.getServer().getPlayer(uuid);
+            if (player == null) {
+                ItemStack stored = takeStoredAnchor(uuid);
+                Location origin = throwOrigins.remove(uuid);
+                if (stored != null && origin != null) {
+                    dropAtLocation(origin, stored);
+                }
+                continue;
+            }
+
+            SchedulerCompat.runForPlayer(player, plugin, () -> {
+                ItemStack stored = takeStoredAnchor(uuid);
+                if (stored != null) {
+                    throwOrigins.remove(uuid);
                     returnItemToPlayer(player, stored, player.getLocation());
                 }
-            }
+            }, () -> {
+                ItemStack stored = takeStoredAnchor(uuid);
+                Location origin = throwOrigins.remove(uuid);
+                if (stored != null && origin != null) {
+                    dropAtLocation(origin, stored);
+                }
+            });
         }
-        activeThrows.clear();
+    }
+
+    private ItemStack takeStoredAnchor(UUID uuid) {
+        return activeThrows.remove(uuid);
+    }
+
+    private void removeDisplay(ItemDisplay display) {
+        activeDisplays.remove(display);
+        Runnable remove = () -> {
+            if (display.isValid()) {
+                display.remove();
+            }
+        };
+        if (SchedulerCompat.isOwnedByCurrentRegion(display)) {
+            remove.run();
+        } else {
+            SchedulerCompat.runForEntity(display, plugin, remove);
+        }
+    }
+
+    private void dropAtLocation(Location location, ItemStack item) {
+        Location dropLocation = location.clone();
+        SchedulerCompat.runAtLocation(dropLocation, plugin, () -> {
+            World world = dropLocation.getWorld();
+            if (world != null) {
+                world.dropItemNaturally(dropLocation, item);
+            }
+        });
+    }
+
+    private void cancelPlayerTasks(UUID uuid) {
+        ScheduledTaskCompat flightTask = flightTasks.remove(uuid);
+        if (flightTask != null) {
+            flightTask.cancel();
+            activeTasks.remove(flightTask);
+        }
+
+        ScheduledTaskCompat pullTask = pullTasks.remove(uuid);
+        if (pullTask != null) {
+            pullTask.cancel();
+            activeTasks.remove(pullTask);
+        }
+
+        ItemDisplay display = flightDisplays.remove(uuid);
+        if (display != null) {
+            removeDisplay(display);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -205,10 +273,7 @@ public final class AnchorListener implements Listener {
                         taskRef.cancel();
                         activeTasks.remove(taskRef);
                     }
-                    if (coral.isValid()) {
-                        coral.remove();
-                    }
-                    activeDisplays.remove(coral);
+                    removeDisplay(coral);
                 }
             }
 
@@ -254,22 +319,29 @@ public final class AnchorListener implements Listener {
             return;
         }
 
-        cooldownManager.setCooldown(player, ABILITY_COOLDOWN_KEY, getAbilityCooldownMillis());
         @NonNull Material mainHandMaterial = Objects.requireNonNull(mainHandItem.getType());
+        if (!executeAnchorThrow(player, mainHandItem)) {
+            return;
+        }
+
+        cooldownManager.setCooldown(player, ABILITY_COOLDOWN_KEY, getAbilityCooldownMillis());
         player.setCooldown(mainHandMaterial, 20);
         player.swingMainHand();
-
-        executeAnchorThrow(player, mainHandItem);
     }
 
-    private void executeAnchorThrow(Player player, ItemStack item) {
+    private boolean executeAnchorThrow(Player player, ItemStack item) {
+        UUID playerId = player.getUniqueId();
+        ItemStack anchorItem = item.clone();
+        if (activeThrows.putIfAbsent(playerId, anchorItem) != null) {
+            return false;
+        }
+
         Location startLoc = player.getEyeLocation().add(0, -0.3, 0);
         Vector direction = player.getLocation().getDirection().normalize();
 
         // Clone item for safety and temporarily clear it from the hand
-        ItemStack anchorItem = item.clone();
         player.getInventory().setItemInMainHand(null);
-        activeThrows.put(player.getUniqueId(), anchorItem);
+        throwOrigins.put(playerId, startLoc.clone());
 
         @NonNull World playerWorld = Objects.requireNonNull(player.getWorld());
         @NonNull ItemDisplay display = Objects.requireNonNull(
@@ -288,6 +360,7 @@ public final class AnchorListener implements Listener {
                 }));
 
         activeDisplays.add(display);
+        flightDisplays.put(player.getUniqueId(), display);
 
         class AnchorFlightTask implements Runnable {
             private int tick = 0;
@@ -295,6 +368,7 @@ public final class AnchorListener implements Listener {
             private final Location currentLoc = startLoc.clone();
             private final Vector velocity = direction.multiply(AnchorDefinition.THROW_SPEED); // Fired with configured
                                                                                               // velocity
+            private Location hitLocation;
 
             @Override
             public void run() {
@@ -342,6 +416,7 @@ public final class AnchorListener implements Listener {
 
                 if (hit != null && (hit.getHitBlock() != null || hit.getHitEntity() != null)) {
                     Location impactLoc = hit.getHitPosition().toLocation(player.getWorld());
+                    hitLocation = impactLoc.clone();
                     try {
                         onHit(hit, impactLoc);
                     } finally {
@@ -400,6 +475,7 @@ public final class AnchorListener implements Listener {
                             if (pullTaskRef != null) {
                                 pullTaskRef.cancel();
                                 activeTasks.remove(pullTaskRef);
+                                pullTasks.remove(player.getUniqueId(), pullTaskRef);
                             }
                         }
                     }
@@ -408,6 +484,7 @@ public final class AnchorListener implements Listener {
                     ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, pullTask, 0L, 1L);
                     pullTask.pullTaskRef = task;
                     activeTasks.add(task);
+                    pullTasks.put(player.getUniqueId(), task);
 
                     player.getWorld().playSound(impactLoc, Sound.BLOCK_CHAIN_PLACE, 1.0f, 1.2f);
                     player.getWorld().playSound(impactLoc, Sound.ITEM_TRIDENT_HIT, 1.0f, 0.8f);
@@ -448,18 +525,17 @@ public final class AnchorListener implements Listener {
                 if (taskRef != null) {
                     taskRef.cancel();
                     activeTasks.remove(taskRef);
+                    flightTasks.remove(player.getUniqueId(), taskRef);
                 }
-                if (SchedulerCompat.isOwnedByCurrentRegion(display)) {
-                    display.remove();
-                } else {
-                    SchedulerCompat.runForEntity(display, plugin, display::remove);
-                }
-                activeDisplays.remove(display);
+                flightDisplays.remove(player.getUniqueId(), display);
+                removeDisplay(display);
 
                 Runnable returnAnchor = () -> {
                     ItemStack stored = activeThrows.remove(player.getUniqueId());
                     if (stored != null) {
-                        returnItemToPlayer(player, stored, player.getLocation());
+                        throwOrigins.remove(player.getUniqueId());
+                        Location fallbackLocation = hitLocation == null ? player.getLocation() : hitLocation;
+                        returnItemToPlayer(player, stored, fallbackLocation);
                     }
                 };
                 if (SchedulerCompat.isOwnedByCurrentRegion(player)) {
@@ -473,7 +549,9 @@ public final class AnchorListener implements Listener {
         AnchorFlightTask flightTask = new AnchorFlightTask();
         ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, flightTask, 1L, 1L);
         flightTask.taskRef = task;
+        flightTasks.put(player.getUniqueId(), task);
         activeTasks.add(task);
+        return true;
     }
 
     private void hitEntity(Player player, LivingEntity target, Location impactLoc) {
@@ -529,9 +607,30 @@ public final class AnchorListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        ItemStack stored = activeThrows.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        Location quitLocation = player.getLocation().clone();
+        cancelPlayerTasks(uuid);
+
+        ItemStack stored = takeStoredAnchor(uuid);
         if (stored != null) {
-            returnItemToPlayer(player, stored, player.getLocation());
+            throwOrigins.remove(uuid);
+            returnItemOnQuit(player, stored, quitLocation);
+        }
+    }
+
+    private void returnItemOnQuit(Player player, ItemStack item, Location quitLocation) {
+        ItemStack hand = player.getInventory().getItemInMainHand();
+        if (hand == null || hand.getType().isAir()) {
+            player.getInventory().setItemInMainHand(item);
+            return;
+        }
+
+        HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(item);
+        for (ItemStack rest : remaining.values()) {
+            World world = quitLocation.getWorld();
+            if (world != null) {
+                world.dropItemNaturally(quitLocation, rest);
+            }
         }
     }
 
@@ -549,21 +648,25 @@ public final class AnchorListener implements Listener {
             }
 
             for (ItemStack rest : remaining.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), rest);
+                Location fallbackLocation = dropLocation == null ? player.getLocation() : dropLocation;
+                dropAtLocation(fallbackLocation, rest);
             }
             return;
         }
 
-        if (dropLocation != null && dropLocation.getWorld() != null) {
-            dropLocation.getWorld().dropItemNaturally(dropLocation, item);
+        if (dropLocation != null) {
+            dropAtLocation(dropLocation, item);
         }
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
-        ItemStack stored = activeThrows.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        cancelPlayerTasks(uuid);
+        ItemStack stored = takeStoredAnchor(uuid);
         if (stored != null) {
+            throwOrigins.remove(uuid);
             event.getDrops().add(stored);
         }
     }

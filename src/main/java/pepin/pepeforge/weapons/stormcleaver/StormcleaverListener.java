@@ -83,7 +83,6 @@ public final class StormcleaverListener implements Listener {
                 || !(event.getEntity() instanceof LivingEntity target)
                 || target == player
                 || !itemFactory.isStormcleaver(player.getInventory().getItemInMainHand())
-                || !hasEmptyOffHand(player)
                 || DamageFlow.isSecondaryDamage(event)
                 || suppressedChargePlayers.contains(player.getUniqueId())) {
             return;
@@ -105,7 +104,7 @@ public final class StormcleaverListener implements Listener {
             return;
         }
         ItemStack item = player.getInventory().getItemInMainHand();
-        if (!itemFactory.isStormcleaver(item) || !hasEmptyOffHand(player) || !player.isOnGround()) {
+        if (!itemFactory.isStormcleaver(item) || !player.isOnGround()) {
             return;
         }
 
@@ -163,15 +162,21 @@ public final class StormcleaverListener implements Listener {
         int requiredCharges = getRequiredCharges();
         int currentCharges = chargeManager.getCharges(player);
         if (currentCharges >= requiredCharges) {
-            showCharge(player, currentCharges, requiredCharges);
+            showReadyCharge(player);
             return;
         }
 
-        int nextCharges = chargeManager.addCharge(player, requiredCharges, player.getWorld().getGameTime());
-        showCharge(player, nextCharges, requiredCharges);
+        ChargeManager.ChargeResult result = chargeManager.addChargeOncePerTick(
+                player, requiredCharges, player.getWorld().getGameTime());
+        if (!result.added()) {
+            return;
+        }
 
-        if (currentCharges < requiredCharges && nextCharges == requiredCharges) {
+        if (currentCharges < requiredCharges && result.charges() == requiredCharges) {
             showFullChargeEffect(player);
+            showReadyCharge(player);
+        } else {
+            showCharge(player, result.charges(), requiredCharges);
         }
     }
 
@@ -180,16 +185,21 @@ public final class StormcleaverListener implements Listener {
             return;
         }
 
+        int requiredCharges = getRequiredCharges();
         int charges = chargeManager.getCharges(player);
         if (charges <= 0) {
             return;
         }
 
         long currentTick = player.getWorld().getGameTime();
-        charges = chargeManager.decay(player, currentTick, getChargeDecayInterval(), 1);
+        charges = chargeManager.decay(player, currentTick, getChargeDecayInterval(), 1, requiredCharges);
 
-        if (itemFactory.isStormcleaver(player.getInventory().getItemInMainHand()) && charges > 0) {
-            showCharge(player, charges, getRequiredCharges());
+        if (itemFactory.isStormcleaver(player.getInventory().getItemInMainHand())) {
+            if (charges >= requiredCharges) {
+                showReadyCharge(player);
+            } else if (charges > 0) {
+                showCharge(player, charges, requiredCharges);
+            }
         }
     }
 
@@ -321,6 +331,12 @@ public final class StormcleaverListener implements Listener {
         ActionBarHelper.showActionBar(player, message);
     }
 
+    private void showReadyCharge(Player player) {
+        String message = lang.text("messages.stormcleaver.ready")
+                .replace("{bar}", ActionBarHelper.buildProgressBar(1.0D));
+        ActionBarHelper.showActionBar(player, message);
+    }
+
     private int getRequiredCharges() {
         return Math.max(1, Math.min(10, plugin.getConfig().getInt(CHARGES_CONFIG_PATH,
                 StormcleaverDefinition.DEFAULT_CHARGES_REQUIRED)));
@@ -334,11 +350,6 @@ public final class StormcleaverListener implements Listener {
     private int getChargeDecayInterval() {
         return Math.max(1, Math.min(1200, plugin.getConfig().getInt(CHARGE_DECAY_INTERVAL_CONFIG_PATH,
                 StormcleaverDefinition.DEFAULT_CHARGE_DECAY_INTERVAL)));
-    }
-
-    private boolean hasEmptyOffHand(Player player) {
-        ItemStack offHand = player.getInventory().getItemInOffHand();
-        return offHand == null || offHand.getType().isAir();
     }
 
     private void denyInteraction(PlayerInteractEvent event) {

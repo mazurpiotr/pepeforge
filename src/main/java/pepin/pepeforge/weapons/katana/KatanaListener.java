@@ -8,6 +8,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -20,6 +21,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -265,6 +267,22 @@ public final class KatanaListener implements Listener {
         }
         activeParryUntil.remove(playerId);
         cooldownManager.clearCooldown(event.getPlayer(), PARRY_COOLDOWN_KEY);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDrop(PlayerDropItemEvent event) {
+        Item droppedEntity = event.getItemDrop();
+        ItemStack droppedItem = droppedEntity.getItemStack();
+        if (!itemFactory.isKatana(droppedItem)) {
+            return;
+        }
+
+        boolean parryVisualWasActive = itemFactory.hasKatanaParryVisual(droppedItem);
+        itemFactory.setKatanaParryVisual(droppedItem, false);
+        droppedEntity.setItemStack(droppedItem);
+        if (parryVisualWasActive) {
+            clearActiveParry(event.getPlayer(), droppedItem);
+        }
     }
 
     private void activateParry(Player player, ItemStack katana, long now) {

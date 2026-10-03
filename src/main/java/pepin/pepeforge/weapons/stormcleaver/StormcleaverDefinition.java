@@ -13,9 +13,9 @@ public final class StormcleaverDefinition {
     public static final String LANG_PATH = "stormcleaver";
     public static final String TRANSLATION_KEY_BASE = "item.pepeforge.stormcleaver";
     public static final ItemNameColor NAME_COLOR = ItemNameColor.CRESCENT;
-    public static final int LORE_LINE_COUNT = 8;
+    public static final int LORE_LINE_COUNT = 7;
     public static final ItemRarity RARITY = ItemRarity.LEGENDARY;
-    public static final Material BASE_MATERIAL = Material.MACE;
+    public static final Material BASE_MATERIAL = Material.DIAMOND_AXE;
     public static final NamespacedKey MODEL_KEY = new NamespacedKey("pepeforge", "stormcleaver");
     public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.STORMCLEAVER;
 

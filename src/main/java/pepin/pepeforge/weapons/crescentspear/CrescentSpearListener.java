@@ -41,9 +41,9 @@ public final class CrescentSpearListener implements Listener {
     private final ItemFactory itemFactory;
     private final PluginLang lang;
     private final ChargeManager chargeManager;
-    private final Map<UUID, Long> lastCountedTick = new ConcurrentHashMap<>();
     private final Map<UUID, Long> specialAttackUntilTick = new ConcurrentHashMap<>();
-    private final Set<UUID> armedPlayers = ConcurrentHashMap.newKeySet();
+    private final Object taskLock = new Object();
+    private final Map<UUID, Set<ScheduledTaskCompat>> activeSkillTasks = new ConcurrentHashMap<>();
 
     public CrescentSpearListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
         this.plugin = plugin;
@@ -64,48 +64,108 @@ public final class CrescentSpearListener implements Listener {
     }
 
     private ScheduledTaskCompat statusTask;
+    private volatile long lifecycleGeneration;
+    private volatile boolean running;
 
     public void startStatusTask() {
-        statusTask = SchedulerCompat.runTimer(plugin, () -> {
-            for (Player player : plugin.getServer().getOnlinePlayers()) {
-                SchedulerCompat.runForPlayer(player, plugin, () -> {
-                    if (player == null || !player.isOnline()) {
+        synchronized (taskLock) {
+            if (running) {
+                return;
+            }
+            long generation = lifecycleGeneration + 1L;
+            ScheduledTaskCompat scheduledTask = SchedulerCompat.runTimer(plugin, () -> {
+                if (!isRunning(generation)) {
+                    return;
+                }
+                for (Player player : plugin.getServer().getOnlinePlayers()) {
+                    if (!isRunning(generation)) {
                         return;
                     }
-                    UUID playerId = player.getUniqueId();
-                    int currentCharge = chargeManager.getCharges(player);
-                    boolean armed = armedPlayers.contains(playerId);
-                    boolean holdingSpear = itemFactory.isCrescentSpear(player.getInventory().getItemInMainHand());
-                    if (holdingSpear) {
-                        if (armed) {
-                            showReadyActionBar(player);
-                        } else if (currentCharge > 0) {
-                            showChargeActionBar(player, currentCharge);
+                    SchedulerCompat.runForPlayer(player, plugin, () -> {
+                        if (!isRunning(generation) || !player.isOnline()) {
+                            return;
                         }
-                    }
-
-                    if (currentCharge > 0 && !armed) {
-                        long currentTick = player.getWorld().getGameTime();
-                        chargeManager.decay(player, currentTick,
-                                CrescentSpearDefinition.CHARGE_DECAY_DELAY_TICKS,
-                                CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL);
-                    }
-                });
-            }
-        }, 1L, CrescentSpearDefinition.STATUS_INTERVAL_TICKS);
+                        UUID playerId = player.getUniqueId();
+                        int currentCharge = chargeManager.getCharges(player);
+                        int chargesRequired = getChargesRequired();
+                        if (currentCharge > 0 && currentCharge < chargesRequired) {
+                            long currentTick = player.getWorld().getGameTime();
+                            currentCharge = chargeManager.decay(player, currentTick,
+                                    CrescentSpearDefinition.CHARGE_DECAY_DELAY_TICKS,
+                                    CrescentSpearDefinition.CHARGE_DECAY_PER_INTERVAL,
+                                    chargesRequired);
+                        }
+                        boolean holdingSpear = itemFactory.isCrescentSpear(player.getInventory().getItemInMainHand());
+                        if (holdingSpear) {
+                            if (currentCharge >= chargesRequired) {
+                                showReadyActionBar(player);
+                            } else if (currentCharge > 0) {
+                                showChargeActionBar(player, currentCharge);
+                            }
+                        }
+                    });
+                }
+            }, 1L, CrescentSpearDefinition.STATUS_INTERVAL_TICKS);
+            lifecycleGeneration = generation;
+            running = true;
+            statusTask = scheduledTask;
+        }
     }
 
     public void stop() {
-        if (statusTask != null) {
-            statusTask.cancel();
-            statusTask = null;
+        synchronized (taskLock) {
+            running = false;
+            lifecycleGeneration++;
+            if (statusTask != null) {
+                statusTask.cancel();
+                statusTask = null;
+            }
+            activeSkillTasks.values().forEach(tasks -> tasks.forEach(ScheduledTaskCompat::cancel));
+            activeSkillTasks.clear();
+            specialAttackUntilTick.clear();
+            chargeManager.clear();
         }
-        chargeManager.clear();
+    }
+
+    private boolean isRunning(long generation) {
+        return running && lifecycleGeneration == generation;
+    }
+
+    private ScheduledTaskCompat schedulePlayerTask(
+            Player player,
+            Runnable runner,
+            long generation,
+            long delayTicks) {
+        synchronized (taskLock) {
+            if (!isRunning(generation)) {
+                return null;
+            }
+            ScheduledTaskCompat task = SchedulerCompat.runLaterForPlayer(player, plugin, runner, delayTicks);
+            activeSkillTasks.computeIfAbsent(player.getUniqueId(), ignored -> ConcurrentHashMap.newKeySet()).add(task);
+            return task;
+        }
+    }
+
+    private void finishPlayerTask(UUID playerId, ScheduledTaskCompat task) {
+        if (task == null) {
+            return;
+        }
+        Set<ScheduledTaskCompat> tasks = activeSkillTasks.get(playerId);
+        if (tasks != null && tasks.remove(task) && tasks.isEmpty()) {
+            activeSkillTasks.remove(playerId, tasks);
+        }
+    }
+
+    private void cancelPlayerTasks(UUID playerId) {
+        Set<ScheduledTaskCompat> tasks = activeSkillTasks.remove(playerId);
+        if (tasks != null) {
+            tasks.forEach(ScheduledTaskCompat::cancel);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
-        if (DamageFlow.isSecondaryDamage(event) || !(event.getDamager() instanceof Player player)) {
+        if (!running || DamageFlow.isSecondaryDamage(event) || !(event.getDamager() instanceof Player player)) {
             return;
         }
 
@@ -124,7 +184,7 @@ public final class CrescentSpearListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSuccessfulDamage(EntityDamageByEntityEvent event) {
-        if (DamageFlow.isSecondaryDamage(event) || !(event.getDamager() instanceof Player player)) {
+        if (!running || DamageFlow.isSecondaryDamage(event) || !(event.getDamager() instanceof Player player)) {
             return;
         }
 
@@ -147,25 +207,22 @@ public final class CrescentSpearListener implements Listener {
         }
         specialAttackUntilTick.remove(playerId);
 
-        if (armedPlayers.remove(playerId)) {
+        int chargesRequired = getChargesRequired();
+        if (chargeManager.getCharges(player) >= chargesRequired) {
             chargeManager.reset(player);
             triggerActiveSkill(player);
             return;
         }
 
-        Long previousTick = lastCountedTick.get(playerId);
-        // One spear swing can clip multiple targets in the same tick. Count it once
-        // so the charge meter cannot jump several steps from one attack animation.
-        if (previousTick != null && previousTick == currentTick) {
+        ChargeManager.ChargeResult chargeResult = chargeManager.addChargeOncePerTick(
+                player, chargesRequired, currentTick);
+        if (!chargeResult.added()) {
             return;
         }
 
-        lastCountedTick.put(playerId, currentTick);
-        int chargesRequired = getChargesRequired();
-        int nextCharge = chargeManager.addCharge(player, chargesRequired, currentTick);
+        int nextCharge = chargeResult.charges();
 
         if (nextCharge >= chargesRequired) {
-            armedPlayers.add(playerId);
             showReadyActionBar(player);
         } else {
             showChargeActionBar(player, nextCharge);
@@ -175,13 +232,16 @@ public final class CrescentSpearListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
+        cancelPlayerTasks(playerId);
         chargeManager.clearTransientState(playerId);
-        lastCountedTick.remove(playerId);
         specialAttackUntilTick.remove(playerId);
-        armedPlayers.remove(playerId);
     }
 
     private void triggerActiveSkill(Player player) {
+        if (!running) {
+            return;
+        }
+        long generation = lifecycleGeneration;
         Location effectPoint = player.getEyeLocation().add(player.getLocation().getDirection().normalize()
                 .multiply(CrescentSpearDefinition.ACTIVE_PARTICLE_DISTANCE));
 
@@ -199,25 +259,46 @@ public final class CrescentSpearListener implements Listener {
         double hitDamage = resolveActiveHitDamage(player);
         for (int i = 0; i < activeHitCount; i++) {
             int hitIndex = i;
-            SchedulerCompat.runLaterForPlayer(player, plugin, () -> {
-                if (!player.isOnline()) {
-                    return;
-                }
-                playActiveSwingVisuals(player);
+            class ActiveHitTask implements Runnable {
+                private ScheduledTaskCompat taskRef;
 
-                LivingEntity target = findActiveTarget(player);
-                if (target == null || target.isDead() || !target.isValid()) {
-                    return;
+                @Override
+                public void run() {
+                    try {
+                        if (!isRunning(generation) || !player.isOnline()) {
+                            return;
+                        }
+                        playActiveSwingVisuals(player);
+
+                        if (!isRunning(generation)) {
+                            return;
+                        }
+                        LivingEntity target = findActiveTarget(player);
+                        if (target == null || target.isDead() || !target.isValid()
+                                || !isRunning(generation)) {
+                            return;
+                        }
+                        if (!DamageFlow.damage(target, hitDamage, player, true).accepted()
+                                || !isRunning(generation)) {
+                            return;
+                        }
+                        playSpecialEffects(player.getWorld(), target.getLocation().add(0.0D, 1.0D, 0.0D));
+                        if (hitIndex == activeHitCount - 1) {
+                            applyLastHitKnockback(player, target);
+                        }
+                    } finally {
+                        finishPlayerTask(playerId, taskRef);
+                    }
                 }
-                if (!DamageFlow.damage(target, hitDamage, player, true).accepted()) {
-                    return;
-                }
-                playSpecialEffects(player.getWorld(), target.getLocation().add(0.0D, 1.0D, 0.0D));
-                if (hitIndex == activeHitCount - 1) {
-                    applyLastHitKnockback(player, target);
-                }
-            }, CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS
-                    + (long) hitIndex * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS);
+            }
+
+            ActiveHitTask task = new ActiveHitTask();
+            task.taskRef = schedulePlayerTask(
+                    player,
+                    task,
+                    generation,
+                    CrescentSpearDefinition.ACTIVE_FIRST_HIT_DELAY_TICKS
+                            + (long) hitIndex * CrescentSpearDefinition.ACTIVE_HIT_INTERVAL_TICKS);
         }
     }
 

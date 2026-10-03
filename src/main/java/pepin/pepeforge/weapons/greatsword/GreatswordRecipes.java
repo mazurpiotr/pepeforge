@@ -55,7 +55,7 @@ public final class GreatswordRecipes {
     }
 
     private void registerNetheriteUpgrade() {
-        if (!itemFactory.isRecipeEnabled(GreatswordTier.NETHERITE.itemId())) {
+        if (!itemFactory.isItemEnabled(GreatswordTier.NETHERITE.itemId())) {
             return;
         }
 
