@@ -1,4 +1,5 @@
 target/
+dist/
 .m2/
 scripts/
 .jqwik-database
