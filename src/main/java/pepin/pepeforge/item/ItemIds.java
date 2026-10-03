@@ -20,6 +20,7 @@ public final class ItemIds {
     public static final String ANCHOR = "anchor";
     public static final String THROWING_KNIFE = "throwing_knife";
     public static final String STORMCLEAVER = "stormcleaver";
+    public static final String EMBERFANG = "emberfang";
 
     private ItemIds() {
     }

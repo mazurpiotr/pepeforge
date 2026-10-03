@@ -26,6 +26,7 @@ public final class CustomModelDataIds {
     public static final int DIAMOND_WIND_BLADE = 212001;
     public static final int DIAMOND_GREATSWORD = 212002;
     public static final int CRIMSON_SWORD = 212003;
+    public static final int EMBERFANG = 212004;
 
     // NETHERITE_SWORD family in the resource pack (vanilla base item grouping, not gameplay grouping)
     public static final int NETHERITE_WIND_BLADE = 213001;
@@ -34,8 +35,8 @@ public final class CustomModelDataIds {
     // SNOWBALL family in the resource pack (vanilla base item grouping, not gameplay grouping)
     public static final int THROWING_KNIFE = 261001;
 
-    // MACE family in the resource pack (vanilla base item grouping, not gameplay grouping)
-    public static final int STORMCLEAVER = 271001;
+    // DIAMOND_AXE family in the resource pack (vanilla base item grouping, not gameplay grouping)
+    public static final int STORMCLEAVER = 281001;
 
     private CustomModelDataIds() {
     }

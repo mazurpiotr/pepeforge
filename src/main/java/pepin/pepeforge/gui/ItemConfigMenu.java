@@ -12,9 +12,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.gui.itemconfig.anchor.AnchorConfig;
+import pepin.pepeforge.gui.itemconfig.emberfang.EmberfangConfig;
 import pepin.pepeforge.gui.itemconfig.stormcleaver.StormcleaverConfig;
 import pepin.pepeforge.gui.itemconfig.windblade.WindBladeConfig;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.util.ColorUtil;
 
 public final class ItemConfigMenu {
@@ -45,6 +47,11 @@ public final class ItemConfigMenu {
             stormcleaverConfig.build(inventory);
         }
 
+        if (ItemIds.EMBERFANG.equals(itemId)) {
+            EmberfangConfig emberfangConfig = new EmberfangConfig(plugin);
+            emberfangConfig.build(inventory);
+        }
+
         return inventory;
     }
 
@@ -61,14 +68,16 @@ public final class ItemConfigMenu {
         }
         inventory.setItem(11, enabledBtn);
 
-        ItemStack recipeBtn = new ItemStack(isRecipeEnabled ? ConfigIconography.ENABLED : ConfigIconography.DISABLED);
-        ItemMeta recipeMeta = recipeBtn.getItemMeta();
-        if (recipeMeta != null) {
-            recipeMeta.setDisplayName(ColorUtil.WHITE + "Recipe Enabled: "
-                    + (isRecipeEnabled ? ColorUtil.GREEN + "TRUE" : ColorUtil.RED + "FALSE"));
-            recipeBtn.setItemMeta(recipeMeta);
+        if (hasRecipeToggle(itemId)) {
+            ItemStack recipeBtn = new ItemStack(isRecipeEnabled ? ConfigIconography.ENABLED : ConfigIconography.DISABLED);
+            ItemMeta recipeMeta = recipeBtn.getItemMeta();
+            if (recipeMeta != null) {
+                recipeMeta.setDisplayName(ColorUtil.WHITE + "Crafting Recipe Enabled: "
+                        + (isRecipeEnabled ? ColorUtil.GREEN + "TRUE" : ColorUtil.RED + "FALSE"));
+                recipeBtn.setItemMeta(recipeMeta);
+            }
+            inventory.setItem(15, recipeBtn);
         }
-        inventory.setItem(15, recipeBtn);
 
         ItemStack backBtn = new ItemStack(Material.ARROW);
         ItemMeta backMeta = backBtn.getItemMeta();
@@ -88,6 +97,27 @@ public final class ItemConfigMenu {
             return holder.itemId;
         }
         return null;
+    }
+
+    public static boolean hasRecipeToggle(String itemId) {
+        return switch (itemId) {
+            case ItemIds.CRESCENT_BOW,
+                    ItemIds.CRESCENT_SPEAR,
+                    ItemIds.CHISEL,
+                    ItemIds.KATANA,
+                    ItemIds.IRON_WIND_BLADE,
+                    ItemIds.DIAMOND_WIND_BLADE,
+                    ItemIds.IRON_GREATSWORD,
+                    ItemIds.DIAMOND_GREATSWORD,
+                    ItemIds.IRON_SCYTHE,
+                    ItemIds.DIAMOND_SCYTHE,
+                    ItemIds.SOLAR_SHIELD,
+                    ItemIds.ANCHOR,
+                    ItemIds.THROWING_KNIFE,
+                    ItemIds.STORMCLEAVER,
+                    ItemIds.EMBERFANG -> true;
+            default -> false;
+        };
     }
 
     public static boolean isWindBlade(String itemId) {

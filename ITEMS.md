@@ -15,6 +15,7 @@ Detailed item and recipe reference for the current Pepe's Forge item set.
 - [Anchor](#-anchor)
 - [Throwing Knife](#-throwing-knife)
 - [Stormcleaver](#-stormcleaver)
+- [Emberfang](#-emberfang)
 - [Give Names](#give-names)
 
 
@@ -121,9 +122,12 @@ Moon-themed ranged weapon that fires a three-arrow volley.
 
 Moon-themed melee weapon with an armed follow-up burst.
 
+| Base Attack Damage | 5 |
+| ------------------ | - |
+
 | Feature | Details |
 |---------|---------|
-| Charge | Each successful hit adds one charge toward the configured requirement, while the meter slowly decays between attacks |
+| Charge | Each successful attack adds at most one charge per tick. Partial charge slowly decays; full charge stays ready until used. |
 | Active | The next melee hit at full charge triggers rapid follow-up attacks; the final hit lightly knocks the target back and upward |
 | Day | Deals 1 less damage during the day |
 | Moonlight | Deals 2 bonus damage at night under open sky |
@@ -136,6 +140,9 @@ Moon-themed melee weapon with an armed follow-up burst.
 ## 🗡️ Katana
 
 Two-handed parry weapon built around short defensive timing windows.
+
+| Base Attack Damage | 5 |
+| ------------------ | - |
 
 | Feature | Details |
 |---------|---------|
@@ -168,6 +175,9 @@ A legendary sun-blessed shield that charges passively in strong sky light.
 
 A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
 
+| Base Attack Damage | 7 |
+| ------------------ | - |
+
 | Feature | Details |
 |----------|---------|
 | **Acquisition** | Boss Drop / Quest Reward |
@@ -191,10 +201,13 @@ A legendary weapon that grows stronger through combat, feeding on the blood of i
 
 A heavy, slow-swinging marine weapon with crowd-control capability and a grappling-hook active utility.
 
+| Base Attack Damage | 8 |
+| ------------------ | - |
+
 | Feature | Details |
 |---------|---------|
 | **Snare** | Melee attacks temporarily lock the target in place and prevent jumping, wrapping their feet in a visual coral display. |
-| **Hook** | Right-click launches the anchor as a projectile. Hitting a block pulls you to it. Hitting a living entity damages it and can pull you and the target together. Shield blocks still allow pulling. |
+| **Hook** | Right-click launches the anchor as a projectile; each player can have only one anchor in flight at a time. Hitting a block pulls you to it. Hitting a living entity damages it and can pull you and the target together. Shield blocks still allow pulling. After a hit, if the inventory cannot hold the returned anchor, it drops at the raycast impact location. Logging out during flight cancels it and returns the anchor; if the inventory cannot hold it, the anchor drops at the logout location. |
 
 **Crafting** (Shaped Recipe):
 
@@ -203,6 +216,9 @@ A heavy, slow-swinging marine weapon with crowd-control capability and a grappli
 ## 🗡️ Throwing Knife
 
 A consumable ranged weapon that's perfect for finishing off fleeing enemies or opening a fight from a distance.
+
+| Base Attack Damage | 5 |
+| ------------------ | - |
 
 | Feature | Details |
 |---|---|
@@ -214,11 +230,14 @@ A consumable ranged weapon that's perfect for finishing off fleeing enemies or o
 
 ## ⚡ Stormcleaver
 
-A legendary two-handed mace with an aggressive charge-and-leap combat loop.
+A legendary diamond axe with an aggressive charge-and-leap combat loop.
+
+| Base Attack Damage | 9 |
+| ------------------ | - |
 
 | Feature | Details |
 |---|---|
-| **Static Charge** | Melee hits build charges toward the configured maximum. |
+| **Static Charge** | Each successful attack adds at most one charge per tick. Partial charge slowly decays; full charge stays ready until used. |
 | **Thunder Leap** | Right-click while grounded at full charge to launch upward. Landing creates a protected knockback shockwave and cosmetic lightning strikes. A blocked ceiling triggers the impact immediately. |
 | **Protection** | Shockwave damage respects region and PvP protection and never ignites blocks. |
 
@@ -228,6 +247,27 @@ A legendary two-handed mace with an aggressive charge-and-leap combat loop.
 [ Iron Block ] [ Conduit ] [ Iron Block ]
 [      -     ] [  Stick  ] [      -     ]
 [      -     ] [  Stick  ] [      -     ]
+```
+
+## 🔥 Emberfang
+
+A blade of hardened magma that burns both its targets and careless wielders.
+
+| Base Attack Damage | 7 |
+| ------------------ | - |
+
+| Feature | Details |
+|---|---|
+| **Ember Strike** | Strikes add the configured fire damage shown in the item's lore; target defenses can reduce it. |
+| **Ignition** | Strikes have a **low chance** to briefly set the target ablaze. |
+| **Self-Burn** | Burns its wielder unless they wear at least one armor piece enchanted with **Fire Protection**. |
+
+**Crafting** (Shaped Recipe):
+
+```text
+[     -     ] [ Magma Block ] [     -     ]
+[     -     ] [ Magma Block ] [     -     ]
+[     -     ] [  Iron Ingot ] [     -     ]
 ```
 
 ## Give Names
@@ -253,3 +293,4 @@ Available internal item names for `/pepeforge give`:
 - `anchor`
 - `throwing_knife`
 - `stormcleaver`
+- `emberfang`

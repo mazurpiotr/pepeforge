@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.gui.itemconfig.anchor.AnchorConfigListener;
+import pepin.pepeforge.gui.itemconfig.emberfang.EmberfangConfigListener;
 import pepin.pepeforge.gui.itemconfig.windblade.WindBladeConfigListener;
 import pepin.pepeforge.gui.itemconfig.stormcleaver.StormcleaverConfigListener;
 import pepin.pepeforge.item.ItemFactory;
@@ -28,6 +29,7 @@ public final class ConfigMenuListener implements Listener {
     private final AnchorConfigListener anchorConfigListener;
     private final WindBladeConfigListener windBladeConfigListener;
     private final StormcleaverConfigListener stormcleaverConfigListener;
+    private final EmberfangConfigListener emberfangConfigListener;
 
 
     /** Players who changed at least one setting since opening the config menu. */
@@ -40,6 +42,7 @@ public final class ConfigMenuListener implements Listener {
         this.anchorConfigListener = new AnchorConfigListener(plugin);
         this.windBladeConfigListener = new WindBladeConfigListener(plugin);
         this.stormcleaverConfigListener = new StormcleaverConfigListener(plugin);
+        this.emberfangConfigListener = new EmberfangConfigListener(plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -141,7 +144,7 @@ public final class ConfigMenuListener implements Listener {
             plugin.saveConfig();
             pendingReload.add(player.getUniqueId());
             refresh = true;
-        } else if (event.getSlot() == 15) {
+        } else if (event.getSlot() == 15 && ItemConfigMenu.hasRecipeToggle(itemId)) {
             boolean current = plugin.getConfig().contains(configPath + ".recipe_enabled")
                     ? plugin.getConfig().getBoolean(configPath + ".recipe_enabled")
                     : true;
@@ -161,6 +164,11 @@ public final class ConfigMenuListener implements Listener {
             }
         } else if ("stormcleaver".equals(itemId)) {
            if (stormcleaverConfigListener.handleClick(event)) {
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            }
+        } else if ("emberfang".equals(itemId)) {
+            if (emberfangConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
             }

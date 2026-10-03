@@ -60,7 +60,7 @@ Upgrading from an older version of Pepe's Forge to the new `item_model` system p
 ## FAQ
 
 **Q: Does the Resource Pack work on Spigot?**
-A: The resource pack is designed for the supported 1.21.11+ server platforms. Paper and Folia provide the full client-side translation path; Spigot uses the compatible server-side fallback where needed.
+A: The resource pack currently supports Minecraft 1.21.11 through 26.2. Paper and Folia provide the full client-side translation path; Spigot uses the compatible server-side fallback where needed.
 
 **Q: Will my existing items stop working after updating from an older version?**
 A: Supported legacy items retain their logical `item_id` and may be migrated when the plugin handles them. Appearance and text should be checked after an upgrade.
@@ -72,11 +72,15 @@ A: The pack keeps custom models in the `pepeforge` namespace and does not replac
 
 Edit `plugins/PepeForge/config.yml` to enable or disable custom items, recipes and localization options.
 
-Each custom item and its recipe can be configured independently.
+Set `mechanics.emberfang.fire_damage` to configure Emberfang's bonus fire damage. The configured amount is shown in the item's lore.
+
+Custom items and crafting-table recipes can be configured independently. Netherite variants remain available through Minecraft's smithing upgrade path; the recipe toggle is not shown for those upgrade-only items or items without a custom recipe.
+If `language` does not match a bundled or local language file, the plugin falls back to `en_us` and saves that value in the config.
+Bundled `en_us.yml` and `pl_pl.yml` files in `plugins/PepeForge/lang` are refreshed from the installed plugin version at startup. When an existing file differs, PepeForge saves a versioned `.backup-*` copy before replacing it. Custom language files that are not bundled remain untouched.
 
 ### Statistics (bStats)
 
-Pepe's Forge uses [bStats](https://bstats.org/) to collect anonymous usage data, such as the popularity of specific weapons and configuration settings.
+Pepe's Forge uses [bStats](https://bstats.org/) to collect anonymous usage data, including crafting and give counts and which items are disabled in the server configuration.
 This helps guide the future development of the plugin. You can opt-out at any time by setting `metrics.enabled: false` in `config.yml`.
 
 ## Commands
@@ -85,7 +89,7 @@ This helps guide the future development of the plugin. You can opt-out at any ti
 - `/pepeforge config` - Opens an in-game GUI menu to toggle items and recipes
 - `/pepeforge reload` - Reloads the plugin configuration
 - `/pepeforge migration <on|pause|disable>` - Controls lazy legacy-item migration
-- `/pepeforge give <item> <player>` - Gives an item to a player
+- `/pepeforge give <item> <player>` - Gives an item to an online player when their inventory has room; failed deliveries are not counted in item-given statistics
 - `/pepeforge setlevel <level>` - Sets the level of the Crimson Sword in your main hand (for debugging / testing)
 
 ## Permissions
