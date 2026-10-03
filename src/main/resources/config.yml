@@ -36,10 +36,12 @@ mechanics:
     charges_required: 5
     jump_velocity_multiplier: 1.5
     charge_decay_interval: 40
+  emberfang:
+    fire_damage: 2.0
 
 # Item availability settings
 # enabled: hard on/off switch for the item itself
-# recipe_enabled: controls crafting separately and must be set explicitly
+# recipe_enabled: controls custom crafting-table recipes separately and must be set explicitly
 items:
   crescent_bow:
     enabled: true
@@ -61,7 +63,6 @@ items:
     recipe_enabled: true
   netherite_wind_blade:
     enabled: true
-    recipe_enabled: true
   iron_greatsword:
     enabled: true
     recipe_enabled: true
@@ -70,7 +71,6 @@ items:
     recipe_enabled: true
   netherite_greatsword:
     enabled: true
-    recipe_enabled: true
   iron_scythe:
     enabled: true
     recipe_enabled: true
@@ -79,10 +79,8 @@ items:
     recipe_enabled: true
   netherite_scythe:
     enabled: true
-    recipe_enabled: true
   crimson_sword:
     enabled: true
-    recipe_enabled: true
   solar_shield:
     enabled: true
     recipe_enabled: true
@@ -90,6 +88,9 @@ items:
     enabled: true
     recipe_enabled: true
   stormcleaver:
+    enabled: true
+    recipe_enabled: true
+  emberfang:
     enabled: true
     recipe_enabled: true
   throwing_knife:
