@@ -35,6 +35,7 @@ import pepin.pepeforge.weapons.anchor.AnchorModule;
 import pepin.pepeforge.weapons.throwingknife.ThrowingKnifeModule;
 import pepin.pepeforge.weapons.stormcleaver.StormcleaverModule;
 import pepin.pepeforge.weapons.stormcleaver.StormcleaverAuraEffect;
+import pepin.pepeforge.weapons.emberfang.EmberfangModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,8 @@ public final class PepeForgePlugin extends JavaPlugin {
     private StatisticsManager statsManager;
     private pepin.pepeforge.util.ui.BossBarManager bossBarManager;
     
-    private final List<ItemModule> modules = new ArrayList<>();
+    private volatile List<ItemModule> modules = List.of();
+    private RecipeDiscoveryRefresher recipeDiscoveryRefresher;
 
     @Override
     public void onEnable() {
@@ -125,14 +127,13 @@ public final class PepeForgePlugin extends JavaPlugin {
         cooldownManager = new CooldownManager(this);
         bossBarManager = new pepin.pepeforge.util.ui.BossBarManager(this);
         auraManager = new AuraManager(this);
-        auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
-        auraManager.registerPassiveAura(new StormcleaverAuraEffect(this, itemFactory));
+        registerPassiveAuras();
 
         auraManager.startTask();
         
         registerModules();
 
-        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory, crimsonSwordManager, statsManager, itemMigrator);
+        PepeForgeCommand commandExecutor = new PepeForgeCommand(this, lang, itemFactory, crimsonSwordManager, statsManager, itemMigrator);
         PluginCommand command = getCommand("pepeforge");
         if (command != null) {
             command.setExecutor(commandExecutor);
@@ -142,12 +143,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CustomItemsMenuListener(lang, itemFactory), this);
         getServer().getPluginManager().registerEvents(new pepin.pepeforge.gui.ConfigMenuListener(this, itemFactory, lang), this);
 
-        RecipeDiscoveryRefresher recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
-            for (ItemModule module : modules) {
-                module.discoverRecipesFor(player);
-            }
-        });
-        getServer().getPluginManager().registerEvents(recipeDiscoveryRefresher, this);
+        registerRecipeDiscoveryRefresher();
         recipeDiscoveryRefresher.refreshAllOnlinePlayers();
 
         // Smithing upgrade listener restores custom model data for smithing recipes
@@ -160,10 +156,12 @@ public final class PepeForgePlugin extends JavaPlugin {
             
             metrics.addCustomChart(new AdvancedPie("most_crafted_weapons", () -> statsManager.getCraftedCounts()));
             metrics.addCustomChart(new AdvancedPie("most_given_weapons", () -> statsManager.getGivenCounts()));
-            metrics.addCustomChart(new AdvancedPie("enabled_weapons", () -> {
+            metrics.addCustomChart(new AdvancedPie("disabled_weapons", () -> {
                 java.util.Map<String, Integer> map = new java.util.HashMap<>();
-                for (String itemId : itemFactory.knownGiveNames()) {
-                    map.put(itemId, 1);
+                for (String itemId : itemFactory.getAllCanonicalIds()) {
+                    if (!itemFactory.isItemEnabled(itemId)) {
+                        map.put(itemId, 1);
+                    }
                 }
                 return map;
             }));
@@ -173,27 +171,43 @@ public final class PepeForgePlugin extends JavaPlugin {
     }
     
     private void registerModules() {
-        modules.add(new ChiselModule(this, itemFactory));
-        modules.add(new ScytheModule(this, itemFactory));
-        modules.add(new WindBladeModule(this, itemFactory, lang, cooldownManager, auraManager));
-        modules.add(new CrescentBowModule(this, itemFactory));
-        modules.add(new CrescentSpearModule(this, itemFactory, lang));
-        modules.add(new KatanaModule(this, itemFactory, lang, cooldownManager));
-        modules.add(new GreatswordModule(this, itemFactory, lang));
-        modules.add(new CrimsonSwordModule(this, itemFactory, crimsonSwordManager, auraManager));
-        modules.add(new SolarShieldModule(this, itemFactory, lang, bossBarManager));
-        modules.add(new AnchorModule(this, itemFactory, cooldownManager, lang));
-        modules.add(new ThrowingKnifeModule(this, itemFactory, cooldownManager));
-        modules.add(new StormcleaverModule(this, itemFactory, lang));
+        List<ItemModule> newModules = List.of(
+                new ChiselModule(this, itemFactory),
+                new ScytheModule(this, itemFactory),
+                new WindBladeModule(this, itemFactory, lang, cooldownManager, auraManager),
+                new CrescentBowModule(this, itemFactory),
+                new CrescentSpearModule(this, itemFactory, lang),
+                new KatanaModule(this, itemFactory, lang, cooldownManager),
+                new GreatswordModule(this, itemFactory, lang),
+                new CrimsonSwordModule(this, itemFactory, crimsonSwordManager, auraManager),
+                new SolarShieldModule(this, itemFactory, lang, bossBarManager),
+                new AnchorModule(this, itemFactory, cooldownManager, lang),
+                new ThrowingKnifeModule(this, itemFactory, cooldownManager),
+                new StormcleaverModule(this, itemFactory, lang),
+                new EmberfangModule(this, itemFactory));
+        modules = newModules;
 
-        for (ItemModule module : modules) {
+        for (ItemModule module : newModules) {
             module.onEnable();
         }
     }
 
+    private void registerRecipeDiscoveryRefresher() {
+        recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
+            List<ItemModule> moduleSnapshot = modules;
+            for (ItemModule module : moduleSnapshot) {
+                module.discoverRecipesFor(player);
+            }
+        });
+        getServer().getPluginManager().registerEvents(recipeDiscoveryRefresher, this);
+    }
+
     @Override
     public void onDisable() {
-        for (ItemModule module : modules) {
+        stopRecipeDiscoveryRefresher();
+        List<ItemModule> modulesToDisable = modules;
+        modules = List.of();
+        for (ItemModule module : modulesToDisable) {
             module.onDisable();
         }
         if (auraManager != null) {
@@ -215,6 +229,7 @@ public final class PepeForgePlugin extends JavaPlugin {
         if (statsManager != null) {
             statsManager.forceSave();
         }
+        stopRecipeDiscoveryRefresher();
         HandlerList.unregisterAll(this);
         if (auraManager != null) {
             auraManager.stop();
@@ -222,13 +237,14 @@ public final class PepeForgePlugin extends JavaPlugin {
         if (cooldownManager != null) {
             cooldownManager.clearAll();
         }
+        List<ItemModule> modulesToDisable = modules;
+        modules = List.of();
+        for (ItemModule module : modulesToDisable) {
+            module.onDisable();
+        }
         if (bossBarManager != null) {
             bossBarManager.clearAll();
         }
-        for (ItemModule module : modules) {
-            module.onDisable();
-        }
-        modules.clear();
 
         reloadConfig();
         migrateAnchorMechanicConfig();
@@ -250,20 +266,15 @@ public final class PepeForgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CustomItemsMenuListener(lang, itemFactory), this);
         getServer().getPluginManager().registerEvents(new pepin.pepeforge.gui.ConfigMenuListener(this, itemFactory, lang), this);
 
-        RecipeDiscoveryRefresher recipeDiscoveryRefresher = new RecipeDiscoveryRefresher(this, player -> {
-            for (ItemModule module : modules) {
-                module.discoverRecipesFor(player);
-            }
-        });
-        getServer().getPluginManager().registerEvents(recipeDiscoveryRefresher, this);
         getServer().getPluginManager().registerEvents(new SmithingUpgradeListener(itemFactory), this);
 
-        auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
+        registerPassiveAuras();
         auraManager.startTask();
 
         registerModules();
+        registerRecipeDiscoveryRefresher();
 
-        PepeForgeCommand commandExecutor = new PepeForgeCommand(lang, itemFactory, crimsonSwordManager, statsManager, itemMigrator);
+        PepeForgeCommand commandExecutor = new PepeForgeCommand(this, lang, itemFactory, crimsonSwordManager, statsManager, itemMigrator);
         PluginCommand command = getCommand("pepeforge");
         if (command != null) {
             command.setExecutor(commandExecutor);
@@ -271,6 +282,18 @@ public final class PepeForgePlugin extends JavaPlugin {
         }
 
         recipeDiscoveryRefresher.refreshAllOnlinePlayers();
+    }
+
+    private void stopRecipeDiscoveryRefresher() {
+        if (recipeDiscoveryRefresher != null) {
+            recipeDiscoveryRefresher.stop();
+            recipeDiscoveryRefresher = null;
+        }
+    }
+
+    private void registerPassiveAuras() {
+        auraManager.registerPassiveAura(new CrescentAuraEffect(itemFactory));
+        auraManager.registerPassiveAura(new StormcleaverAuraEffect(this, itemFactory));
     }
 
     private void migrateAnchorMechanicConfig() {
