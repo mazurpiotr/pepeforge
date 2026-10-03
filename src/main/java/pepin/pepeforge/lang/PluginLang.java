@@ -8,11 +8,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.Set;
 
 public final class PluginLang {
 
@@ -22,21 +27,31 @@ public final class PluginLang {
     private final String language;
 
     public PluginLang(JavaPlugin plugin) {
-        language = plugin.getConfig().getString("language", "en_us");
         File langDir = new File(plugin.getDataFolder(), "lang");
         if (!langDir.exists()) {
             langDir.mkdirs();
         }
 
-        // Load all available languages
+        refreshBundledLanguageFiles(plugin, langDir);
         loadAllLanguages(plugin, langDir);
+
+        String configuredLanguage = plugin.getConfig().getString("language", "en_us");
+        language = selectLanguage(configuredLanguage, langFiles.keySet());
+        if (configuredLanguage == null || !language.equalsIgnoreCase(configuredLanguage.trim())) {
+            plugin.getLogger().warning("Unsupported language '" + configuredLanguage + "'; using en_us instead.");
+            plugin.getConfig().set("language", language);
+            plugin.saveConfig();
+        }
 
         File targetFile = new File(langDir, language + ".yml");
         if (!targetFile.exists()) {
             plugin.saveResource("lang/" + language + ".yml", false);
         }
 
-        messages = YamlConfiguration.loadConfiguration(targetFile);
+        YamlConfiguration bundledLanguage = bundledLangFiles.get(language);
+        messages = bundledLanguage != null
+                ? bundledLanguage
+                : YamlConfiguration.loadConfiguration(targetFile);
 
         try (InputStream fallbackStream = plugin.getResource("lang/en_us.yml")) {
             if (fallbackStream != null) {
@@ -47,8 +62,20 @@ public final class PluginLang {
                 messages.options().copyDefaults(true);
                 messages.save(targetFile);
             }
-        } catch (IOException ignored) {
+        } catch (IOException exception) {
+            plugin.getLogger().warning("Could not update language defaults in " + targetFile.getName() + ": "
+                    + exception.getMessage());
         }
+    }
+
+    static String selectLanguage(String requestedLanguage, Set<String> availableLanguages) {
+        if (requestedLanguage != null) {
+            String normalizedLanguage = requestedLanguage.trim().toLowerCase(Locale.ROOT);
+            if (availableLanguages.contains(normalizedLanguage)) {
+                return normalizedLanguage;
+            }
+        }
+        return "en_us";
     }
 
     private void loadAllLanguages(JavaPlugin plugin, File langDir) {
@@ -64,9 +91,55 @@ public final class PluginLang {
         for (File file : files) {
             if (file.getName().endsWith(".yml")) {
                 String lang = file.getName().replace(".yml", "");
-                langFiles.put(lang, YamlConfiguration.loadConfiguration(file));
+                if (!bundledLangFiles.containsKey(lang)) {
+                    langFiles.put(lang, YamlConfiguration.loadConfiguration(file));
+                }
             }
         }
+    }
+
+    private void refreshBundledLanguageFiles(JavaPlugin plugin, File langDir) {
+        refreshBundledLanguageFile(plugin, langDir, "en_us");
+        refreshBundledLanguageFile(plugin, langDir, "pl_pl");
+    }
+
+    private void refreshBundledLanguageFile(JavaPlugin plugin, File langDir, String language) {
+        String resourcePath = "lang/" + language + ".yml";
+        try (InputStream stream = plugin.getResource(resourcePath)) {
+            if (stream == null) {
+                return;
+            }
+
+            byte[] bundledContent = stream.readAllBytes();
+            Path target = langDir.toPath().resolve(language + ".yml");
+            if (Files.exists(target)) {
+                byte[] existingContent = Files.readAllBytes(target);
+                if (Arrays.equals(existingContent, bundledContent)) {
+                    return;
+                }
+
+                Path backup = nextLanguageBackupPath(plugin, langDir, language);
+                Files.copy(target, backup);
+                plugin.getLogger().info("Saved the previous " + language + " language file to "
+                        + backup.getFileName() + ".");
+            }
+
+            Files.write(target, bundledContent);
+        } catch (IOException exception) {
+            plugin.getLogger().warning("Could not refresh bundled language file " + resourcePath + ": "
+                    + exception.getMessage());
+        }
+    }
+
+    private Path nextLanguageBackupPath(JavaPlugin plugin, File langDir, String language) {
+        String version = plugin.getDescription().getVersion().replaceAll("[^A-Za-z0-9._-]", "_");
+        Path backup = langDir.toPath().resolve(language + ".yml.backup-" + version);
+        int copy = 2;
+        while (Files.exists(backup)) {
+            backup = langDir.toPath().resolve(language + ".yml.backup-" + version + "-" + copy);
+            copy++;
+        }
+        return backup;
     }
 
     private void loadLanguageFromResource(JavaPlugin plugin, String lang) {
@@ -115,6 +188,18 @@ public final class PluginLang {
         }
 
         return color(resolveText(path, itemKey, lang));
+    }
+
+    public String getTextForLang(String path, String preferredLanguage) {
+        YamlConfiguration langConfig = langFiles.get(preferredLanguage);
+        if (langConfig != null) {
+            String value = langConfig.getString(path);
+            if (value != null) {
+                return color(value);
+            }
+        }
+
+        return color(resolveText(path, path, preferredLanguage));
     }
 
     public List<String> getItemLoreForLang(String itemKey, String lang) {
