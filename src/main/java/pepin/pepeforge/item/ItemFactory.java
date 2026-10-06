@@ -6,6 +6,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
@@ -288,8 +289,12 @@ public final class ItemFactory {
                 EmberfangDefinition.NAME_COLOR,
                 EmberfangDefinition.CUSTOM_MODEL_DATA,
                 EmberfangDefinition.MODEL_KEY,
-                List.of()));
+                List.<@NonNull ItemAttributeSpec>of(new ItemAttributeSpec(
+                        Attribute.ATTACK_DAMAGE,
+                        "attack_damage",
+                        EmberfangDefinition.ATTACK_DAMAGE_PENALTY))));
         emberfangTextManager.updateText(item);
+        updateEmberfangAttackDamage(item);
         return item;
     }
 
@@ -298,7 +303,30 @@ public final class ItemFactory {
             return false;
         }
         emberfangTextManager.updateText(item);
+        updateEmberfangAttackDamage(item);
         return true;
+    }
+
+    private void updateEmberfangAttackDamage(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return;
+        }
+
+        var existingModifiers = meta.getAttributeModifiers(Attribute.ATTACK_DAMAGE);
+        if (existingModifiers != null) {
+            for (AttributeModifier modifier : new ArrayList<>(existingModifiers)) {
+                if (EmberfangDefinition.ATTACK_DAMAGE_MODIFIER_KEY.equals(modifier.getKey())) {
+                    meta.removeAttributeModifier(Attribute.ATTACK_DAMAGE, modifier);
+                }
+            }
+        }
+        ItemMetaCompat.addMainHandAttribute(
+                meta,
+                Attribute.ATTACK_DAMAGE,
+                EmberfangDefinition.ITEM_ID + "_attack_damage",
+                EmberfangDefinition.ATTACK_DAMAGE_PENALTY);
+        item.setItemMeta(meta);
     }
 
     public double getEmberfangFireDamage() {

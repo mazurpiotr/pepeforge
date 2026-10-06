@@ -93,6 +93,8 @@ Two-handed rhythm weapons for fixed reach, widening area cuts, and space control
 | Sweeping Cut | Timed swings trigger a forward area attack with a wider arc at higher rhythm stages |
 | Cleave | Direct hits also damage nearby targets |
 | Defense | Active rhythm reduces incoming frontal damage |
+| Projectile Resistance | From the first rhythm stage, ignores projectile knockback |
+| Micro Dash | Successful attacks add a short forward dash; enabled state and strength are configurable in `/pepeforge config` |
 | Break Penalty | Bad timing or timeout briefly applies Mining Fatigue |
 | Restriction | Requires an empty off-hand for custom mechanics |
 
@@ -127,7 +129,7 @@ Moon-themed melee weapon with an armed follow-up burst.
 
 | Feature | Details |
 |---------|---------|
-| Charge | Each successful attack adds at most one charge per tick. Partial charge slowly decays; full charge stays ready until used. |
+| Charge | Each successful attack adds a charge. Partial charge slowly decays; full charge stays ready until used. |
 | Active | The next melee hit at full charge triggers rapid follow-up attacks; the final hit lightly knocks the target back and upward |
 | Day | Deals 1 less damage during the day |
 | Moonlight | Deals 2 bonus damage at night under open sky |
@@ -175,7 +177,7 @@ A legendary sun-blessed shield that charges passively in strong sky light.
 
 A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
 
-| Base Attack Damage | 7 |
+| Base Attack Damage | 5 |
 | ------------------ | - |
 
 | Feature | Details |
@@ -237,38 +239,30 @@ A legendary diamond axe with an aggressive charge-and-leap combat loop.
 
 | Feature | Details |
 |---|---|
-| **Static Charge** | Each successful attack adds at most one charge per tick. Partial charge slowly decays; full charge stays ready until used. |
-| **Thunder Leap** | Right-click while grounded at full charge to launch upward. Landing creates a protected knockback shockwave and cosmetic lightning strikes. A blocked ceiling triggers the impact immediately. |
+| **Static Charge** | Each successful attack adds a charge. Partial charge slowly decays; full charge stays ready until used. |
+| **Thunder Leap** | Right-click while grounded at full charge to launch upward. Landing creates a knockback shockwave and lightning strikes. A blocked ceiling triggers the impact immediately. |
 | **Protection** | Shockwave damage respects region and PvP protection and never ignites blocks. |
 
 **Crafting** (Shaped Recipe):
 
-```text
-[ Iron Block ] [ Conduit ] [ Iron Block ]
-[      -     ] [  Stick  ] [      -     ]
-[      -     ] [  Stick  ] [      -     ]
-```
+![Stormcleaver](media/receipes/pepeforge_stormcleaver.png)
 
 ## 🔥 Emberfang
 
 A blade of hardened magma that burns both its targets and careless wielders.
 
-| Base Attack Damage | 7 |
+| Base Attack Damage | 5 |
 | ------------------ | - |
 
 | Feature | Details |
 |---|---|
-| **Ember Strike** | Strikes add the configured fire damage shown in the item's lore; target defenses can reduce it. |
+| **Ember Strike** | Strikes deal additional fire damage; target defenses can reduce the fire bonus. |
 | **Ignition** | Strikes have a **low chance** to briefly set the target ablaze. |
 | **Self-Burn** | Burns its wielder unless they wear at least one armor piece enchanted with **Fire Protection**. |
 
 **Crafting** (Shaped Recipe):
 
-```text
-[     -     ] [ Magma Block ] [     -     ]
-[     -     ] [ Magma Block ] [     -     ]
-[     -     ] [  Iron Ingot ] [     -     ]
-```
+![Emberfang](media/receipes/pepeforge_emberfang.png)
 
 ## Give Names
 

@@ -18,14 +18,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -47,7 +45,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class KatanaListener implements Listener {
-    private static final int OFF_HAND_INVENTORY_SLOT = 40;
     private static final String PARRY_COOLDOWN_KEY = "katana:parry";
 
     private final JavaPlugin plugin;
@@ -163,27 +160,12 @@ public final class KatanaListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onSwapHands(PlayerSwapHandItemsEvent event) {
-        Player player = event.getPlayer();
-        if (itemFactory.isKatana(player.getInventory().getItemInMainHand())
-                || itemFactory.isKatana(event.getOffHandItem())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
 
         boolean mainHandKatana = itemFactory.isKatana(player.getInventory().getItemInMainHand());
-        boolean offHandClick = event.getClick() == ClickType.SWAP_OFFHAND || isPlayerOffHandSlotClick(event);
-        if ((mainHandKatana && offHandClick) || isMovingKatanaToOffHand(event, player)) {
-            event.setCancelled(true);
-            return;
-        }
-
         if (mainHandKatana && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin,
                     () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
@@ -193,13 +175,6 @@ public final class KatanaListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-
-        boolean dragsKatanaToOffHand = itemFactory.isKatana(event.getOldCursor())
-                && event.getRawSlots().stream().anyMatch(rawSlot -> isPlayerOffHandRawSlot(event, rawSlot));
-        if (dragsKatanaToOffHand) {
-            event.setCancelled(true);
             return;
         }
 
@@ -401,34 +376,6 @@ public final class KatanaListener implements Listener {
         return player.isSneaking()
                 || clickedBlock == null
                 || !clickedBlock.getType().isInteractable();
-    }
-
-    private boolean isPlayerOffHandSlotClick(InventoryClickEvent event) {
-        return event.getClickedInventory() instanceof PlayerInventory
-                && event.getSlot() == OFF_HAND_INVENTORY_SLOT;
-    }
-
-    private boolean isMovingKatanaToOffHand(InventoryClickEvent event, Player player) {
-        if (event.getClick() == ClickType.SWAP_OFFHAND) {
-            return itemFactory.isKatana(event.getCurrentItem());
-        }
-
-        if (!isPlayerOffHandSlotClick(event)) {
-            return false;
-        }
-
-        if (itemFactory.isKatana(event.getCursor())) {
-            return true;
-        }
-
-        return event.getClick() == ClickType.NUMBER_KEY
-                && event.getHotbarButton() >= 0
-                && itemFactory.isKatana(player.getInventory().getItem(event.getHotbarButton()));
-    }
-
-    private boolean isPlayerOffHandRawSlot(InventoryDragEvent event, int rawSlot) {
-        return event.getView().getInventory(rawSlot) instanceof PlayerInventory
-                && event.getView().convertSlot(rawSlot) == OFF_HAND_INVENTORY_SLOT;
     }
 
     private void clearActiveParry(Player player) {

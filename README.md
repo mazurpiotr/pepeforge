@@ -15,34 +15,45 @@ A Paper, Spigot, Purpur, and Folia plugin adding custom weapons and tools to Min
 
 ## Features
 
-Pepe's Forge adds custom weapons, tools and gameplay mechanics to Minecraft servers.
-
-Current content includes:
-- Greatswords and Katana (two-handed rhythm & parry weapons)
-- Wind-themed weapons (high-mobility gear with dash abilities)
-- Crescent-themed weapons (moonlight-powered bow and spear)
-- Chisel and scythes (specialized building & AoE farming tools)
-- Legendary Crimson Sword and Solar Shield (combat progression & sun energy defense)
-- Heavy Anchor (grappling hook movement & snare utility)
-- Throwing Knives and Stormcleaver (ranged attacks and charged thunder leaps)
-- Custom models and textures through the modern resource pack published with each release
+Pepe's Forge adds custom weapons, tools to Minecraft servers.
 
 See [ITEMS.md](ITEMS.md) for the full item and recipe list.
 
 ## Installation
 
-1. Download the latest JAR from [Releases](../../releases).
-2. Place `pepeforge-X.Y.Z.jar` in your server's `plugins/` folder.
-3. Download and configure your Resource Pack (see **Resource Pack Installation** below).
-4. Restart your server.
+1. Download the JAR matching your server's Minecraft release from [Releases](../../releases).
+2. Make sure the server uses the Java runtime required by that release.
+3. Place `pepeforge-X.Y.Z.jar` in your server's `plugins/` folder and start the server once.
+4. Configure Resource Pack delivery as described below.
+5. Restart the server or run `/pepeforge reload` after changing the configuration.
 
 ## Resource Pack Installation
 
-Since 1.2.0 Pepe's Forge uses Minecraft's modern item model system. It works on **Paper/Purpur** (Recommended), **Spigot/CraftBukkit** and Folia for Minecraft 1.21.11+. You can download the resource pack from [GitHub Releases](https://github.com/mazurpiotr/pepeforge/releases).
+Since 1.2.0 Pepe's Forge uses Minecraft's modern `item_model` system. The plugin supports **Paper**, **Purpur**, **Spigot**, and **Folia** on Minecraft 1.21.11+.
 
-*⚠ Note for Paper users: By default, Pepe's Forge uses client-side translations (`translations.use_client_side` = true), which **requires** players to have the resource pack loaded. Otherwise, custom item names and lore will appear as raw translation keys (e.g., `item.pepeforge.crimson_sword.name`).*
+The matching Resource Pack is required for custom item models and complete item presentation. Download it from [GitHub Releases](https://github.com/mazurpiotr/pepeforge/releases).
 
-*For the best experience, distributing the resource pack automatically with a plugin such as **ResourcePackManager** or **ForceResourcePack** is highly recommended.*
+### Resource Pack Delivery
+
+Resource Pack delivery supports two modes. `MANAGER` is the default and leaves delivery to an external Resource Pack manager:
+
+```yaml
+resource_pack:
+  mode: MANAGER
+```
+
+In `GITHUB` mode, PepeForge sends the Resource Pack directly from GitHub Releases:
+
+```yaml
+resource_pack:
+  mode: GITHUB
+```
+
+### Language Support
+
+On Paper, Purpur, and Folia, item names and descriptions can follow each player's Minecraft client language when client-side translations are enabled. The Resource Pack must be loaded for this feature; otherwise, players may see raw translation keys such as `item.pepeforge.katana.name`.
+
+Spigot and CraftBukkit use the server-side language fallback configured by the administrator and do not provide client-side translations.
 
 ## Migration Guide (From 1.0 or 1.1)
 
@@ -59,23 +70,22 @@ Upgrading from an older version of Pepe's Forge to the new `item_model` system p
 
 ## FAQ
 
-**Q: Does the Resource Pack work on Spigot?**
-A: The resource pack currently supports Minecraft 1.21.11 through 26.2. Paper and Folia provide the full client-side translation path; Spigot uses the compatible server-side fallback where needed.
-
 **Q: Will my existing items stop working after updating from an older version?**
-A: Supported legacy items retain their logical `item_id` and may be migrated when the plugin handles them. Appearance and text should be checked after an upgrade.
+A: Supported items from Pepe's Forge 1.0 and 1.1 retain their logical `item_id` and are migrated when handled by the plugin. See the [Migration Guide](#migration-guide-from-10-or-11) for the upgrade workflow.
 
 **Q: Does the Resource Pack conflict with other custom texture packs?**
 A: The pack keeps custom models in the `pepeforge` namespace and does not replace vanilla assets. Compatibility still depends on how another pack handles the same client resources.
 
 ## Configuration
 
-Edit `plugins/PepeForge/config.yml` to enable or disable custom items, recipes and localization options.
+Edit `plugins/PepeForge/config.yml` to configure item availability, crafting recipes, selected mechanics, language and translation behavior, resource-pack delivery, and anonymous metrics.
 
-Set `mechanics.emberfang.fire_damage` to configure Emberfang's bonus fire damage. The configured amount is shown in the item's lore.
+Use `/pepeforge config` for the supported in-game item and recipe settings. Custom crafting recipes and smithing upgrades may be controlled separately where applicable.
 
-Custom items and crafting-table recipes can be configured independently. Netherite variants remain available through Minecraft's smithing upgrade path; the recipe toggle is not shown for those upgrade-only items or items without a custom recipe.
+The generated `config.yml` contains the current settings and defaults for the installed plugin version. Missing default settings are added automatically while existing values are preserved. Run `/pepeforge reload` after making manual changes.
+
 If `language` does not match a bundled or local language file, the plugin falls back to `en_us` and saves that value in the config.
+
 Bundled `en_us.yml` and `pl_pl.yml` files in `plugins/PepeForge/lang` are refreshed from the installed plugin version at startup. When an existing file differs, PepeForge saves a versioned `.backup-*` copy before replacing it. Custom language files that are not bundled remain untouched.
 
 ### Statistics (bStats)
@@ -112,7 +122,7 @@ Suggestions, feedback and feature requests are always appreciated.
 ## Compatibility
 
 - Minecraft 1.21.11+
-- Java 21 for Minecraft 1.21.11; Java 25 for the 26.x builds
+- Use the Java runtime required by the selected Minecraft release
 - Paper, Purpur, Spigot and Folia
 
 Paper, Purpur and Folia provide the best experience when client-side item translations are enabled. Spigot and CraftBukkit use the server-side fallback text path.
