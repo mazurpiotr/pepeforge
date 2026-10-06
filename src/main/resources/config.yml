@@ -16,6 +16,12 @@ translations:
   # Server language if client-side translation is disabled or unsupported.
   server_language: "en_us"
 
+# Resource Pack delivery.
+# MANAGER:vThe server owner must handle Resource Pack delivery, e.g. using an external plugin.
+# GITHUB: PepeForge sends the release pack from GitHub to players.
+resource_pack:
+  mode: MANAGER
+
 # Shared Wind Blade family settings.
 mechanics:
   wind_blade:
@@ -36,8 +42,12 @@ mechanics:
     charges_required: 5
     jump_velocity_multiplier: 1.5
     charge_decay_interval: 40
+  greatsword:
+    projectile_knockback_immunity: true
+    micro_dash_enabled: true
+    micro_dash_strength: 0.15
   emberfang:
-    fire_damage: 2.0
+    fire_damage: 4.0
 
 # Item availability settings
 # enabled: hard on/off switch for the item itself

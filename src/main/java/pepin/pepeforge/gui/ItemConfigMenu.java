@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.gui.itemconfig.anchor.AnchorConfig;
 import pepin.pepeforge.gui.itemconfig.emberfang.EmberfangConfig;
+import pepin.pepeforge.gui.itemconfig.greatsword.GreatswordConfig;
 import pepin.pepeforge.gui.itemconfig.stormcleaver.StormcleaverConfig;
 import pepin.pepeforge.gui.itemconfig.windblade.WindBladeConfig;
 import pepin.pepeforge.item.ItemFactory;
@@ -40,6 +41,11 @@ public final class ItemConfigMenu {
         if (isWindBlade(itemId)) {
             WindBladeConfig windBladeConfig = new WindBladeConfig(plugin);
             windBladeConfig.build(inventory);
+        }
+
+        if (isGreatsword(itemId)) {
+            GreatswordConfig greatswordConfig = new GreatswordConfig(plugin);
+            greatswordConfig.build(inventory);
         }
 
         if ("stormcleaver".equals(itemId)) {
@@ -124,6 +130,12 @@ public final class ItemConfigMenu {
         return "iron_wind_blade".equals(itemId)
                 || "diamond_wind_blade".equals(itemId)
                 || "netherite_wind_blade".equals(itemId);
+    }
+
+    public static boolean isGreatsword(String itemId) {
+        return "iron_greatsword".equals(itemId)
+                || "diamond_greatsword".equals(itemId)
+                || "netherite_greatsword".equals(itemId);
     }
 
     private static final class Holder implements InventoryHolder {

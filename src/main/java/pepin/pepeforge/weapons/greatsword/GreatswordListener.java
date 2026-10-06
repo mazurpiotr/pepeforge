@@ -17,7 +17,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
@@ -26,11 +25,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -53,11 +50,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 public final class GreatswordListener implements Listener {
 
-    private static final int OFF_HAND_INVENTORY_SLOT = 40;
     private static final int COMBO_STAGE_MAX = 5;
     private static final int STATUS_INTERVAL_TICKS = 1;
     private static final int RHYTHM_BAR_SEGMENTS = 21;
@@ -88,6 +85,7 @@ public final class GreatswordListener implements Listener {
     private final ItemFactory itemFactory;
     private final PluginLang lang;
     private final NamespacedKey reachModifierKey;
+    private final NamespacedKey projectileKnockbackResistanceKey;
     private final Map<UUID, ComboState> comboStates = new ConcurrentHashMap<>();
     private final Map<UUID, PendingSwing> pendingSwings = new ConcurrentHashMap<>();
     private final Map<UUID, Long> resolvedHitTicks = new ConcurrentHashMap<>();
@@ -95,6 +93,7 @@ public final class GreatswordListener implements Listener {
     private final Map<UUID, Long> rhythmCueTicks = new ConcurrentHashMap<>();
     private final Set<UUID> rhythmBarShown = ConcurrentHashMap.newKeySet();
     private final Set<UUID> cleavingPlayers = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, ScheduledTaskCompat> projectileKnockbackTasks = new ConcurrentHashMap<>();
     private boolean transientModifierLogged = false;
 
     public GreatswordListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
@@ -102,6 +101,7 @@ public final class GreatswordListener implements Listener {
         this.itemFactory = itemFactory;
         this.lang = lang;
         this.reachModifierKey = new NamespacedKey(plugin, "greatsword_reach_bonus");
+        this.projectileKnockbackResistanceKey = new NamespacedKey(plugin, "greatsword_projectile_knockback");
     }
 
     private ScheduledTaskCompat statusTask;
@@ -238,11 +238,28 @@ public final class GreatswordListener implements Listener {
         }
 
         int currentStage = currentStage(playerId);
+        applyMicroDash(player);
         List<LivingEntity> areaTargets = findAreaTargets(player, primaryTarget, currentStage);
         applyAreaAttack(player, areaTargets, event.getDamage() * AREA_DAMAGE_MULTIPLIER, currentStage, false);
 
         advanceCombo(player, currentStage, currentTick);
         applyReachModifier(player, FIXED_REACH_BONUS);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onProjectileDamage(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player player)
+                || !(event.getDamager() instanceof Projectile)
+                || !plugin.getConfig().getBoolean(
+                        "mechanics.greatsword.projectile_knockback_immunity",
+                        GreatswordDefinition.DEFAULT_PROJECTILE_KNOCKBACK_IMMUNITY)
+                || currentStage(player.getUniqueId()) < 1
+                || itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) == null
+                || !CombatUtils.hasEmptyOffHand(player)) {
+            return;
+        }
+
+        applyTemporaryProjectileKnockbackResistance(player);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -271,11 +288,6 @@ public final class GreatswordListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onInteract(PlayerInteractEvent event) {
-        if (event.getHand() == EquipmentSlot.OFF_HAND
-                && itemFactory.getGreatswordTier(event.getPlayer().getInventory().getItemInMainHand()) != null) {
-            event.setCancelled(true);
-            return;
-        }
         if (event.getHand() != EquipmentSlot.HAND) {
             return;
         }
@@ -303,26 +315,12 @@ public final class GreatswordListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onSwapHands(PlayerSwapHandItemsEvent event) {
-        if (itemFactory.getGreatswordTier(event.getMainHandItem()) != null
-                || itemFactory.getGreatswordTier(event.getOffHandItem()) != null) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
 
         boolean mainHandGreatsword = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null;
-        boolean offHandClick = event.getClick() == ClickType.SWAP_OFFHAND || isPlayerOffHandSlotClick(event);
-        if ((mainHandGreatsword && offHandClick) || isMovingGreatswordToOffHand(event, player)) {
-            event.setCancelled(true);
-            return;
-        }
-
         if (mainHandGreatsword && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin,
                     () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
@@ -335,46 +333,11 @@ public final class GreatswordListener implements Listener {
             return;
         }
 
-        boolean dragsGreatswordToOffHand = itemFactory.getGreatswordTier(event.getOldCursor()) != null
-                && event.getRawSlots().stream().anyMatch(rawSlot -> isPlayerOffHandRawSlot(event, rawSlot));
-        if (dragsGreatswordToOffHand) {
-            event.setCancelled(true);
-            return;
-        }
-
         if (itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null
                 && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin,
                     () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
         }
-    }
-
-    private boolean isPlayerOffHandSlotClick(InventoryClickEvent event) {
-        return event.getClickedInventory() instanceof PlayerInventory
-                && event.getSlot() == OFF_HAND_INVENTORY_SLOT;
-    }
-
-    private boolean isMovingGreatswordToOffHand(InventoryClickEvent event, Player player) {
-        if (event.getClick() == ClickType.SWAP_OFFHAND) {
-            return itemFactory.getGreatswordTier(event.getCurrentItem()) != null;
-        }
-
-        if (!isPlayerOffHandSlotClick(event)) {
-            return false;
-        }
-
-        if (itemFactory.getGreatswordTier(event.getCursor()) != null) {
-            return true;
-        }
-
-        return event.getClick() == ClickType.NUMBER_KEY
-                && event.getHotbarButton() >= 0
-                && itemFactory.getGreatswordTier(player.getInventory().getItem(event.getHotbarButton())) != null;
-    }
-
-    private boolean isPlayerOffHandRawSlot(InventoryDragEvent event, int rawSlot) {
-        return event.getView().getInventory(rawSlot) instanceof PlayerInventory
-                && event.getView().convertSlot(rawSlot) == OFF_HAND_INVENTORY_SLOT;
     }
 
     @EventHandler
@@ -578,6 +541,80 @@ public final class GreatswordListener implements Listener {
         target.setVelocity(velocity);
     }
 
+    private void applyMicroDash(Player player) {
+        if (!plugin.getConfig().getBoolean(
+                "mechanics.greatsword.micro_dash_enabled",
+                GreatswordDefinition.DEFAULT_MICRO_DASH_ENABLED)) {
+            return;
+        }
+
+        double strength = plugin.getConfig().getDouble(
+                "mechanics.greatsword.micro_dash_strength",
+                GreatswordDefinition.DEFAULT_MICRO_DASH_STRENGTH);
+        strength = Math.max(GreatswordDefinition.MIN_MICRO_DASH_STRENGTH,
+                Math.min(GreatswordDefinition.MAX_MICRO_DASH_STRENGTH, strength));
+        if (strength <= 0.0D) {
+            return;
+        }
+
+        Vector direction = horizontalDirection(player.getEyeLocation().getDirection());
+        Vector velocity = player.getVelocity().add(direction.multiply(strength));
+        player.setVelocity(velocity);
+    }
+
+    private void applyTemporaryProjectileKnockbackResistance(Player player) {
+        AttributeInstance attribute = player.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
+        if (attribute == null) {
+            return;
+        }
+
+        boolean modifierPresent = attribute.getModifiers().stream()
+                .anyMatch(modifier -> projectileKnockbackResistanceKey.equals(modifier.getKey()));
+        if (!modifierPresent) {
+            attribute.addModifier(new AttributeModifier(
+                    projectileKnockbackResistanceKey,
+                    1.0D,
+                    AttributeModifier.Operation.ADD_NUMBER,
+                    EquipmentSlotGroup.ANY));
+        }
+
+        UUID playerId = player.getUniqueId();
+        ScheduledTaskCompat previousTask = projectileKnockbackTasks.remove(playerId);
+        if (previousTask != null) {
+            previousTask.cancel();
+        }
+
+        AtomicReference<ScheduledTaskCompat> scheduledReference = new AtomicReference<>();
+        ScheduledTaskCompat scheduledTask = SchedulerCompat.runLaterForPlayer(
+                player,
+                plugin,
+                () -> {
+                    if (projectileKnockbackTasks.remove(playerId, scheduledReference.get())) {
+                        removeProjectileKnockbackResistance(player);
+                    }
+                },
+                GreatswordDefinition.PROJECTILE_KNOCKBACK_WINDOW_TICKS);
+        scheduledReference.set(scheduledTask);
+        projectileKnockbackTasks.put(playerId, scheduledTask);
+    }
+
+    private void removeProjectileKnockbackResistance(Player player) {
+        ScheduledTaskCompat task = projectileKnockbackTasks.remove(player.getUniqueId());
+        if (task != null) {
+            task.cancel();
+        }
+
+        AttributeInstance attribute = player.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
+        if (attribute == null) {
+            return;
+        }
+        for (AttributeModifier modifier : attribute.getModifiers()) {
+            if (projectileKnockbackResistanceKey.equals(modifier.getKey())) {
+                attribute.removeModifier(modifier);
+            }
+        }
+    }
+
     private void playTargetAreaEffects(World world, Location location) {
         world.spawnParticle(Particle.SWEEP_ATTACK, location, 1, 0.08D, 0.08D, 0.08D, 0.0D);
         world.spawnParticle(Particle.CRIT, location, 4, 0.18D, 0.12D, 0.18D, 0.02D);
@@ -694,6 +731,7 @@ public final class GreatswordListener implements Listener {
 
     private void clearPlayerState(Player player) {
         UUID playerId = player.getUniqueId();
+        removeProjectileKnockbackResistance(player);
         comboStates.remove(playerId);
         pendingSwings.remove(playerId);
         resolvedHitTicks.remove(playerId);

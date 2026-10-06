@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.gui.itemconfig.anchor.AnchorConfigListener;
 import pepin.pepeforge.gui.itemconfig.emberfang.EmberfangConfigListener;
+import pepin.pepeforge.gui.itemconfig.greatsword.GreatswordConfigListener;
 import pepin.pepeforge.gui.itemconfig.windblade.WindBladeConfigListener;
 import pepin.pepeforge.gui.itemconfig.stormcleaver.StormcleaverConfigListener;
 import pepin.pepeforge.item.ItemFactory;
@@ -30,6 +31,7 @@ public final class ConfigMenuListener implements Listener {
     private final WindBladeConfigListener windBladeConfigListener;
     private final StormcleaverConfigListener stormcleaverConfigListener;
     private final EmberfangConfigListener emberfangConfigListener;
+    private final GreatswordConfigListener greatswordConfigListener;
 
 
     /** Players who changed at least one setting since opening the config menu. */
@@ -43,6 +45,7 @@ public final class ConfigMenuListener implements Listener {
         this.windBladeConfigListener = new WindBladeConfigListener(plugin);
         this.stormcleaverConfigListener = new StormcleaverConfigListener(plugin);
         this.emberfangConfigListener = new EmberfangConfigListener(plugin);
+        this.greatswordConfigListener = new GreatswordConfigListener(plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -159,6 +162,11 @@ public final class ConfigMenuListener implements Listener {
             }
         } else if (ItemConfigMenu.isWindBlade(itemId)) {
             if (windBladeConfigListener.handleClick(event)) {
+                pendingReload.add(player.getUniqueId());
+                refresh = true;
+            }
+        } else if (ItemConfigMenu.isGreatsword(itemId)) {
+            if (greatswordConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
             }

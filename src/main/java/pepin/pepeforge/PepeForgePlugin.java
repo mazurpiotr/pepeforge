@@ -11,6 +11,7 @@ import pepin.pepeforge.recipe.RecipeDiscoveryRefresher;
 import pepin.pepeforge.util.aura.AuraManager;
 import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.util.cooldown.CooldownManager;
+import pepin.pepeforge.resourcepack.ResourcePackService;
 import pepin.pepeforge.weapons.crescent.CrescentAuraEffect;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 import pepin.pepeforge.recipe.SmithingUpgradeListener;
@@ -49,6 +50,7 @@ public final class PepeForgePlugin extends JavaPlugin {
     private CrimsonSwordManager crimsonSwordManager;
     private StatisticsManager statsManager;
     private pepin.pepeforge.util.ui.BossBarManager bossBarManager;
+    private ResourcePackService resourcePackService;
     
     private volatile List<ItemModule> modules = List.of();
     private RecipeDiscoveryRefresher recipeDiscoveryRefresher;
@@ -126,6 +128,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         
         cooldownManager = new CooldownManager(this);
         bossBarManager = new pepin.pepeforge.util.ui.BossBarManager(this);
+        resourcePackService = new ResourcePackService(this);
+        getServer().getPluginManager().registerEvents(resourcePackService, this);
+        resourcePackService.start();
         auraManager = new AuraManager(this);
         registerPassiveAuras();
 
@@ -204,6 +209,9 @@ public final class PepeForgePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (resourcePackService != null) {
+            resourcePackService.stop();
+        }
         stopRecipeDiscoveryRefresher();
         List<ItemModule> modulesToDisable = modules;
         modules = List.of();
@@ -228,6 +236,9 @@ public final class PepeForgePlugin extends JavaPlugin {
     public void reloadPlugin() {
         if (statsManager != null) {
             statsManager.forceSave();
+        }
+        if (resourcePackService != null) {
+            resourcePackService.stop();
         }
         stopRecipeDiscoveryRefresher();
         HandlerList.unregisterAll(this);
@@ -257,6 +268,9 @@ public final class PepeForgePlugin extends JavaPlugin {
         itemFactory = new ItemFactory(this, lang, crimsonSwordManager);
         cooldownManager = new CooldownManager(this);
         bossBarManager = new pepin.pepeforge.util.ui.BossBarManager(this);
+        resourcePackService = new ResourcePackService(this);
+        getServer().getPluginManager().registerEvents(resourcePackService, this);
+        resourcePackService.start();
 
         boolean migrationEnabled = getConfig().getBoolean("migration.enabled", true);
         pepin.pepeforge.item.ItemMigrator itemMigrator = new pepin.pepeforge.item.ItemMigrator(this, itemFactory, migrationEnabled);

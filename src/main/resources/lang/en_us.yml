@@ -231,7 +231,7 @@ items:
     lore:
       - "&6---------------"
       - "&ePassive: &cEmber Strike"
-      - "&3Adds {fire_damage} fire damage on hit; defenses can reduce it."
+      - "&3Trades some melee damage for {fire_damage} fire damage on hit; defenses can reduce the bonus."
       - "&3Strikes can briefly set targets ablaze."
       - "&cBurns its wielder unless they wear armor enchanted with Fire Protection."
       - "Epic"

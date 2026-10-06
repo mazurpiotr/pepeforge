@@ -231,7 +231,7 @@ items:
     lore:
       - "&6---------------"
       - "&eCecha: &cŻarzące Uderzenie"
-      - "&3Dodaje {fire_damage} obrażeń od ognia przy trafieniu; ochrona celu może je zmniejszyć."
+      - "&3Zamienia część obrażeń wręcz na {fire_damage} obrażeń od ognia przy trafieniu; ochrona celu może zmniejszyć tę premię."
       - "&3Trafienia mogą na krótko podpalić cel."
       - "&cParzy właściciela, chyba że nosi element zbroi z zaklęciem Ochrona przed ogniem."
       - "Epicki"
