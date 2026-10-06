@@ -147,7 +147,7 @@
   "item.pepeforge.emberfang.name": "Ognisty Kieł",
   "item.pepeforge.emberfang.lore.1": "§6---------------",
   "item.pepeforge.emberfang.lore.2": "§eCecha: §cŻarzące Uderzenie",
-  "item.pepeforge.emberfang.lore.3": "§3Dodaje %s obrażeń od ognia przy trafieniu; ochrona celu może je zmniejszyć.",
+  "item.pepeforge.emberfang.lore.3": "§3Zamienia część obrażeń wręcz na %s obrażeń od ognia przy trafieniu; ochrona celu może zmniejszyć tę premię.",
   "item.pepeforge.emberfang.lore.4": "§3Trafienia mogą na krótko podpalić cel.",
   "item.pepeforge.emberfang.lore.5": "§cParzy właściciela, chyba że nosi element zbroi z zaklęciem Ochrona przed ogniem.",
   "item.pepeforge.emberfang.lore.6": "Epicki"

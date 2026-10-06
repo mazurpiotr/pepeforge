@@ -17,6 +17,8 @@
         <paper.version>26.2.build.124-stable</paper.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <pepeforge.resource-pack.sha1></pepeforge.resource-pack.sha1>
     </properties>
 
     <repositories>

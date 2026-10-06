@@ -147,7 +147,7 @@
   "item.pepeforge.emberfang.name": "Emberfang",
   "item.pepeforge.emberfang.lore.1": "§6---------------",
   "item.pepeforge.emberfang.lore.2": "§ePassive: §cEmber Strike",
-  "item.pepeforge.emberfang.lore.3": "§3Adds %s fire damage on hit; defenses can reduce it.",
+  "item.pepeforge.emberfang.lore.3": "§3Trades some melee damage for %s fire damage on hit; defenses can reduce the bonus.",
   "item.pepeforge.emberfang.lore.4": "§3Strikes can briefly set targets ablaze.",
   "item.pepeforge.emberfang.lore.5": "§cBurns its wielder unless they wear armor enchanted with Fire Protection.",
   "item.pepeforge.emberfang.lore.6": "Epic"
