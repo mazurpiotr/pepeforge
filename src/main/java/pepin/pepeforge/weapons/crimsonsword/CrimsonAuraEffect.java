@@ -7,7 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import pepin.pepeforge.util.aura.TimedAuraEffect;
-import pepin.pepeforge.util.protection.ProtectionUtil;
+import pepin.pepeforge.util.combat.DamageFlow;
 
 
 import java.util.UUID;
@@ -78,13 +78,8 @@ public final class CrimsonAuraEffect implements TimedAuraEffect {
                 if (!(entity instanceof LivingEntity target) || target == player || target.isDead() || !target.isValid()) {
                     continue;
                 }
-                if (!ProtectionUtil.canDamage(player, target)) {
-                    continue;
-                }
-
-                double beforeHealth = target.getHealth();
-                target.damage(drainAmount, player);
-                double drained = Math.max(0.0D, beforeHealth - Math.max(0.0D, target.getHealth()));
+                DamageFlow.Result result = DamageFlow.damage(target, drainAmount, player);
+                double drained = result.healthLost();
                 if (drained <= 0.0D) {
                     continue;
                 }

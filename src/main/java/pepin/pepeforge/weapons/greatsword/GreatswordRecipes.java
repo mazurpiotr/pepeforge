@@ -9,6 +9,7 @@ import org.bukkit.inventory.SmithingTransformRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.recipe.RecipeRegistrar;
+import pepin.pepeforge.util.recipe.RecipeChoiceCompat;
 
 public final class GreatswordRecipes {
 
@@ -54,7 +55,7 @@ public final class GreatswordRecipes {
     }
 
     private void registerNetheriteUpgrade() {
-        if (!itemFactory.isRecipeEnabled(GreatswordTier.NETHERITE.itemId())) {
+        if (!itemFactory.isItemEnabled(GreatswordTier.NETHERITE.itemId())) {
             return;
         }
 
@@ -66,7 +67,7 @@ public final class GreatswordRecipes {
                 key,
                 result,
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
-                new RecipeChoice.ExactChoice(itemFactory.createGreatsword(GreatswordTier.DIAMOND)),
+                RecipeChoiceCompat.exactChoice(itemFactory.createGreatsword(GreatswordTier.DIAMOND)),
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_INGOT)
         );
         RecipeRegistrar.add(plugin, key, recipe);

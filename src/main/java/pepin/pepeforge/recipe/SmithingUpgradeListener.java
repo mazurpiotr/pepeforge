@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.util.itemmeta.ItemMetaCompat;
 import pepin.pepeforge.weapons.greatsword.GreatswordTier;
 import pepin.pepeforge.tools.scythe.ScytheTier;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
@@ -122,6 +123,16 @@ public final class SmithingUpgradeListener implements Listener {
             targetDamage.setDamage(sourceDamage.getDamage());
         }
 
+        String sourceCustomName = ItemMetaCompat.getDisplayName(sourceMeta);
+        String sourceItemName = ItemMetaCompat.getItemName(sourceMeta);
+        if (hasCustomDisplayName(sourceCustomName, sourceItemName)) {
+            ItemMetaCompat.setDisplayName(targetMeta, sourceCustomName);
+        }
+
         target.setItemMeta(targetMeta);
+    }
+
+    static boolean hasCustomDisplayName(String customName, String itemName) {
+        return customName != null && !customName.equals(itemName);
     }
 }

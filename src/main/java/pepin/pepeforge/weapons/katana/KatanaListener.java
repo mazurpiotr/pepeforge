@@ -8,6 +8,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -17,13 +18,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -33,6 +33,7 @@ import org.bukkit.util.Vector;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.combat.CombatUtils;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.util.ui.ActionBarHelper;
 import pepin.pepeforge.util.cooldown.CooldownManager;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
@@ -44,7 +45,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class KatanaListener implements Listener {
-    private static final int OFF_HAND_INVENTORY_SLOT = 40;
     private static final String PARRY_COOLDOWN_KEY = "katana:parry";
 
     private final JavaPlugin plugin;
@@ -160,27 +160,12 @@ public final class KatanaListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onSwapHands(PlayerSwapHandItemsEvent event) {
-        Player player = event.getPlayer();
-        if (itemFactory.isKatana(player.getInventory().getItemInMainHand())
-                || itemFactory.isKatana(event.getOffHandItem())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
 
         boolean mainHandKatana = itemFactory.isKatana(player.getInventory().getItemInMainHand());
-        boolean offHandClick = event.getClick() == ClickType.SWAP_OFFHAND || isPlayerOffHandSlotClick(event);
-        if ((mainHandKatana && offHandClick) || isMovingKatanaToOffHand(event, player)) {
-            event.setCancelled(true);
-            return;
-        }
-
         if (mainHandKatana && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin,
                     () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
@@ -193,13 +178,6 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        boolean dragsKatanaToOffHand = itemFactory.isKatana(event.getOldCursor())
-                && event.getRawSlots().stream().anyMatch(rawSlot -> isPlayerOffHandRawSlot(event, rawSlot));
-        if (dragsKatanaToOffHand) {
-            event.setCancelled(true);
-            return;
-        }
-
         if (itemFactory.isKatana(player.getInventory().getItemInMainHand()) && !CombatUtils.hasEmptyOffHand(player)) {
             SchedulerCompat.runForPlayer(player, plugin,
                     () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
@@ -209,6 +187,11 @@ public final class KatanaListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        if (!SchedulerCompat.isOwnedByCurrentRegion(player)
+                || !SchedulerCompat.isOwnedByCurrentRegion(event.getDamager())) {
             return;
         }
 
@@ -238,8 +221,16 @@ public final class KatanaListener implements Listener {
         }
 
         event.setCancelled(true);
-        knockBackAttacker(player, attacker);
-        playMeleeParryEffects(player.getWorld(), player.getLocation());
+        World parryWorld = player.getWorld();
+        Location parryLocation = player.getLocation();
+        if (!DamageFlow.isCounterattack(event)
+                && DamageFlow.counterattack(attacker, KatanaDefinition.COUNTERATTACK_DAMAGE, player).accepted()
+                && SchedulerCompat.isOwnedByCurrentRegion(player) && SchedulerCompat.isOwnedByCurrentRegion(attacker)
+                && player.isOnline() && !player.isDead() && attacker.isValid() && !attacker.isDead()
+                && player.getWorld() == attacker.getWorld()) {
+            knockBackAttacker(player, attacker);
+        }
+        playMeleeParryEffects(parryWorld, parryLocation);
     }
 
     @EventHandler
@@ -251,6 +242,22 @@ public final class KatanaListener implements Listener {
         }
         activeParryUntil.remove(playerId);
         cooldownManager.clearCooldown(event.getPlayer(), PARRY_COOLDOWN_KEY);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDrop(PlayerDropItemEvent event) {
+        Item droppedEntity = event.getItemDrop();
+        ItemStack droppedItem = droppedEntity.getItemStack();
+        if (!itemFactory.isKatana(droppedItem)) {
+            return;
+        }
+
+        boolean parryVisualWasActive = itemFactory.hasKatanaParryVisual(droppedItem);
+        itemFactory.setKatanaParryVisual(droppedItem, false);
+        droppedEntity.setItemStack(droppedItem);
+        if (parryVisualWasActive) {
+            clearActiveParry(event.getPlayer(), droppedItem);
+        }
     }
 
     private void activateParry(Player player, ItemStack katana, long now) {
@@ -308,6 +315,9 @@ public final class KatanaListener implements Listener {
     }
 
     private boolean isProjectileReflectable(Player player, Projectile projectile, long now) {
+        if (!SchedulerCompat.isOwnedByCurrentRegion(projectile)) {
+            return false;
+        }
         if (!projectile.isValid() || projectile.isDead()) {
             return false;
         }
@@ -366,34 +376,6 @@ public final class KatanaListener implements Listener {
         return player.isSneaking()
                 || clickedBlock == null
                 || !clickedBlock.getType().isInteractable();
-    }
-
-    private boolean isPlayerOffHandSlotClick(InventoryClickEvent event) {
-        return event.getClickedInventory() instanceof PlayerInventory
-                && event.getSlot() == OFF_HAND_INVENTORY_SLOT;
-    }
-
-    private boolean isMovingKatanaToOffHand(InventoryClickEvent event, Player player) {
-        if (event.getClick() == ClickType.SWAP_OFFHAND) {
-            return itemFactory.isKatana(event.getCurrentItem());
-        }
-
-        if (!isPlayerOffHandSlotClick(event)) {
-            return false;
-        }
-
-        if (itemFactory.isKatana(event.getCursor())) {
-            return true;
-        }
-
-        return event.getClick() == ClickType.NUMBER_KEY
-                && event.getHotbarButton() >= 0
-                && itemFactory.isKatana(player.getInventory().getItem(event.getHotbarButton()));
-    }
-
-    private boolean isPlayerOffHandRawSlot(InventoryDragEvent event, int rawSlot) {
-        return event.getView().getInventory(rawSlot) instanceof PlayerInventory
-                && event.getView().convertSlot(rawSlot) == OFF_HAND_INVENTORY_SLOT;
     }
 
     private void clearActiveParry(Player player) {

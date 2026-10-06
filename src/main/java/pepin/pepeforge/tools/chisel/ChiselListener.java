@@ -18,14 +18,15 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.NonNull;
+
 import pepin.pepeforge.item.ItemFactory;
 
 import java.util.EnumMap;
-import java.util.Map;
 
 public final class ChiselListener implements Listener {
 
-    private static final Map<Material, Material[]> FAMILIES = new EnumMap<>(Material.class);
+    private static final @NonNull EnumMap<@NonNull Material, Material[]> FAMILIES = new EnumMap<>(Material.class);
 
     static {
         addFamily(

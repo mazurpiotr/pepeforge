@@ -14,6 +14,8 @@ Detailed item and recipe reference for the current Pepe's Forge item set.
 - [Crimson Sword](#-crimson-sword)
 - [Anchor](#-anchor)
 - [Throwing Knife](#-throwing-knife)
+- [Stormcleaver](#-stormcleaver)
+- [Emberfang](#-emberfang)
 - [Give Names](#give-names)
 
 
@@ -53,7 +55,7 @@ Replant order: Uses harvested seeds first, then inventory fallback.
 
 ![Scythe](media/receipes/pepeforge_scythe.gif)
 
-Netherite upgrade uses Smithing Table with Diamond Greatsword + Netherite Ingot.
+Netherite upgrade uses Smithing Table with Diamond Scythe + Netherite Ingot.
 
 ## ⚔️ Wind Blade
 
@@ -67,7 +69,7 @@ Elemental melee weapons with speed effects.
 
 | Feature | Details |
 |---------|---------|
-| Dash | Right-click to activate a dash ability (5-second cooldown). Available on all tiers. |
+| Dash | Right-click to activate a dash ability (5-second default cooldown). Available on all tiers. |
 
 **Crafting** (Shaped Recipe):
 
@@ -91,6 +93,8 @@ Two-handed rhythm weapons for fixed reach, widening area cuts, and space control
 | Sweeping Cut | Timed swings trigger a forward area attack with a wider arc at higher rhythm stages |
 | Cleave | Direct hits also damage nearby targets |
 | Defense | Active rhythm reduces incoming frontal damage |
+| Projectile Resistance | From the first rhythm stage, ignores projectile knockback |
+| Micro Dash | Successful attacks add a short forward dash; enabled state and strength are configurable in `/pepeforge config` |
 | Break Penalty | Bad timing or timeout briefly applies Mining Fatigue |
 | Restriction | Requires an empty off-hand for custom mechanics |
 
@@ -120,10 +124,13 @@ Moon-themed ranged weapon that fires a three-arrow volley.
 
 Moon-themed melee weapon with an armed follow-up burst.
 
+| Base Attack Damage | 5 |
+| ------------------ | - |
+
 | Feature | Details |
 |---------|---------|
-| Charge | Each successful hit adds 20% charge, while the meter slowly decays between attacks |
-| Active | The next melee hit at full charge triggers 3 rapid follow-up attacks |
+| Charge | Each successful attack adds a charge. Partial charge slowly decays; full charge stays ready until used. |
+| Active | The next melee hit at full charge triggers rapid follow-up attacks; the final hit lightly knocks the target back and upward |
 | Day | Deals 1 less damage during the day |
 | Moonlight | Deals 2 bonus damage at night under open sky |
 | Visual | Subtly shimmers under moonlight |
@@ -136,10 +143,14 @@ Moon-themed melee weapon with an armed follow-up burst.
 
 Two-handed parry weapon built around short defensive timing windows.
 
+| Base Attack Damage | 5 |
+| ------------------ | - |
+
 | Feature | Details |
 |---------|---------|
 | Parry | Right-click enters a brief parry stance |
 | Defense | Blocks melee and reflects projectiles during the active window |
+| Counterattack | A successful melee parry briefly damages and pushes a surviving attacker back. Counterattacks cannot chain into further counterattacks. |
 | Restriction | Requires an empty off-hand for custom mechanics |
 
 **Crafting** (Shaped Recipe):
@@ -148,14 +159,14 @@ Two-handed parry weapon built around short defensive timing windows.
 
 ## ☀️ Solar Shield
 
-A legendary sun-blessed shield that charges passively during the day.
+A legendary sun-blessed shield that charges passively in strong sky light.
 *Ancient Cities were not always shrouded in darkness...*
 
 | Feature | Details |
 |---------|---------|
-| Passive Charging | Automatically gains charges (up to 3) while held under direct sunlight. |
+| Passive Charging | Charges while held in strong daylight. |
 | Retaliation | While blocking, getting hit consumes 1 charge to ignite attackers and trigger a blinding flashbang effect for 2s. |
-| Discharge | Slowly loses charges when held in darkness, and instantly resets to 0 when unequipped. |
+| Discharge | Loses charges in darkness, shade and while the shield is not equipped. |
 | Rarity | Legendary |
 
 **Crafting** (Shaped Recipe):
@@ -165,6 +176,9 @@ A legendary sun-blessed shield that charges passively during the day.
 ## 🩸 Crimson Sword
 
 A legendary weapon that grows stronger through combat, feeding on the blood of its enemies.
+
+| Base Attack Damage | 5 |
+| ------------------ | - |
 
 | Feature | Details |
 |----------|---------|
@@ -189,10 +203,13 @@ A legendary weapon that grows stronger through combat, feeding on the blood of i
 
 A heavy, slow-swinging marine weapon with crowd-control capability and a grappling-hook active utility.
 
+| Base Attack Damage | 8 |
+| ------------------ | - |
+
 | Feature | Details |
 |---------|---------|
 | **Snare** | Melee attacks temporarily lock the target in place and prevent jumping, wrapping their feet in a visual coral display. |
-| **Hook** | Right-click launches the anchor as a projectile. Hitting a block pulls you to it, while hitting a living entity pulls you and the target together to meet in the middle. |
+| **Hook** | Right-click launches the anchor as a projectile; each player can have only one anchor in flight at a time. Hitting a block pulls you to it. Hitting a living entity damages it and can pull you and the target together. Shield blocks still allow pulling. After a hit, if the inventory cannot hold the returned anchor, it drops at the raycast impact location. Logging out during flight cancels it and returns the anchor; if the inventory cannot hold it, the anchor drops at the logout location. |
 
 **Crafting** (Shaped Recipe):
 
@@ -202,13 +219,50 @@ A heavy, slow-swinging marine weapon with crowd-control capability and a grappli
 
 A consumable ranged weapon that's perfect for finishing off fleeing enemies or opening a fight from a distance.
 
+| Base Attack Damage | 5 |
+| ------------------ | - |
+
 | Feature | Details |
 |---|---|
-| **Throwing** | Can be thrown rapidly with a short cooldown. |
+| **Throwing** | Right-click to throw one knife from the stack. A short cooldown limits repeated throws. |
 
 **Crafting** (Shaped Recipe):
 
 ![Throwing Knife](media/receipes/pepeforge_throwing_knife.png)
+
+## ⚡ Stormcleaver
+
+A legendary diamond axe with an aggressive charge-and-leap combat loop.
+
+| Base Attack Damage | 9 |
+| ------------------ | - |
+
+| Feature | Details |
+|---|---|
+| **Static Charge** | Each successful attack adds a charge. Partial charge slowly decays; full charge stays ready until used. |
+| **Thunder Leap** | Right-click while grounded at full charge to launch upward. Landing creates a knockback shockwave and lightning strikes. A blocked ceiling triggers the impact immediately. |
+| **Protection** | Shockwave damage respects region and PvP protection and never ignites blocks. |
+
+**Crafting** (Shaped Recipe):
+
+![Stormcleaver](media/receipes/pepeforge_stormcleaver.png)
+
+## 🔥 Emberfang
+
+A blade of hardened magma that burns both its targets and careless wielders.
+
+| Base Attack Damage | 5 |
+| ------------------ | - |
+
+| Feature | Details |
+|---|---|
+| **Ember Strike** | Strikes deal additional fire damage; target defenses can reduce the fire bonus. |
+| **Ignition** | Strikes have a **low chance** to briefly set the target ablaze. |
+| **Self-Burn** | Burns its wielder unless they wear at least one armor piece enchanted with **Fire Protection**. |
+
+**Crafting** (Shaped Recipe):
+
+![Emberfang](media/receipes/pepeforge_emberfang.png)
 
 ## Give Names
 
@@ -232,4 +286,5 @@ Available internal item names for `/pepeforge give`:
 - `solar_shield`
 - `anchor`
 - `throwing_knife`
-
+- `stormcleaver`
+- `emberfang`

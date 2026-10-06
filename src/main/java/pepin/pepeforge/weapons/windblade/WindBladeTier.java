@@ -7,10 +7,8 @@ import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public enum WindBladeTier {
     IRON(
@@ -65,8 +63,21 @@ public enum WindBladeTier {
             1,
             60);
 
-    private static final Map<String, WindBladeTier> BY_ITEM_ID = Arrays.stream(values())
-            .collect(Collectors.toUnmodifiableMap(WindBladeTier::itemId, Function.identity()));
+    public static final long DEFAULT_DASH_COOLDOWN_MILLIS = 5_000L;
+    public static final double DEFAULT_DASH_STRENGTH = 1.5D;
+    public static final boolean DEFAULT_DASH_WHILE_GLIDING = false;
+
+    private static final Map<String, WindBladeTier> BY_ITEM_ID = createItemIdMap();
+
+    private static Map<String, WindBladeTier> createItemIdMap() {
+        Map<String, WindBladeTier> result = new HashMap<>();
+
+        for (WindBladeTier tier : values()) {
+            result.put(tier.itemId(), tier);
+        }
+
+        return Map.copyOf(result);
+    }
 
     private final String itemId;
     private final String langPath;

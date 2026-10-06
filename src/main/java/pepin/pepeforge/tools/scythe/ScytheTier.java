@@ -2,15 +2,15 @@ package pepin.pepeforge.tools.scythe;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.CustomModelDataIds;
 import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.item.ItemNameColor;
 import pepin.pepeforge.item.ItemRarity;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public enum ScytheTier {
     IRON(
@@ -53,10 +53,19 @@ public enum ScytheTier {
             CustomModelDataIds.NETHERITE_SCYTHE,
             3);
 
-    private static final Map<String, ScytheTier> BY_ITEM_ID = Arrays.stream(values())
-            .collect(Collectors.toUnmodifiableMap(ScytheTier::itemId, Function.identity()));
+    private static final @NonNull Map<@NonNull String, @NonNull ScytheTier> BY_ITEM_ID = createItemIdMap();
 
-    private final String itemId;
+    private static @NonNull Map<@NonNull String, @NonNull ScytheTier> createItemIdMap() {
+        Map<@NonNull String, @NonNull ScytheTier> result = new HashMap<>();
+
+        for (ScytheTier tier : values()) {
+            result.put(tier.itemId(), tier);
+        }
+
+        return Objects.requireNonNull(Map.copyOf(result));
+    }
+
+    private final @NonNull String itemId;
     private final String langPath;
     private final String translationKeyBase;
     private final ItemNameColor nameColor;
@@ -70,7 +79,7 @@ public enum ScytheTier {
     private final int radius;
 
     ScytheTier(
-            String itemId,
+            @NonNull String itemId,
             String langPath,
             String translationKeyBase,
             ItemNameColor nameColor,
@@ -96,7 +105,7 @@ public enum ScytheTier {
         this.radius = radius;
     }
 
-    public String itemId() {
+    public @NonNull String itemId() {
         return itemId;
     }
 

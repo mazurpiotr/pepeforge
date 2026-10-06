@@ -1,6 +1,8 @@
 target/
+dist/
 .m2/
 scripts/
 .jqwik-database
 PepeForge-ResourcePack.zip
 PepeForge-ResourcePack.zip.sha1
+dependency-reduced-pom.xml

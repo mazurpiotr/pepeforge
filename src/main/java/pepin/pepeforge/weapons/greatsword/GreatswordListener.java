@@ -17,6 +17,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -30,22 +32,25 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 import pepin.pepeforge.util.combat.CombatUtils;
 import pepin.pepeforge.util.ui.ActionBarHelper;
-import pepin.pepeforge.util.protection.ProtectionUtil;
+import pepin.pepeforge.util.combat.DamageFlow;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 public final class GreatswordListener implements Listener {
@@ -80,6 +85,7 @@ public final class GreatswordListener implements Listener {
     private final ItemFactory itemFactory;
     private final PluginLang lang;
     private final NamespacedKey reachModifierKey;
+    private final NamespacedKey projectileKnockbackResistanceKey;
     private final Map<UUID, ComboState> comboStates = new ConcurrentHashMap<>();
     private final Map<UUID, PendingSwing> pendingSwings = new ConcurrentHashMap<>();
     private final Map<UUID, Long> resolvedHitTicks = new ConcurrentHashMap<>();
@@ -87,6 +93,7 @@ public final class GreatswordListener implements Listener {
     private final Map<UUID, Long> rhythmCueTicks = new ConcurrentHashMap<>();
     private final Set<UUID> rhythmBarShown = ConcurrentHashMap.newKeySet();
     private final Set<UUID> cleavingPlayers = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, ScheduledTaskCompat> projectileKnockbackTasks = new ConcurrentHashMap<>();
     private boolean transientModifierLogged = false;
 
     public GreatswordListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
@@ -94,6 +101,7 @@ public final class GreatswordListener implements Listener {
         this.itemFactory = itemFactory;
         this.lang = lang;
         this.reachModifierKey = new NamespacedKey(plugin, "greatsword_reach_bonus");
+        this.projectileKnockbackResistanceKey = new NamespacedKey(plugin, "greatsword_projectile_knockback");
     }
 
     private ScheduledTaskCompat statusTask;
@@ -102,6 +110,9 @@ public final class GreatswordListener implements Listener {
         statusTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 SchedulerCompat.runForPlayer(player, plugin, () -> {
+                    if (player == null || !player.isOnline()) {
+                        return;
+                    }
                     GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
                     if (tier == null) {
                         clearPlayerState(player);
@@ -148,7 +159,11 @@ public final class GreatswordListener implements Listener {
 
     public void clearAllPlayerState() {
         for (Player player : plugin.getServer().getOnlinePlayers()) {
-            clearPlayerState(player);
+            if (SchedulerCompat.isOwnedByCurrentRegion(player)) {
+                clearPlayerState(player);
+            } else {
+                SchedulerCompat.runForPlayer(player, plugin, () -> clearPlayerState(player));
+            }
         }
     }
 
@@ -186,12 +201,12 @@ public final class GreatswordListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) {
             return;
         }
-        if (cleavingPlayers.contains(player.getUniqueId())) {
+        if (DamageFlow.isSecondaryDamage(event) || cleavingPlayers.contains(player.getUniqueId())) {
             return;
         }
 
@@ -223,11 +238,28 @@ public final class GreatswordListener implements Listener {
         }
 
         int currentStage = currentStage(playerId);
+        applyMicroDash(player);
         List<LivingEntity> areaTargets = findAreaTargets(player, primaryTarget, currentStage);
         applyAreaAttack(player, areaTargets, event.getDamage() * AREA_DAMAGE_MULTIPLIER, currentStage, false);
 
         advanceCombo(player, currentStage, currentTick);
         applyReachModifier(player, FIXED_REACH_BONUS);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onProjectileDamage(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player player)
+                || !(event.getDamager() instanceof Projectile)
+                || !plugin.getConfig().getBoolean(
+                        "mechanics.greatsword.projectile_knockback_immunity",
+                        GreatswordDefinition.DEFAULT_PROJECTILE_KNOCKBACK_IMMUNITY)
+                || currentStage(player.getUniqueId()) < 1
+                || itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) == null
+                || !CombatUtils.hasEmptyOffHand(player)) {
+            return;
+        }
+
+        applyTemporaryProjectileKnockbackResistance(player);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -280,6 +312,32 @@ public final class GreatswordListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onItemHeld(PlayerItemHeldEvent event) {
         clearPlayerState(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        boolean mainHandGreatsword = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null;
+        if (mainHandGreatsword && !CombatUtils.hasEmptyOffHand(player)) {
+            SchedulerCompat.runForPlayer(player, plugin,
+                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        if (itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null
+                && !CombatUtils.hasEmptyOffHand(player)) {
+            SchedulerCompat.runForPlayer(player, plugin,
+                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
+        }
     }
 
     @EventHandler
@@ -447,11 +505,9 @@ public final class GreatswordListener implements Listener {
         cleavingPlayers.add(player.getUniqueId());
         try {
             for (LivingEntity target : targets) {
-                if (!ProtectionUtil.canDamage(player, target)) {
+                if (!DamageFlow.damage(target, areaDamage, player, true).accepted()) {
                     continue;
                 }
-                target.setNoDamageTicks(0);
-                target.damage(areaDamage, player);
                 applyKnockback(player, target, knockbackStrength);
                 playTargetAreaEffects(target.getWorld(), target.getLocation().add(0.0D, 1.0D, 0.0D));
             }
@@ -483,6 +539,80 @@ public final class GreatswordListener implements Listener {
         Vector velocity = target.getVelocity().add(push);
         velocity.setY(Math.max(velocity.getY(), 0.12D));
         target.setVelocity(velocity);
+    }
+
+    private void applyMicroDash(Player player) {
+        if (!plugin.getConfig().getBoolean(
+                "mechanics.greatsword.micro_dash_enabled",
+                GreatswordDefinition.DEFAULT_MICRO_DASH_ENABLED)) {
+            return;
+        }
+
+        double strength = plugin.getConfig().getDouble(
+                "mechanics.greatsword.micro_dash_strength",
+                GreatswordDefinition.DEFAULT_MICRO_DASH_STRENGTH);
+        strength = Math.max(GreatswordDefinition.MIN_MICRO_DASH_STRENGTH,
+                Math.min(GreatswordDefinition.MAX_MICRO_DASH_STRENGTH, strength));
+        if (strength <= 0.0D) {
+            return;
+        }
+
+        Vector direction = horizontalDirection(player.getEyeLocation().getDirection());
+        Vector velocity = player.getVelocity().add(direction.multiply(strength));
+        player.setVelocity(velocity);
+    }
+
+    private void applyTemporaryProjectileKnockbackResistance(Player player) {
+        AttributeInstance attribute = player.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
+        if (attribute == null) {
+            return;
+        }
+
+        boolean modifierPresent = attribute.getModifiers().stream()
+                .anyMatch(modifier -> projectileKnockbackResistanceKey.equals(modifier.getKey()));
+        if (!modifierPresent) {
+            attribute.addModifier(new AttributeModifier(
+                    projectileKnockbackResistanceKey,
+                    1.0D,
+                    AttributeModifier.Operation.ADD_NUMBER,
+                    EquipmentSlotGroup.ANY));
+        }
+
+        UUID playerId = player.getUniqueId();
+        ScheduledTaskCompat previousTask = projectileKnockbackTasks.remove(playerId);
+        if (previousTask != null) {
+            previousTask.cancel();
+        }
+
+        AtomicReference<ScheduledTaskCompat> scheduledReference = new AtomicReference<>();
+        ScheduledTaskCompat scheduledTask = SchedulerCompat.runLaterForPlayer(
+                player,
+                plugin,
+                () -> {
+                    if (projectileKnockbackTasks.remove(playerId, scheduledReference.get())) {
+                        removeProjectileKnockbackResistance(player);
+                    }
+                },
+                GreatswordDefinition.PROJECTILE_KNOCKBACK_WINDOW_TICKS);
+        scheduledReference.set(scheduledTask);
+        projectileKnockbackTasks.put(playerId, scheduledTask);
+    }
+
+    private void removeProjectileKnockbackResistance(Player player) {
+        ScheduledTaskCompat task = projectileKnockbackTasks.remove(player.getUniqueId());
+        if (task != null) {
+            task.cancel();
+        }
+
+        AttributeInstance attribute = player.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
+        if (attribute == null) {
+            return;
+        }
+        for (AttributeModifier modifier : attribute.getModifiers()) {
+            if (projectileKnockbackResistanceKey.equals(modifier.getKey())) {
+                attribute.removeModifier(modifier);
+            }
+        }
     }
 
     private void playTargetAreaEffects(World world, Location location) {
@@ -601,6 +731,7 @@ public final class GreatswordListener implements Listener {
 
     private void clearPlayerState(Player player) {
         UUID playerId = player.getUniqueId();
+        removeProjectileKnockbackResistance(player);
         comboStates.remove(playerId);
         pendingSwings.remove(playerId);
         resolvedHitTicks.remove(playerId);
@@ -643,7 +774,8 @@ public final class GreatswordListener implements Listener {
         }
 
         rhythmCueTicks.put(playerId, state.lastSuccessTick());
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, RHYTHM_CUE_VOLUME, RHYTHM_CUE_PITCH);
+        @NonNull Sound rhythmCueSound = Objects.requireNonNull(Sound.BLOCK_NOTE_BLOCK_PLING);
+        player.playSound(player.getLocation(), rhythmCueSound, RHYTHM_CUE_VOLUME, RHYTHM_CUE_PITCH);
     }
 
     private void clearRhythmActionBar(Player player) {

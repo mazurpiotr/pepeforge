@@ -7,10 +7,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.gui.CustomItemsMenu;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ColorUtil;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 
@@ -21,18 +23,24 @@ import java.util.stream.Collectors;
 
 public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
 
+    private final JavaPlugin plugin;
     private final PluginLang lang;
     private final ItemFactory itemFactory;
     private final CrimsonSwordManager crimsonSwordManager;
     private final pepin.pepeforge.stats.StatisticsManager statsManager;
     private final pepin.pepeforge.item.ItemMigrator itemMigrator;
+    private final OnlinePlayerNames onlinePlayerNames;
 
-    public PepeForgeCommand(PluginLang lang, ItemFactory itemFactory, CrimsonSwordManager crimsonSwordManager, pepin.pepeforge.stats.StatisticsManager statsManager, pepin.pepeforge.item.ItemMigrator itemMigrator) {
+    public PepeForgeCommand(JavaPlugin plugin, PluginLang lang, ItemFactory itemFactory,
+            CrimsonSwordManager crimsonSwordManager,
+            pepin.pepeforge.stats.StatisticsManager statsManager, pepin.pepeforge.item.ItemMigrator itemMigrator) {
+        this.plugin = plugin;
         this.lang = lang;
         this.itemFactory = itemFactory;
         this.crimsonSwordManager = crimsonSwordManager;
         this.statsManager = statsManager;
         this.itemMigrator = itemMigrator;
+        this.onlinePlayerNames = new OnlinePlayerNames();
     }
 
     @Override
@@ -102,7 +110,8 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
             try {
                 int level = Integer.parseInt(args[1]);
                 crimsonSwordManager.setLevel(item, level);
-                sender.sendMessage(lang.message("messages.command.setlevel_success", Map.of("level", String.valueOf(level))));
+                sender.sendMessage(
+                        lang.message("messages.command.setlevel_success", Map.of("level", String.valueOf(level))));
             } catch (NumberFormatException e) {
                 sender.sendMessage(lang.message("messages.command.invalid_level"));
             }
@@ -169,15 +178,80 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        target.getInventory().addItem(item);
-        statsManager.incrementGiven(itemFactory.getItemId(item));
         String itemName = itemFactory.getBestName(item);
-        sender.sendMessage(lang.message("messages.command.give_success_sender", Map.of(
-                "item", itemName,
-                "player", target.getName()
-        )));
-        target.sendMessage(lang.message("messages.command.give_success_target", Map.of("item", itemName)));
+        String itemId = itemFactory.getItemId(item);
+        String targetName = args[2];
+        SchedulerCompat.runForPlayer(target, plugin, () -> {
+            if (!target.isOnline()) {
+                sendGivePlayerUnavailable(sender, targetName);
+                return;
+            }
+
+            if (!hasRoomFor(target, item)) {
+                sendGiveFailure(sender, itemName, targetName);
+                return;
+            }
+
+            Map<Integer, ItemStack> remaining = target.getInventory().addItem(item.clone());
+            if (!remaining.isEmpty()) {
+                sendGiveFailure(sender, itemName, targetName);
+                return;
+            }
+
+            sendGiveSuccess(sender, target, itemName, targetName);
+            statsManager.incrementGiven(itemId);
+        }, () -> sendGivePlayerUnavailable(sender, targetName));
         return true;
+    }
+
+    private boolean hasRoomFor(Player player, ItemStack item) {
+        int remaining = item.getAmount();
+        for (ItemStack stack : player.getInventory().getStorageContents()) {
+            if (stack == null || stack.getType().isAir()) {
+                remaining -= item.getMaxStackSize();
+            } else if (stack.isSimilar(item)) {
+                remaining -= Math.max(0, stack.getMaxStackSize() - stack.getAmount());
+            }
+
+            if (remaining <= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void sendGiveSuccess(CommandSender sender, Player target, String itemName, String targetName) {
+        Runnable notifySender = () -> sender.sendMessage(lang.message(
+                "messages.command.give_success_sender",
+                Map.of("item", itemName, "player", targetName)));
+        if (sender instanceof Player senderPlayer && senderPlayer != target) {
+            SchedulerCompat.runForPlayer(senderPlayer, plugin, notifySender);
+        } else {
+            notifySender.run();
+        }
+        target.sendMessage(lang.message("messages.command.give_success_target", Map.of("item", itemName)));
+    }
+
+    private void sendGiveFailure(CommandSender sender, String itemName, String targetName) {
+        Runnable notify = () -> sender.sendMessage(lang.message(
+                "messages.command.give_inventory_full",
+                Map.of("item", itemName, "player", targetName)));
+        if (sender instanceof Player senderPlayer) {
+            SchedulerCompat.runForPlayer(senderPlayer, plugin, notify);
+        } else {
+            notify.run();
+        }
+    }
+
+    private void sendGivePlayerUnavailable(CommandSender sender, String targetName) {
+        Runnable notify = () -> sender.sendMessage(lang.message(
+                "messages.command.player_not_found",
+                Map.of("player", targetName)));
+        if (sender instanceof Player senderPlayer) {
+            SchedulerCompat.runForPlayer(senderPlayer, plugin, notify);
+        } else {
+            notify.run();
+        }
     }
 
     @Override
@@ -203,10 +277,7 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
                     .collect(Collectors.toList());
         }
         if (args.length == 3 && "give".equalsIgnoreCase(args[0])) {
-            return Bukkit.getOnlinePlayers().stream()
-                    .map(Player::getName)
-                    .filter(name -> name.toLowerCase().startsWith(args[2].toLowerCase()))
-                    .collect(Collectors.toList());
+            return onlinePlayerNames.matching(args[2]);
         }
         return Collections.emptyList();
     }

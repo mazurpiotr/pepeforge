@@ -1,5 +1,6 @@
 package pepin.pepeforge.weapons.windblade;
 
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -18,7 +19,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.util.combat.DamageFlow;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.aura.AuraManager;
 import pepin.pepeforge.util.ui.ActionBarHelper;
@@ -27,13 +30,15 @@ import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public final class WindBladeListener implements Listener {
 
     private static final int HOLDING_SPEED_DURATION_TICKS = 200;
     private static final String DASH_COOLDOWN_KEY = "wind_blade:dash";
-    private static final long DASH_COOLDOWN_MILLIS = 5_000L;
-    private static final double DASH_STRENGTH = 1.5D;
+    private static final String DASH_COOLDOWN_CONFIG_PATH = "mechanics.wind_blade.dash_cooldown";
+    private static final String DASH_STRENGTH_CONFIG_PATH = "mechanics.wind_blade.dash_strength";
+    private static final String DASH_WHILE_GLIDING_CONFIG_PATH = "mechanics.wind_blade.dash_while_gliding";
     private static final double DASH_LIFT = 0.3D;
     private static final PotionEffect HOLDING_SPEED_EFFECT = new PotionEffect(
             PotionEffectType.SPEED,
@@ -67,6 +72,9 @@ public final class WindBladeListener implements Listener {
     public void startHoldingTask() {
         holdingTask = SchedulerCompat.runTimer(plugin, () -> {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
+                if (player == null) {
+                    continue;
+                }
                 SchedulerCompat.runForPlayer(player, plugin, () -> {
                     if (!player.isOnline()) {
                         return;
@@ -114,19 +122,28 @@ public final class WindBladeListener implements Listener {
 
         denyInteraction(event);
 
+        if (player.isGliding() && !isDashWhileGlidingEnabled()) {
+            return;
+        }
+
         long remainingMillis = cooldownManager.getRemainingCooldownMillis(player, DASH_COOLDOWN_KEY);
         if (remainingMillis > 0L) {
             showCooldownActionBar(player, remainingMillis);
             return;
         }
 
-        cooldownManager.setCooldown(player, DASH_COOLDOWN_KEY, DASH_COOLDOWN_MILLIS);
+        long dashCooldownMillis = getDashCooldownMillis();
+        cooldownManager.setCooldown(player, DASH_COOLDOWN_KEY, dashCooldownMillis);
         dash(player);
-        player.setCooldown(mainHandItem.getType(), 10);
+        @NonNull Material mainHandMaterial = Objects.requireNonNull(mainHandItem.getType());
+        player.setCooldown(mainHandMaterial, 10);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
+        if (DamageFlow.isSecondaryDamage(event)) {
+            return;
+        }
         if (!(event.getDamager() instanceof Player player)) {
             return;
         }
@@ -166,7 +183,7 @@ public final class WindBladeListener implements Listener {
             direction = player.getEyeLocation().getDirection().normalize();
         }
 
-        player.setVelocity(direction.multiply(DASH_STRENGTH).setY(DASH_LIFT));
+        player.setVelocity(direction.multiply(getDashStrength()).setY(DASH_LIFT));
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BREEZE_SHOOT, 1.0f, 1.2f);
         player.getWorld().spawnParticle(Particle.GUST, player.getLocation().add(0.0D, 1.0D, 0.0D), 3, 0.5D, 0.5D, 0.5D,
                 0.0D);
@@ -197,12 +214,31 @@ public final class WindBladeListener implements Listener {
 
     private void showCooldownActionBar(Player player, long remainingMillis) {
         double seconds = remainingMillis / 1000.0D;
-        double progress = Math.max(0.0D, Math.min(1.0D, 1.0D - ((double) remainingMillis / DASH_COOLDOWN_MILLIS)));
+        double progress = Math.max(0.0D, Math.min(1.0D,
+                1.0D - ((double) remainingMillis / getDashCooldownMillis())));
         String bar = ActionBarHelper.buildProgressBar(progress);
         String message = lang.text("messages.wind_blade.cooldown")
                 .replace("{bar}", bar)
                 .replace("{seconds}", String.format(Locale.US, "%.1f", seconds));
         ActionBarHelper.showActionBar(player, message);
+    }
+
+    private long getDashCooldownMillis() {
+        return Math.max(500L, Math.min(30_000L,
+            plugin.getConfig().getLong(DASH_COOLDOWN_CONFIG_PATH,
+                WindBladeTier.DEFAULT_DASH_COOLDOWN_MILLIS)));
+    }
+
+    private double getDashStrength() {
+        double configured = plugin.getConfig().getDouble(DASH_STRENGTH_CONFIG_PATH,
+            WindBladeTier.DEFAULT_DASH_STRENGTH);
+        return Double.isFinite(configured) ? Math.max(0.1D, Math.min(5.0D, configured))
+            : WindBladeTier.DEFAULT_DASH_STRENGTH;
+    }
+
+    private boolean isDashWhileGlidingEnabled() {
+        return plugin.getConfig().getBoolean(DASH_WHILE_GLIDING_CONFIG_PATH,
+            WindBladeTier.DEFAULT_DASH_WHILE_GLIDING);
     }
 
 }

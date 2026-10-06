@@ -16,4 +16,8 @@ public enum ItemNameColor {
     public String colorName() {
         return color.colorName();
     }
+
+    public String formatLegacy(String text) {
+        return color.formatLegacy(text);
+    }
 }

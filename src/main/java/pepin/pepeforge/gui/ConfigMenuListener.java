@@ -8,6 +8,11 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.PepeForgePlugin;
+import pepin.pepeforge.gui.itemconfig.anchor.AnchorConfigListener;
+import pepin.pepeforge.gui.itemconfig.emberfang.EmberfangConfigListener;
+import pepin.pepeforge.gui.itemconfig.greatsword.GreatswordConfigListener;
+import pepin.pepeforge.gui.itemconfig.windblade.WindBladeConfigListener;
+import pepin.pepeforge.gui.itemconfig.stormcleaver.StormcleaverConfigListener;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 
@@ -21,6 +26,14 @@ public final class ConfigMenuListener implements Listener {
     private final ItemFactory itemFactory;
     private final PluginLang lang;
 
+    // Listeners for specific item config menus
+    private final AnchorConfigListener anchorConfigListener;
+    private final WindBladeConfigListener windBladeConfigListener;
+    private final StormcleaverConfigListener stormcleaverConfigListener;
+    private final EmberfangConfigListener emberfangConfigListener;
+    private final GreatswordConfigListener greatswordConfigListener;
+
+
     /** Players who changed at least one setting since opening the config menu. */
     private final Set<UUID> pendingReload = ConcurrentHashMap.newKeySet();
 
@@ -28,6 +41,11 @@ public final class ConfigMenuListener implements Listener {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.lang = lang;
+        this.anchorConfigListener = new AnchorConfigListener(plugin);
+        this.windBladeConfigListener = new WindBladeConfigListener(plugin);
+        this.stormcleaverConfigListener = new StormcleaverConfigListener(plugin);
+        this.emberfangConfigListener = new EmberfangConfigListener(plugin);
+        this.greatswordConfigListener = new GreatswordConfigListener(plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -129,7 +147,7 @@ public final class ConfigMenuListener implements Listener {
             plugin.saveConfig();
             pendingReload.add(player.getUniqueId());
             refresh = true;
-        } else if (event.getSlot() == 15) {
+        } else if (event.getSlot() == 15 && ItemConfigMenu.hasRecipeToggle(itemId)) {
             boolean current = plugin.getConfig().contains(configPath + ".recipe_enabled")
                     ? plugin.getConfig().getBoolean(configPath + ".recipe_enabled")
                     : true;
@@ -138,58 +156,27 @@ public final class ConfigMenuListener implements Listener {
             pendingReload.add(player.getUniqueId());
             refresh = true;
         } else if ("anchor".equals(itemId)) {
-            if (event.getSlot() == 18) {
-                plugin.getConfig().set(configPath + ".ability_cooldown", 5000L);
-                plugin.getConfig().set(configPath + ".snare_duration", 40);
-                plugin.getConfig().set(configPath + ".snare_cooldown", 5000L);
-                plugin.getConfig().set(configPath + ".ability_range", 20.0D);
-                plugin.getConfig().set(configPath + ".snare_enabled", true);
-                plugin.getConfig().set(configPath + ".hook_enabled", true);
-                plugin.saveConfig();
+            if (anchorConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
-            } else if (event.getSlot() == 19) {
-                boolean current = plugin.getConfig().getBoolean(configPath + ".hook_enabled", true);
-                plugin.getConfig().set(configPath + ".hook_enabled", !current);
-                plugin.saveConfig();
+            }
+        } else if (ItemConfigMenu.isWindBlade(itemId)) {
+            if (windBladeConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
-            } else if (event.getSlot() == 20) {
-                long current = plugin.getConfig().getLong(configPath + ".ability_cooldown", 5000L);
-                long change = event.isLeftClick() ? -500L : 500L;
-                long newValue = Math.max(500L, Math.min(30000L, current + change));
-                plugin.getConfig().set(configPath + ".ability_cooldown", newValue);
-                plugin.saveConfig();
+            }
+        } else if (ItemConfigMenu.isGreatsword(itemId)) {
+            if (greatswordConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
-            } else if (event.getSlot() == 21) {
-                double current = plugin.getConfig().getDouble(configPath + ".ability_range", 20.0D);
-                double change = event.isLeftClick() ? -1.0D : 1.0D;
-                double newValue = Math.max(5.0D, Math.min(50.0D, current + change));
-                plugin.getConfig().set(configPath + ".ability_range", newValue);
-                plugin.saveConfig();
+            }
+        } else if ("stormcleaver".equals(itemId)) {
+           if (stormcleaverConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
-            } else if (event.getSlot() == 23) {
-                boolean current = plugin.getConfig().getBoolean(configPath + ".snare_enabled", true);
-                plugin.getConfig().set(configPath + ".snare_enabled", !current);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 24) {
-                int current = plugin.getConfig().getInt(configPath + ".snare_duration", 40);
-                int change = event.isLeftClick() ? -10 : 10;
-                int newValue = Math.max(10, Math.min(200, current + change));
-                plugin.getConfig().set(configPath + ".snare_duration", newValue);
-                plugin.saveConfig();
-                pendingReload.add(player.getUniqueId());
-                refresh = true;
-            } else if (event.getSlot() == 25) {
-                long current = plugin.getConfig().getLong(configPath + ".snare_cooldown", 5000L);
-                long change = event.isLeftClick() ? -1000L : 1000L;
-                long newValue = Math.max(1000L, Math.min(60000L, current + change));
-                plugin.getConfig().set(configPath + ".snare_cooldown", newValue);
-                plugin.saveConfig();
+            }
+        } else if ("emberfang".equals(itemId)) {
+            if (emberfangConfigListener.handleClick(event)) {
                 pendingReload.add(player.getUniqueId());
                 refresh = true;
             }

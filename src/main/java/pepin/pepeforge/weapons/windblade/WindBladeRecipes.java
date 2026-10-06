@@ -9,6 +9,7 @@ import org.bukkit.inventory.SmithingTransformRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.recipe.RecipeRegistrar;
+import pepin.pepeforge.util.recipe.RecipeChoiceCompat;
 
 public final class WindBladeRecipes {
 
@@ -54,7 +55,7 @@ public final class WindBladeRecipes {
     }
 
     private void registerNetheriteUpgrade() {
-        if (!itemFactory.isRecipeEnabled(WindBladeTier.NETHERITE.itemId())) {
+        if (!itemFactory.isItemEnabled(WindBladeTier.NETHERITE.itemId())) {
             return;
         }
 
@@ -66,7 +67,7 @@ public final class WindBladeRecipes {
                 key,
                 result,
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
-                new RecipeChoice.ExactChoice(itemFactory.createWindBlade(WindBladeTier.DIAMOND)),
+                RecipeChoiceCompat.exactChoice(itemFactory.createWindBlade(WindBladeTier.DIAMOND)),
                 new RecipeChoice.MaterialChoice(Material.NETHERITE_INGOT)
         );
         RecipeRegistrar.add(plugin, key, recipe);

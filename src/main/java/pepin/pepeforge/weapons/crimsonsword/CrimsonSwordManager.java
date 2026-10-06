@@ -11,7 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ColorUtil;
-import pepin.pepeforge.util.itemmeta.ItemMetaManager;
+import pepin.pepeforge.util.itemmeta.ItemMetaCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,34 +148,37 @@ public final class CrimsonSwordManager {
             String displayName = fallbackName(serverLang, level);
             List<String> lore = buildFallbackLore(serverLang, level, xp, requiredXp);
 
-            ItemMetaManager.setItemName(meta, displayName);
-            ItemMetaManager.setDisplayName(meta, displayName);
-            ItemMetaManager.setStringLore(meta, lore);
+            ItemMetaCompat.setItemName(meta, displayName);
+            ItemMetaCompat.setDisplayName(meta, displayName);
+            ItemMetaCompat.setLore(meta, lore);
             item.setItemMeta(meta);
         }
     }
 
     private String fallbackName(String serverLang, int level) {
         String baseName = lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang);
-        return ColorUtil.translate(baseName) + ColorUtil.GRAY + " [Lv. " + level + "]";
+        String levelSuffix = lang.getTextForLang("items.crimson_sword.dynamic_text.level_suffix", serverLang)
+                .replace("{level}", String.valueOf(level));
+        return CrimsonSwordDefinition.NAME_COLOR.formatLegacy(baseName)
+                + ColorUtil.GRAY + " " + ColorUtil.translate(levelSuffix);
     }
 
-    private List<String> fallbackFeatures(int level) {
+    private List<String> fallbackFeatures(int level, String serverLang) {
         List<String> features = new ArrayList<>();
 
         features.add(ColorUtil.translate(
-                lang.text("items.crimson_sword.features.edge")
+                lang.getTextForLang("items.crimson_sword.features.edge", serverLang)
                         .replace("{percent}", String.valueOf(damageBonusPercent(level)))));
 
-        addLifestealFeature(level, features);
-        addAuraFeature(level, features);
+        addLifestealFeature(level, serverLang, features);
+        addAuraFeature(level, serverLang, features);
         return features;
     }
 
-    private void addLifestealFeature(int level, List<String> features) {
+    private void addLifestealFeature(int level, String serverLang, List<String> features) {
         double lifesteal = lifesteal(level);
         if (lifesteal <= 0.0D) {
-            features.add(ColorUtil.translate(lang.text("items.crimson_sword.features.lifesteal_locked")));
+            features.add(lang.getTextForLang("items.crimson_sword.features.lifesteal_locked", serverLang));
             return;
         }
 
@@ -183,18 +186,18 @@ public final class CrimsonSwordManager {
         double nextPercent = nextLifestealPercent(nextLevel);
 
         String line = nextLevel > level && nextPercent > lifesteal
-                ? lang.text("items.crimson_sword.features.lifesteal_next")
-                : lang.text("items.crimson_sword.features.lifesteal");
+                ? lang.getTextForLang("items.crimson_sword.features.lifesteal_next", serverLang)
+                : lang.getTextForLang("items.crimson_sword.features.lifesteal", serverLang);
 
-        features.add(ColorUtil.translate(line
+        features.add(line
                 .replace("{percent}", formatPercent(lifesteal * 100))
                 .replace("{next_level}", String.valueOf(nextLevel))
-                .replace("{next_percent}", formatPercent(nextPercent * 100))));
+                .replace("{next_percent}", formatPercent(nextPercent * 100)));
     }
 
-    private void addAuraFeature(int level, List<String> features) {
+    private void addAuraFeature(int level, String serverLang, List<String> features) {
         if (level < 10) {
-            features.add(ColorUtil.translate(lang.text("items.crimson_sword.features.aura_locked")));
+            features.add(lang.getTextForLang("items.crimson_sword.features.aura_locked", serverLang));
             return;
         }
 
@@ -206,30 +209,32 @@ public final class CrimsonSwordManager {
         String nextDrain = formatPercent(auraDrainAmount(nextLevel));
 
         String line = nextLevel > level
-                ? lang.text("items.crimson_sword.features.aura_next")
-                : lang.text("items.crimson_sword.features.aura");
+                ? lang.getTextForLang("items.crimson_sword.features.aura_next", serverLang)
+                : lang.getTextForLang("items.crimson_sword.features.aura", serverLang);
 
-        features.add(ColorUtil.translate(line
+        features.add(line
                 .replace("{seconds}", seconds)
                 .replace("{drain}", drain)
                 .replace("{radius}", radius)
                 .replace("{next_level}", String.valueOf(nextLevel))
                 .replace("{next_seconds}", nextSeconds)
-                .replace("{next_drain}", nextDrain)));
+                .replace("{next_drain}", nextDrain));
     }
 
     private List<String> buildFallbackLore(String serverLang, int level, double xp, double requiredXp) {
         List<String> loreLines = new ArrayList<>(lang.getItemLoreForLang(CrimsonSwordDefinition.LANG_PATH, serverLang));
 
         List<String> result = new ArrayList<>();
-        List<String> features = fallbackFeatures(level);
+        List<String> features = fallbackFeatures(level, serverLang);
+        String maxXpLabel = lang.getTextForLang("items.crimson_sword.dynamic_text.max_xp", serverLang);
 
-        for (String line : loreLines) {
+        for (int lineIndex = 0; lineIndex < loreLines.size(); lineIndex++) {
+            String line = loreLines.get(lineIndex);
             line = line
                     .replace("{level}", String.valueOf(level))
                     .replace("{xp}", formatXp(xp))
                     .replace("{max_xp}", level >= CrimsonSwordDefinition.MAX_LEVEL
-                            ? "MAX"
+                            ? maxXpLabel
                             : formatXp(requiredXp));
 
             if (line.contains("{features}")) {
@@ -241,7 +246,9 @@ public final class CrimsonSwordManager {
                     }
                 }
             } else {
-                result.add(ColorUtil.translate(line));
+                result.add(lineIndex == loreLines.size() - 2
+                        ? CrimsonSwordDefinition.RARITY.formatLegacy(line)
+                        : ColorUtil.translate(line));
             }
         }
 

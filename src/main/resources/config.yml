@@ -16,9 +16,42 @@ translations:
   # Server language if client-side translation is disabled or unsupported.
   server_language: "en_us"
 
+# Resource Pack delivery.
+# MANAGER:vThe server owner must handle Resource Pack delivery, e.g. using an external plugin.
+# GITHUB: PepeForge sends the release pack from GitHub to players.
+resource_pack:
+  mode: MANAGER
+
+# Shared Wind Blade family settings.
+mechanics:
+  wind_blade:
+    dash_cooldown: 5000
+    dash_strength: 1.5
+    dash_while_gliding: false
+  anchor:
+    ability_cooldown: 5000
+    snare_duration: 40
+    snare_cooldown: 5000
+    ability_range: 20.0
+    snare_enabled: true
+    hook_enabled: true
+  crescent_spear:
+    charges_required: 5
+    active_hit_count: 2
+  stormcleaver:
+    charges_required: 5
+    jump_velocity_multiplier: 1.5
+    charge_decay_interval: 40
+  greatsword:
+    projectile_knockback_immunity: true
+    micro_dash_enabled: true
+    micro_dash_strength: 0.15
+  emberfang:
+    fire_damage: 4.0
+
 # Item availability settings
 # enabled: hard on/off switch for the item itself
-# recipe_enabled: controls crafting separately and must be set explicitly
+# recipe_enabled: controls custom crafting-table recipes separately and must be set explicitly
 items:
   crescent_bow:
     enabled: true
@@ -40,7 +73,6 @@ items:
     recipe_enabled: true
   netherite_wind_blade:
     enabled: true
-    recipe_enabled: true
   iron_greatsword:
     enabled: true
     recipe_enabled: true
@@ -49,7 +81,6 @@ items:
     recipe_enabled: true
   netherite_greatsword:
     enabled: true
-    recipe_enabled: true
   iron_scythe:
     enabled: true
     recipe_enabled: true
@@ -58,23 +89,20 @@ items:
     recipe_enabled: true
   netherite_scythe:
     enabled: true
-    recipe_enabled: true
   crimson_sword:
     enabled: true
-    recipe_enabled: true
   solar_shield:
     enabled: true
     recipe_enabled: true
   anchor:
     enabled: true
     recipe_enabled: true
-    ability_cooldown: 5000
-    snare_duration: 40
-    snare_cooldown: 5000
-    ability_range: 20.0
-    snare_enabled: true
-    hook_enabled: true
+  stormcleaver:
+    enabled: true
+    recipe_enabled: true
+  emberfang:
+    enabled: true
+    recipe_enabled: true
   throwing_knife:
     enabled: true
     recipe_enabled: true
-

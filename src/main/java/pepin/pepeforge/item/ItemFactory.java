@@ -6,13 +6,16 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NonNull;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.tools.chisel.ChiselDefinition;
 import pepin.pepeforge.tools.scythe.ScytheTier;
-import pepin.pepeforge.util.itemmeta.ItemMetaManager;
-import pepin.pepeforge.util.itemmeta.DataComponentManager;
+import pepin.pepeforge.util.ColorUtil;
+import pepin.pepeforge.util.itemmeta.ItemMetaCompat;
+import pepin.pepeforge.util.itemmeta.DataComponentCompat;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowDefinition;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
@@ -23,10 +26,14 @@ import pepin.pepeforge.weapons.solarshield.SolarShieldDefinition;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
 import pepin.pepeforge.weapons.anchor.AnchorDefinition;
 import pepin.pepeforge.weapons.throwingknife.ThrowingKnifeDefinition;
+import pepin.pepeforge.weapons.stormcleaver.StormcleaverDefinition;
+import pepin.pepeforge.weapons.emberfang.EmberfangDefinition;
+import pepin.pepeforge.weapons.emberfang.EmberfangTextManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public final class ItemFactory {
 
@@ -47,21 +54,27 @@ public final class ItemFactory {
             ItemIds.CRIMSON_SWORD,
             ItemIds.SOLAR_SHIELD,
             ItemIds.ANCHOR,
-            ItemIds.THROWING_KNIFE);
+            ItemIds.THROWING_KNIFE,
+            ItemIds.STORMCLEAVER,
+            ItemIds.EMBERFANG);
+    private static final @NonNull PersistentDataType<String, String> ITEM_ID_DATA_TYPE = Objects.requireNonNull(
+            PersistentDataType.STRING);
 
-    private final NamespacedKey itemIdKey;
+    private final @NonNull NamespacedKey itemIdKey;
     private final JavaPlugin plugin;
     private final PluginLang lang;
     private final CrimsonSwordManager crimsonSwordManager;
+    private final EmberfangTextManager emberfangTextManager;
 
     public ItemFactory(JavaPlugin plugin, PluginLang lang, CrimsonSwordManager crimsonSwordManager) {
         this.itemIdKey = new NamespacedKey(plugin, "item_id");
         this.plugin = plugin;
         this.lang = lang;
         this.crimsonSwordManager = crimsonSwordManager;
+        this.emberfangTextManager = new EmberfangTextManager(plugin, lang);
     }
 
-    public ItemStack createWindBlade(WindBladeTier tier) {
+    public @NonNull ItemStack createWindBlade(WindBladeTier tier) {
         return createItem(new ItemSpec(
                 tier.itemId(),
                 tier.baseMaterial(),
@@ -72,12 +85,12 @@ public final class ItemFactory {
                 tier.nameColor(),
                 tier.customModelData(),
                 tier.modelKey(),
-                List.of(
+                List.<@NonNull ItemAttributeSpec>of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", tier.attackDamage()),
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", tier.attackSpeed()))));
     }
 
-    public ItemStack createGreatsword(GreatswordTier tier) {
+    public @NonNull ItemStack createGreatsword(GreatswordTier tier) {
         return createItem(new ItemSpec(
                 tier.itemId(),
                 tier.baseMaterial(),
@@ -88,7 +101,7 @@ public final class ItemFactory {
                 tier.nameColor(),
                 tier.customModelData(),
                 tier.modelKey(),
-                List.of(
+                List.<@NonNull ItemAttributeSpec>of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", tier.attackDamage()),
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", tier.attackSpeed()))));
     }
@@ -146,14 +159,14 @@ public final class ItemFactory {
                 KatanaDefinition.NAME_COLOR,
                 KatanaDefinition.CUSTOM_MODEL_DATA,
                 KatanaDefinition.MODEL_KEY,
-                List.of(
+                List.<@NonNull ItemAttributeSpec>of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", KatanaDefinition.ATTACK_DAMAGE),
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", KatanaDefinition.ATTACK_SPEED),
                         new ItemAttributeSpec(Attribute.ENTITY_INTERACTION_RANGE, "attack_range",
                                 KatanaDefinition.ATTACK_RANGE_BONUS))));
     }
 
-    public ItemStack createScythe(ScytheTier tier) {
+    public @NonNull ItemStack createScythe(ScytheTier tier) {
         return createItem(new ItemSpec(
                 tier.itemId(),
                 tier.baseMaterial(),
@@ -171,25 +184,26 @@ public final class ItemFactory {
         ItemStack item = new ItemStack(CrimsonSwordDefinition.BASE_MATERIAL);
         ItemMeta meta = item.getItemMeta();
         String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
-        String fallbackName = lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang);
+        String fallbackName = CrimsonSwordDefinition.NAME_COLOR.formatLegacy(
+                lang.getItemNameForLang(CrimsonSwordDefinition.LANG_PATH, serverLang));
 
-        ItemMetaManager.setItemName(meta, fallbackName);
+        ItemMetaCompat.setItemName(meta, fallbackName);
         if (!useClientSideTranslations()) {
-            ItemMetaManager.setDisplayName(meta, fallbackName);
+            ItemMetaCompat.setDisplayName(meta, fallbackName);
         }
-        ItemMetaManager.setCustomModelData(meta, CrimsonSwordDefinition.CUSTOM_MODEL_DATA);
-        ItemMetaManager.setItemModelIfSupported(meta, CrimsonSwordDefinition.MODEL_KEY);
-        ItemMetaManager.addMainHandAttribute(
+        ItemMetaCompat.setCustomModelData(meta, CrimsonSwordDefinition.CUSTOM_MODEL_DATA);
+        ItemMetaCompat.setItemModelIfSupported(meta, CrimsonSwordDefinition.MODEL_KEY);
+        ItemMetaCompat.addMainHandAttribute(
                 meta,
                 Attribute.ATTACK_DAMAGE,
                 CrimsonSwordDefinition.ITEM_ID + "_attack_damage",
                 CrimsonSwordDefinition.ATTACK_DAMAGE);
-        ItemMetaManager.addMainHandAttribute(
+        ItemMetaCompat.addMainHandAttribute(
                 meta,
                 Attribute.ATTACK_SPEED,
                 CrimsonSwordDefinition.ITEM_ID + "_attack_speed",
                 CrimsonSwordDefinition.ATTACK_SPEED);
-        meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, CrimsonSwordDefinition.ITEM_ID);
+        meta.getPersistentDataContainer().set(itemIdKey, ITEM_ID_DATA_TYPE, CrimsonSwordDefinition.ITEM_ID);
         item.setItemMeta(meta);
         crimsonSwordManager.initialize(item);
         return item;
@@ -225,7 +239,7 @@ public final class ItemFactory {
                 AnchorDefinition.NAME_COLOR,
                 0,
                 AnchorDefinition.MODEL_KEY,
-                List.of(
+                List.<@NonNull ItemAttributeSpec>of(
                         new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", AnchorDefinition.ATTACK_DAMAGE),
                         new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", AnchorDefinition.ATTACK_SPEED))));
     }
@@ -246,6 +260,77 @@ public final class ItemFactory {
 
     public boolean isThrowingKnife(ItemStack item) {
         return ItemIds.THROWING_KNIFE.equals(getItemId(item)) && isItemEnabled(ItemIds.THROWING_KNIFE);
+    }
+
+    public ItemStack createStormcleaver() {
+        return createItem(new ItemSpec(
+                StormcleaverDefinition.ITEM_ID,
+                StormcleaverDefinition.BASE_MATERIAL,
+                StormcleaverDefinition.LANG_PATH,
+                StormcleaverDefinition.TRANSLATION_KEY_BASE,
+                StormcleaverDefinition.LORE_LINE_COUNT,
+                StormcleaverDefinition.RARITY,
+                StormcleaverDefinition.NAME_COLOR,
+                StormcleaverDefinition.CUSTOM_MODEL_DATA,
+                StormcleaverDefinition.MODEL_KEY,
+                List.<@NonNull ItemAttributeSpec>of(
+                        new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage", StormcleaverDefinition.ATTACK_DAMAGE),
+                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", StormcleaverDefinition.ATTACK_SPEED))));
+    }
+
+    public ItemStack createEmberfang() {
+        ItemStack item = createItem(new ItemSpec(
+                EmberfangDefinition.ITEM_ID,
+                EmberfangDefinition.BASE_MATERIAL,
+                EmberfangDefinition.LANG_PATH,
+                EmberfangDefinition.TRANSLATION_KEY_BASE,
+                EmberfangDefinition.LORE_LINE_COUNT,
+                EmberfangDefinition.RARITY,
+                EmberfangDefinition.NAME_COLOR,
+                EmberfangDefinition.CUSTOM_MODEL_DATA,
+                EmberfangDefinition.MODEL_KEY,
+                List.<@NonNull ItemAttributeSpec>of(new ItemAttributeSpec(
+                        Attribute.ATTACK_DAMAGE,
+                        "attack_damage",
+                        EmberfangDefinition.ATTACK_DAMAGE_PENALTY))));
+        emberfangTextManager.updateText(item);
+        updateEmberfangAttackDamage(item);
+        return item;
+    }
+
+    public boolean updateEmberfangText(ItemStack item) {
+        if (!ItemIds.EMBERFANG.equals(getItemId(item))) {
+            return false;
+        }
+        emberfangTextManager.updateText(item);
+        updateEmberfangAttackDamage(item);
+        return true;
+    }
+
+    private void updateEmberfangAttackDamage(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return;
+        }
+
+        var existingModifiers = meta.getAttributeModifiers(Attribute.ATTACK_DAMAGE);
+        if (existingModifiers != null) {
+            for (AttributeModifier modifier : new ArrayList<>(existingModifiers)) {
+                if (EmberfangDefinition.ATTACK_DAMAGE_MODIFIER_KEY.equals(modifier.getKey())) {
+                    meta.removeAttributeModifier(Attribute.ATTACK_DAMAGE, modifier);
+                }
+            }
+        }
+        ItemMetaCompat.addMainHandAttribute(
+                meta,
+                Attribute.ATTACK_DAMAGE,
+                EmberfangDefinition.ITEM_ID + "_attack_damage",
+                EmberfangDefinition.ATTACK_DAMAGE_PENALTY);
+        item.setItemMeta(meta);
+    }
+
+    public double getEmberfangFireDamage() {
+        return emberfangTextManager.getConfiguredFireDamage();
     }
 
     public void updateSolarShieldVisuals(ItemStack item, int charges) {
@@ -271,56 +356,57 @@ public final class ItemFactory {
             default -> SolarShieldDefinition.MODEL_KEY_0;
         };
 
-        ItemMetaManager.setCustomModelData(meta, customModelData);
-        ItemMetaManager.setItemModelIfSupported(meta, modelKey);
+        ItemMetaCompat.setCustomModelData(meta, customModelData);
+        ItemMetaCompat.setItemModelIfSupported(meta, modelKey);
         item.setItemMeta(meta);
     }
 
-    private ItemStack createItem(ItemSpec spec) {
+    private @NonNull ItemStack createItem(ItemSpec spec) {
         ItemStack item = new ItemStack(spec.baseMaterial());
         ItemMeta meta = item.getItemMeta();
         boolean clientSideTranslations = useClientSideTranslations();
 
         String serverLang = plugin.getConfig().getString("translations.server_language", "en_us");
-        String fallbackName = lang.getItemNameForLang(spec.langPath(), serverLang);
-        List<String> fallbackLore = trimLore(lang.getItemLoreForLang(spec.langPath(), serverLang),
-                spec.loreLineCount());
+        String fallbackName = spec.nameColor().formatLegacy(lang.getItemNameForLang(spec.langPath(), serverLang));
+        List<String> fallbackLore = applyRarityColor(
+                trimLore(lang.getItemLoreForLang(spec.langPath(), serverLang), spec.loreLineCount()),
+                spec.rarity());
 
-        ItemMetaManager.setItemName(meta, fallbackName);
+        ItemMetaCompat.setItemName(meta, fallbackName);
         if (!clientSideTranslations) {
-            ItemMetaManager.setDisplayName(meta, fallbackName);
+            ItemMetaCompat.setDisplayName(meta, fallbackName);
         }
-        ItemMetaManager.setStringLore(meta, fallbackLore);
+        ItemMetaCompat.setLore(meta, fallbackLore);
         if (spec.customModelData() > 0) {
-            ItemMetaManager.setCustomModelData(meta, spec.customModelData());
+            ItemMetaCompat.setCustomModelData(meta, spec.customModelData());
         }
         if (spec.modelKey() != null) {
-            ItemMetaManager.setItemModelIfSupported(meta, spec.modelKey());
+            ItemMetaCompat.setItemModelIfSupported(meta, spec.modelKey());
         }
         for (ItemAttributeSpec attribute : spec.attributes()) {
-            ItemMetaManager.addMainHandAttribute(
+            ItemMetaCompat.addMainHandAttribute(
                     meta,
                     attribute.attribute(),
                     spec.itemId() + "_" + attribute.idSuffix(),
                     attribute.value());
         }
 
-        meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, spec.itemId());
+        meta.getPersistentDataContainer().set(itemIdKey, ITEM_ID_DATA_TYPE, spec.itemId());
         item.setItemMeta(meta);
 
         if (pepin.pepeforge.util.env.ServerEnv.hasDataComponentApi()) {
             if (spec.itemId().equals(ItemIds.THROWING_KNIFE)) {
-                DataComponentManager.applyMaxStackSize(item, 16);
+                DataComponentCompat.applyMaxStackSize(item, 16);
             }
         }
 
         if (clientSideTranslations) {
-            DataComponentManager.applyTranslatableItemTextData(
+            DataComponentCompat.applyTranslatableItemTextData(
                     item,
                     spec.translationKeyBase() + ".name",
                     spec.nameColor().colorName(),
                     buildLoreKeys(spec.translationKeyBase(), spec.loreLineCount()),
-                    buildLoreColors(spec.loreLineCount(), spec.rarity()));
+                    buildLoreColors(fallbackLore, spec.rarity()));
         }
         return item;
     }
@@ -353,6 +439,8 @@ public final class ItemFactory {
             case ItemIds.SOLAR_SHIELD -> createSolarShield();
             case ItemIds.ANCHOR -> createAnchor();
             case ItemIds.THROWING_KNIFE -> createThrowingKnife();
+            case ItemIds.STORMCLEAVER -> createStormcleaver();
+            case ItemIds.EMBERFANG -> createEmberfang();
             default -> null;
         };
     }
@@ -433,19 +521,34 @@ public final class ItemFactory {
         return ItemIds.ANCHOR.equals(getItemId(item)) && isItemEnabled(ItemIds.ANCHOR);
     }
 
+    public boolean isStormcleaver(ItemStack item) {
+        return ItemIds.STORMCLEAVER.equals(getItemId(item)) && isItemEnabled(ItemIds.STORMCLEAVER);
+    }
+
+    public boolean isEmberfang(ItemStack item) {
+        return ItemIds.EMBERFANG.equals(getItemId(item)) && isItemEnabled(ItemIds.EMBERFANG);
+    }
+
     public void setKatanaParryVisual(ItemStack item, boolean active) {
         if (item == null || !isKatana(item) || !item.hasItemMeta()) {
             return;
         }
         ItemMeta meta = item.getItemMeta();
         int targetData = active ? KatanaDefinition.PARRY_MODEL_DATA : KatanaDefinition.CUSTOM_MODEL_DATA;
-        if (ItemMetaManager.hasCustomModelData(meta, targetData)) {
+        if (ItemMetaCompat.hasCustomModelData(meta, targetData)) {
             return;
         }
-        ItemMetaManager.setCustomModelData(meta, targetData);
-        ItemMetaManager.setItemModelIfSupported(meta,
+        ItemMetaCompat.setCustomModelData(meta, targetData);
+        ItemMetaCompat.setItemModelIfSupported(meta,
                 active ? KatanaDefinition.PARRY_MODEL_KEY : KatanaDefinition.MODEL_KEY);
         item.setItemMeta(meta);
+    }
+
+    public boolean hasKatanaParryVisual(ItemStack item) {
+        return item != null
+                && isKatana(item)
+                && item.hasItemMeta()
+                && ItemMetaCompat.hasCustomModelData(item.getItemMeta(), KatanaDefinition.PARRY_MODEL_DATA);
     }
 
     public boolean hasWindBlade(Inventory inventory, WindBladeTier wantedTier) {
@@ -487,7 +590,7 @@ public final class ItemFactory {
         if (item == null || !item.hasItemMeta()) {
             return null;
         }
-        return item.getItemMeta().getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
+        return item.getItemMeta().getPersistentDataContainer().get(itemIdKey, ITEM_ID_DATA_TYPE);
     }
 
     public String getBestName(ItemStack item) {
@@ -559,6 +662,8 @@ public final class ItemFactory {
             case ItemIds.SOLAR_SHIELD -> lang.itemFallbackName(SolarShieldDefinition.LANG_PATH);
             case ItemIds.ANCHOR -> lang.itemFallbackName(AnchorDefinition.LANG_PATH);
             case ItemIds.THROWING_KNIFE -> lang.itemFallbackName(ThrowingKnifeDefinition.LANG_PATH);
+            case ItemIds.STORMCLEAVER -> lang.itemFallbackName(StormcleaverDefinition.LANG_PATH);
+            case ItemIds.EMBERFANG -> lang.itemFallbackName(EmberfangDefinition.LANG_PATH);
             default -> null;
         };
     }
@@ -593,11 +698,30 @@ public final class ItemFactory {
         return new ArrayList<>(lore.subList(0, maxLines));
     }
 
-    private List<String> buildLoreColors(int loreLineCount, ItemRarity rarity) {
-        List<String> colors = new ArrayList<>(loreLineCount);
-        int rarityLoreLineNumber = loreLineCount - 1;
-        for (int i = 1; i <= loreLineCount; i++) {
-            colors.add(i == rarityLoreLineNumber ? rarity.colorName() : null);
+    private List<String> applyRarityColor(List<String> lore, ItemRarity rarity) {
+        int rarityLineIndex = findRarityLineIndex(lore);
+        if (rarityLineIndex >= 0 && rarityLineIndex < lore.size()) {
+            lore.set(rarityLineIndex, rarity.formatLegacy(lore.get(rarityLineIndex)));
+        }
+        return lore;
+    }
+
+    private int findRarityLineIndex(List<String> lore) {
+        if (lore.isEmpty()) {
+            return -1;
+        }
+
+        int lastLineIndex = lore.size() - 1;
+        return ColorUtil.stripLeadingColorCodes(lore.get(lastLineIndex)).matches("-+")
+                ? lastLineIndex - 1
+                : lastLineIndex;
+    }
+
+    private List<String> buildLoreColors(List<String> lore, ItemRarity rarity) {
+        List<String> colors = new ArrayList<>(lore.size());
+        int rarityLineIndex = findRarityLineIndex(lore);
+        for (int i = 0; i < lore.size(); i++) {
+            colors.add(i == rarityLineIndex ? rarity.colorName() : null);
         }
         return colors;
     }
@@ -612,7 +736,7 @@ public final class ItemFactory {
             ItemNameColor nameColor,
             int customModelData,
             NamespacedKey modelKey,
-            List<ItemAttributeSpec> attributes) {
+            List<@NonNull ItemAttributeSpec> attributes) {
     }
 
     private record ItemAttributeSpec(

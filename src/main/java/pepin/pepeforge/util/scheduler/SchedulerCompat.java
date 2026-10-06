@@ -5,11 +5,21 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public final class SchedulerCompat {
 
     private static final boolean REGIONIZED;
     private static java.lang.reflect.Method teleportAsyncMethod;
+    private static final Method serverStoppingMethod;
+    private static final Method asyncSchedulerGetter;
+    private static final Method asyncRunDelayedMethod;
+    private static final Method asyncTaskCancelMethod;
 
     static {
         boolean regionized;
@@ -26,6 +36,29 @@ public final class SchedulerCompat {
         } catch (NoSuchMethodException ignored) {
             teleportAsyncMethod = null;
         }
+
+        Method stoppingMethod;
+        try {
+            stoppingMethod = Bukkit.class.getMethod("isStopping");
+        } catch (NoSuchMethodException ignored) {
+            stoppingMethod = null;
+        }
+        serverStoppingMethod = stoppingMethod;
+
+        Method asyncGetter = null;
+        Method asyncRunDelayed = null;
+        Method asyncTaskCancel = null;
+        try {
+            asyncGetter = Bukkit.class.getMethod("getAsyncScheduler");
+            asyncRunDelayed = asyncGetter.getReturnType().getMethod(
+                    "runDelayed", Plugin.class, Consumer.class, long.class, TimeUnit.class);
+            asyncTaskCancel = asyncRunDelayed.getReturnType().getMethod("cancel");
+        } catch (NoSuchMethodException ignored) {
+            // Older Bukkit implementations do not provide the Folia async scheduler API.
+        }
+        asyncSchedulerGetter = asyncGetter;
+        asyncRunDelayedMethod = asyncRunDelayed;
+        asyncTaskCancelMethod = asyncTaskCancel;
     }
 
     private SchedulerCompat() {
@@ -33,6 +66,21 @@ public final class SchedulerCompat {
 
     public static boolean isRegionized() {
         return REGIONIZED;
+    }
+
+    public static boolean isServerStopping() {
+        if (serverStoppingMethod == null) {
+            return false;
+        }
+        try {
+            return (boolean) serverStoppingMethod.invoke(null);
+        } catch (IllegalAccessException | InvocationTargetException exception) {
+            throw new IllegalStateException("Failed to determine whether the server is stopping", exception);
+        }
+    }
+
+    public static boolean isOwnedByCurrentRegion(Entity entity) {
+        return !REGIONIZED || Bukkit.isOwnedByCurrentRegion(entity);
     }
 
     public static void teleport(Entity entity, Location location) {
@@ -84,6 +132,60 @@ public final class SchedulerCompat {
         }
     }
 
+    public static ScheduledTaskCompat runLaterAsync(
+            Plugin plugin,
+            Runnable runnable,
+            long delayTicks
+    ) {
+        if (!REGIONIZED) {
+            var task = Bukkit.getScheduler().runTaskLaterAsynchronously(
+                    plugin,
+                    runnable,
+                    delayTicks
+            );
+            return task::cancel;
+        }
+
+        if (asyncSchedulerGetter == null || asyncRunDelayedMethod == null || asyncTaskCancelMethod == null) {
+            throw new IllegalStateException("Folia async scheduler API is unavailable");
+        }
+
+        long delayMillis = Math.multiplyExact(Math.max(1L, delayTicks), 50L);
+        try {
+            Object asyncScheduler = asyncSchedulerGetter.invoke(null);
+            Object task = asyncRunDelayedMethod.invoke(
+                    asyncScheduler,
+                    plugin,
+                    (Consumer<Object>) ignored -> runnable.run(),
+                    delayMillis,
+                    TimeUnit.MILLISECONDS
+            );
+            return () -> invokeAsyncTaskCancel(task);
+        } catch (IllegalAccessException | InvocationTargetException exception) {
+            Throwable cause = exception instanceof InvocationTargetException invocationException
+                    ? invocationException.getCause()
+                    : exception;
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new IllegalStateException("Could not schedule a Folia async task", cause);
+        }
+    }
+
+    private static void invokeAsyncTaskCancel(Object task) {
+        try {
+            asyncTaskCancelMethod.invoke(task);
+        } catch (IllegalAccessException | InvocationTargetException exception) {
+            Throwable cause = exception instanceof InvocationTargetException invocationException
+                    ? invocationException.getCause()
+                    : exception;
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new IllegalStateException("Could not cancel a Folia async task", cause);
+        }
+    }
+
     public static ScheduledTaskCompat runTimer(
         JavaPlugin plugin,
         Runnable runnable,
@@ -113,15 +215,24 @@ public final class SchedulerCompat {
     }
 
     public static void runForPlayer(
-            Player player,
-            JavaPlugin plugin,
-            Runnable runnable
+        Player player,
+        JavaPlugin plugin,
+        Runnable runnable
+    ) {
+        runForPlayer(player, plugin, runnable, null);
+    }
+
+    public static void runForPlayer(
+        Player player,
+        JavaPlugin plugin,
+        Runnable runnable,
+        Runnable retired
     ) {
         if (REGIONIZED) {
             player.getScheduler().run(
                     plugin,
                     task -> runnable.run(),
-                    null
+                    retired
             );
         } else {
             Bukkit.getScheduler().runTask(
@@ -150,10 +261,40 @@ public final class SchedulerCompat {
         }
     }
 
+    public static void runAtLocation(
+            Location location,
+            JavaPlugin plugin,
+            Runnable runnable
+    ) {
+        if (REGIONIZED) {
+            Bukkit.getRegionScheduler().run(
+                    plugin,
+                    location,
+                    task -> runnable.run()
+            );
+        } else {
+            Bukkit.getScheduler().runTask(
+                    plugin,
+                    runnable
+            );
+        }
+    }
+
     public static ScheduledTaskCompat runTimerForEntity(
         org.bukkit.entity.Entity entity,
         JavaPlugin plugin,
         Runnable runnable,
+        long delayTicks,
+        long periodTicks
+    ) {
+        return runTimerForEntity(entity, plugin, runnable, null, delayTicks, periodTicks);
+    }
+
+    public static ScheduledTaskCompat runTimerForEntity(
+        org.bukkit.entity.Entity entity,
+        JavaPlugin plugin,
+        Runnable runnable,
+        Runnable retired,
         long delayTicks,
         long periodTicks
     ) {
@@ -162,11 +303,13 @@ public final class SchedulerCompat {
             var task = entity.getScheduler().runAtFixedRate(
                     plugin,
                     scheduledTask -> runnable.run(),
-                    null,
+                    retired,
                     foliaDelay,
                     periodTicks
             );
-            // If player logs out, the task will be cancelled by Folia, so we return a no-op cancel function in that case
+            if (task == null && retired != null) {
+                retired.run();
+            }
             return task != null ? task::cancel : () -> {};
         }
 

@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 public final class ColorUtil {
 
     private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("&#([0-9a-fA-F]{6})");
+    private static final Pattern LEADING_COLOR_CODES_PATTERN = Pattern.compile(
+            "^(?:(?:§x(?:§[0-9a-f]){6})|§[0-9a-f])+", Pattern.CASE_INSENSITIVE);
 
     public static final String BLACK = "§0";
     public static final String DARK_BLUE = "§1";
@@ -45,6 +47,13 @@ public final class ColorUtil {
             return null;
         }
         return translateAlternateColorCodes('&', translateHexColors(text));
+    }
+
+    public static String stripLeadingColorCodes(String text) {
+        if (text == null) {
+            return null;
+        }
+        return LEADING_COLOR_CODES_PATTERN.matcher(translate(text)).replaceFirst("");
     }
 
     private static String translateHexColors(String value) {
