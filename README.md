@@ -2,7 +2,7 @@
 
 # Pepe's Forge
 ![License](https://img.shields.io/github/license/mazurpiotr/pepeforge?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-1.4.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.4.1-blue?style=for-the-badge)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11+-brightgreen?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-21%20%7C%2025-orange?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Purpur%20%7C%20Spigot%20%7C%20Folia-fuchsia?style=for-the-badge)
@@ -124,7 +124,7 @@ Suggestions, feedback and feature requests are always appreciated.
 ## Compatibility
 
 - Minecraft 1.21.11+
-- Use the Java runtime required by the selected Minecraft release
+- Java 21 for Minecraft 1.21.11; Java 25 for the 26.x builds
 - Paper, Purpur, Spigot and Folia
 
 Paper, Purpur and Folia provide the best experience when client-side item translations are enabled. Spigot and CraftBukkit use the server-side fallback text path.

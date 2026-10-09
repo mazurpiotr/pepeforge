@@ -13,8 +13,8 @@ class ResourcePackServiceTest {
     @Test
     void buildsTheVersionedGitHubReleaseUrl() {
         assertEquals(
-                "https://github.com/mazurpiotr/pepeforge/releases/download/v1.4.0/PepeForge-ResourcePack.zip",
-                ResourcePackService.buildPackUrl("1.4.0"));
+                "https://github.com/mazurpiotr/pepeforge/releases/download/v1.4.1/PepeForge-ResourcePack.zip",
+                ResourcePackService.buildPackUrl("1.4.1"));
     }
 
     @Test
