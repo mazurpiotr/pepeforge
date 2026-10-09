@@ -17,7 +17,7 @@ translations:
   server_language: "en_us"
 
 # Resource Pack delivery.
-# MANAGER:vThe server owner must handle Resource Pack delivery, e.g. using an external plugin.
+# MANAGER: The server owner must handle Resource Pack delivery, e.g. using an external plugin.
 # GITHUB: PepeForge sends the release pack from GitHub to players.
 resource_pack:
   mode: MANAGER

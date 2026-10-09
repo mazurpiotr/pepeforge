@@ -5,4 +5,5 @@ scripts/
 .jqwik-database
 PepeForge-ResourcePack.zip
 PepeForge-ResourcePack.zip.sha1
+resource-pack.properties
 dependency-reduced-pom.xml

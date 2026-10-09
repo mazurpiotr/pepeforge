@@ -49,6 +49,8 @@ resource_pack:
   mode: GITHUB
 ```
 
+On first startup in `GITHUB` mode, Pepe's Forge copies the build's default release URL and SHA-1 into `plugins/PepeForge/resource-pack.properties`. Edit this file to use a different Resource Pack URL. At startup, Pepe's Forge checks the URL's `.sha1` sidecar and updates `sha1` if the sidecar matches the downloaded pack. If the sidecar is unavailable, a matching local SHA-1 can still be used.
+
 ### Language Support
 
 On Paper, Purpur, and Folia, item names and descriptions can follow each player's Minecraft client language when client-side translations are enabled. The Resource Pack must be loaded for this feature; otherwise, players may see raw translation keys such as `item.pepeforge.katana.name`.
