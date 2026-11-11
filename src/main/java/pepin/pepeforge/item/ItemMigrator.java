@@ -54,6 +54,13 @@ public class ItemMigrator {
             return false;
         }
 
+        if (itemFactory.refreshRapier(item)) {
+            return true;
+        }
+        if (itemFactory.refreshObsidianGlaive(item)) {
+            return true;
+        }
+
         ItemMeta oldMeta = item.getItemMeta();
         if (oldMeta.hasItemModel()) {
             return false; // Already modernized
@@ -61,7 +68,7 @@ public class ItemMigrator {
 
         NamespacedKey defaultModel = defaultModelKeys.get(itemId);
         if (defaultModel != null) {
-            ItemMetaCompat.setItemModelIfSupported(oldMeta, defaultModel);
+            ItemMetaCompat.setItemModel(oldMeta, defaultModel);
             item.setItemMeta(oldMeta);
 
             // Re-apply any dynamic visuals that might depend on NBT state (e.g. Solar Shield charges)

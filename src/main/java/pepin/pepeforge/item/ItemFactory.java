@@ -6,6 +6,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,11 +17,20 @@ import pepin.pepeforge.tools.scythe.ScytheTier;
 import pepin.pepeforge.util.ColorUtil;
 import pepin.pepeforge.util.itemmeta.ItemMetaCompat;
 import pepin.pepeforge.util.itemmeta.DataComponentCompat;
+import pepin.pepeforge.util.itemmeta.AttackAnimationCompat;
+import pepin.pepeforge.util.itemmeta.AttackRangeCompat;
+import pepin.pepeforge.weapons.obsidianglaive.ObsidianGlaiveDefinition;
+import pepin.pepeforge.weapons.obsidianglaive.ObsidianGlaiveSettings;
 import pepin.pepeforge.weapons.crescentbow.CrescentBowDefinition;
 import pepin.pepeforge.weapons.crescentspear.CrescentSpearDefinition;
+import pepin.pepeforge.weapons.crescentkhopesh.CrescentKhopeshDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
 import pepin.pepeforge.weapons.greatsword.GreatswordTier;
+import pepin.pepeforge.weapons.rapier.RapierMode;
+import pepin.pepeforge.weapons.rapier.RapierSettings;
+import pepin.pepeforge.weapons.rapier.RapierTier;
+import pepin.pepeforge.weapons.rapier.IceRapierSettings;
 import pepin.pepeforge.weapons.katana.KatanaDefinition;
 import pepin.pepeforge.weapons.solarshield.SolarShieldDefinition;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
@@ -34,12 +44,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ItemFactory {
 
     private static final List<String> CANONICAL_ITEM_IDS = List.of(
             ItemIds.CRESCENT_BOW,
             ItemIds.CRESCENT_SPEAR,
+            ItemIds.CRESCENT_KHOPESH,
+            ItemIds.OBSIDIAN_GLAIVE,
             ItemIds.CHISEL,
             ItemIds.KATANA,
             ItemIds.IRON_WIND_BLADE,
@@ -48,6 +62,10 @@ public final class ItemFactory {
             ItemIds.IRON_GREATSWORD,
             ItemIds.DIAMOND_GREATSWORD,
             ItemIds.NETHERITE_GREATSWORD,
+            ItemIds.IRON_RAPIER,
+            ItemIds.DIAMOND_RAPIER,
+            ItemIds.NETHERITE_RAPIER,
+            ItemIds.ICE_RAPIER,
             ItemIds.IRON_SCYTHE,
             ItemIds.DIAMOND_SCYTHE,
             ItemIds.NETHERITE_SCYTHE,
@@ -65,6 +83,19 @@ public final class ItemFactory {
     private final PluginLang lang;
     private final CrimsonSwordManager crimsonSwordManager;
     private final EmberfangTextManager emberfangTextManager;
+    private final RapierSettings rapierSettings;
+    private final IceRapierSettings iceRapierSettings;
+    private final NamespacedKey iceRapierWearKey;
+    private final NamespacedKey rapierModeKey;
+    private final NamespacedKey rapierRevisionKey;
+    private final String rapierRevision = UUID.randomUUID().toString();
+    private final AtomicBoolean animationWarningLogged = new AtomicBoolean();
+    private final AtomicBoolean glaiveRangeWarningLogged = new AtomicBoolean();
+    private final ObsidianGlaiveSettings glaiveSettings;
+    private final NamespacedKey glaiveIdentityKey;
+    private final NamespacedKey glaiveStageKey;
+    private final NamespacedKey glaiveRevisionKey;
+    private final String glaiveRevision = UUID.randomUUID().toString();
 
     public ItemFactory(JavaPlugin plugin, PluginLang lang, CrimsonSwordManager crimsonSwordManager) {
         this.itemIdKey = new NamespacedKey(plugin, "item_id");
@@ -72,6 +103,227 @@ public final class ItemFactory {
         this.lang = lang;
         this.crimsonSwordManager = crimsonSwordManager;
         this.emberfangTextManager = new EmberfangTextManager(plugin, lang);
+        this.rapierSettings = RapierSettings.fromConfig(plugin.getConfig());
+        this.iceRapierSettings = IceRapierSettings.fromConfig(plugin.getConfig());
+        this.iceRapierWearKey = new NamespacedKey(plugin, "ice_rapier_wear");
+        this.rapierModeKey = new NamespacedKey(plugin, "rapier_mode");
+        this.rapierRevisionKey = new NamespacedKey(plugin, "rapier_revision");
+        this.glaiveSettings = ObsidianGlaiveSettings.fromConfig(plugin.getConfig());
+        this.glaiveIdentityKey = new NamespacedKey(plugin, "obsidian_glaive_identity");
+        this.glaiveStageKey = new NamespacedKey(plugin, "obsidian_glaive_stage");
+        this.glaiveRevisionKey = new NamespacedKey(plugin, "obsidian_glaive_revision");
+    }
+
+    public ItemStack createObsidianGlaive() {
+        ItemStack item = createItem(new ItemSpec(ObsidianGlaiveDefinition.ITEM_ID,
+                ObsidianGlaiveDefinition.BASE_MATERIAL, ObsidianGlaiveDefinition.LANG_PATH,
+                ObsidianGlaiveDefinition.TRANSLATION_KEY_BASE, ObsidianGlaiveDefinition.LORE_LINE_COUNT,
+                ObsidianGlaiveDefinition.RARITY, ObsidianGlaiveDefinition.NAME_COLOR,
+                ObsidianGlaiveDefinition.CUSTOM_MODEL_DATA, ObsidianGlaiveDefinition.MODEL_KEY, List.of()));
+        prepareObsidianGlaive(item, 0);
+        return item;
+    }
+
+    public boolean isObsidianGlaive(ItemStack item) {
+        return ItemIds.OBSIDIAN_GLAIVE.equals(getItemId(item)) && isItemEnabled(ItemIds.OBSIDIAN_GLAIVE);
+    }
+
+    public String getObsidianGlaiveIdentity(ItemStack item) {
+        return item != null && item.hasItemMeta() ? item.getItemMeta().getPersistentDataContainer()
+                .get(glaiveIdentityKey, PersistentDataType.STRING) : null;
+    }
+
+    public int getObsidianGlaiveStage(ItemStack item) {
+        return item != null && item.hasItemMeta() ? item.getItemMeta().getPersistentDataContainer()
+                .getOrDefault(glaiveStageKey, PersistentDataType.INTEGER, 0) : 0;
+    }
+
+    public boolean hasCurrentGlaiveRevision(ItemStack item) {
+        return item != null && item.hasItemMeta() && glaiveRevision.equals(item.getItemMeta()
+                .getPersistentDataContainer().get(glaiveRevisionKey, PersistentDataType.STRING));
+    }
+
+    public boolean refreshObsidianGlaive(ItemStack item) {
+        if (!ItemIds.OBSIDIAN_GLAIVE.equals(getItemId(item)) || hasCurrentGlaiveRevision(item)) {
+            return false;
+        }
+        prepareObsidianGlaive(item, 0);
+        return true;
+    }
+
+    public void beginObsidianGlaiveCombo(ItemStack item) {
+        if (!ItemIds.OBSIDIAN_GLAIVE.equals(getItemId(item))) {
+            return;
+        }
+        // Crafting copies recipe metadata, so each equipment session needs a fresh token.
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(glaiveIdentityKey, PersistentDataType.STRING, UUID.randomUUID().toString());
+        item.setItemMeta(meta);
+        prepareObsidianGlaive(item, 0);
+    }
+
+    public void prepareObsidianGlaive(ItemStack item, int stage) {
+        if (!ItemIds.OBSIDIAN_GLAIVE.equals(getItemId(item))) {
+            return;
+        }
+        int nextStage = glaiveSettings.stabEnabled() ? Math.max(0, Math.min(2, stage)) : 0;
+        boolean stab = nextStage == 2;
+        ItemMeta meta = item.getItemMeta();
+        if (!meta.getPersistentDataContainer().has(glaiveIdentityKey, PersistentDataType.STRING)) {
+            meta.getPersistentDataContainer().set(glaiveIdentityKey, PersistentDataType.STRING, UUID.randomUUID().toString());
+        }
+        meta.getPersistentDataContainer().set(glaiveStageKey, PersistentDataType.INTEGER, nextStage);
+        meta.getPersistentDataContainer().set(glaiveRevisionKey, PersistentDataType.STRING, glaiveRevision);
+        ItemMetaCompat.setItemModel(meta, ObsidianGlaiveDefinition.MODEL_KEY);
+        replaceGlaiveAttribute(meta, Attribute.ATTACK_DAMAGE, "attack_damage", glaiveSettings.damage() - 1.0D);
+        replaceGlaiveAttribute(meta, Attribute.ATTACK_SPEED, "attack_speed", ObsidianGlaiveDefinition.ATTACK_SPEED - 4.0D);
+        replaceGlaiveAttribute(meta, Attribute.ENTITY_INTERACTION_RANGE, "attack_range", 0.0D);
+        item.setItemMeta(meta);
+        if (!AttackAnimationCompat.apply(item, stab) && animationWarningLogged.compareAndSet(false, true)) {
+            plugin.getLogger().warning("This server has no supported attack animation API. "
+                    + "Obsidian Glaive retains its combat behavior but uses the default client animation.");
+        }
+        boolean rangeApplied = AttackRangeCompat.apply(item,
+                stab ? ObsidianGlaiveDefinition.STAB_MIN_RANGE : 0.0D,
+                stab ? ObsidianGlaiveDefinition.STAB_RANGE : ObsidianGlaiveDefinition.WHACK_RANGE,
+                stab ? ObsidianGlaiveDefinition.STAB_MIN_RANGE : 0.0D,
+                stab ? ObsidianGlaiveDefinition.STAB_CREATIVE_RANGE : ObsidianGlaiveDefinition.WHACK_RANGE,
+                stab ? 0.125D : 0.3D);
+        if (!rangeApplied) {
+            meta = item.getItemMeta();
+            replaceGlaiveAttribute(meta, Attribute.ENTITY_INTERACTION_RANGE, "attack_range",
+                    (stab ? ObsidianGlaiveDefinition.STAB_RANGE : ObsidianGlaiveDefinition.WHACK_RANGE) - 3.0D);
+            item.setItemMeta(meta);
+            if (glaiveRangeWarningLogged.compareAndSet(false, true)) {
+                plugin.getLogger().warning("This server has no supported attack range component API. "
+                        + "Obsidian Glaive uses an interaction-range modifier with server-side distance validation.");
+            }
+        }
+    }
+
+    private void replaceGlaiveAttribute(ItemMeta meta, Attribute attribute, String suffix, double amount) {
+        NamespacedKey key = new NamespacedKey("pepeforge", ItemIds.OBSIDIAN_GLAIVE + "_" + suffix);
+        var modifiers = meta.getAttributeModifiers(attribute);
+        if (modifiers != null) {
+            for (AttributeModifier modifier : new ArrayList<>(modifiers)) {
+                if (key.equals(modifier.getKey())) {
+                    meta.removeAttributeModifier(attribute, modifier);
+                }
+            }
+        }
+        if (amount != 0.0D) {
+            ItemMetaCompat.addMainHandAttribute(meta, attribute, ItemIds.OBSIDIAN_GLAIVE + "_" + suffix, amount);
+        }
+    }
+
+    public @NonNull ItemStack createRapier(RapierTier tier) {
+        ItemStack item = createItem(new ItemSpec(
+                tier.itemId(), tier.baseMaterial(), tier.langPath(), tier.translationKeyBase(),
+                tier.loreLineCount(), tier.rarity(), tier.nameColor(), tier.customModelData(), tier.modelKey(),
+                List.of()));
+        updateRapierMode(item, RapierMode.THRUST);
+        return item;
+    }
+
+    public RapierTier getRapierTier(ItemStack item) {
+        String itemId = getItemId(item);
+        return itemId != null && isItemEnabled(itemId) ? RapierTier.fromItemId(itemId) : null;
+    }
+
+    public RapierMode getRapierMode(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return RapierMode.THRUST;
+        }
+        String value = item.getItemMeta().getPersistentDataContainer().get(rapierModeKey, ITEM_ID_DATA_TYPE);
+        return RapierMode.fromStoredValue(value);
+    }
+
+    public boolean refreshRapier(ItemStack item) {
+        RapierTier tier = getRapierTier(item);
+        if (tier == null) {
+            return false;
+        }
+        ItemMeta meta = item.getItemMeta();
+        boolean currentRevision = rapierRevision.equals(meta.getPersistentDataContainer()
+                .get(rapierRevisionKey, ITEM_ID_DATA_TYPE));
+        boolean currentWear = tier != RapierTier.ICE || meta instanceof Damageable durability
+                && durability.hasMaxDamage() && durability.getMaxDamage() == iceRapierSettings.maxDurability()
+                && durability.getDamage() == meta.getPersistentDataContainer()
+                        .getOrDefault(iceRapierWearKey, PersistentDataType.INTEGER, -1);
+        if (currentRevision && currentWear) {
+            return false;
+        }
+        updateRapierMode(item, getRapierMode(item));
+        return true;
+    }
+
+    public void updateRapierMode(ItemStack item, RapierMode mode) {
+        RapierTier tier = RapierTier.fromItemId(getItemId(item));
+        if (tier == null) {
+            return;
+        }
+        Objects.requireNonNull(mode, "Rapier mode");
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(rapierModeKey, ITEM_ID_DATA_TYPE, mode.name());
+        meta.getPersistentDataContainer().set(rapierRevisionKey, ITEM_ID_DATA_TYPE, rapierRevision);
+        ItemMetaCompat.setItemModel(meta, tier.modelKey());
+        double attackDamage = rapierSettings.attackDamage(tier);
+        if (tier == RapierTier.ICE) {
+            if (!(meta instanceof Damageable durability)) {
+                throw new IllegalStateException("Ice Rapier requires damageable item metadata");
+            }
+            int maximum = iceRapierSettings.maxDurability();
+            if (durability.hasMaxDamage() && durability.getMaxDamage() != maximum) {
+                int oldMaximum = Math.max(1, durability.getMaxDamage());
+                int scaledWear = (int) Math.round((double) durability.getDamage() * maximum / oldMaximum);
+                durability.setDamage(Math.max(0, Math.min(maximum - 1, scaledWear)));
+            }
+            durability.setMaxDamage(maximum);
+            attackDamage = iceRapierSettings.attackDamage(durability.getDamage(), maximum);
+            meta.getPersistentDataContainer().set(iceRapierWearKey, PersistentDataType.INTEGER, durability.getDamage());
+        }
+        replaceRapierAttribute(meta, tier, Attribute.ATTACK_DAMAGE, "attack_damage",
+                attackDamage - 1.0D);
+        replaceRapierAttribute(meta, tier, Attribute.ATTACK_SPEED, "attack_speed",
+                rapierSettings.attackSpeed() - 4.0D);
+        replaceRapierAttribute(meta, tier, Attribute.ENTITY_INTERACTION_RANGE, "attack_range",
+                mode.attackRangeBonus());
+
+        String serverLanguage = plugin.getConfig().getString("translations.server_language", "en_us");
+        List<String> lore = applyRarityColor(new ArrayList<>(
+                trimLore(lang.getItemLoreForLang(tier.langPath(), serverLanguage), tier.loreLineCount())),
+                tier.rarity());
+        List<String> colors = buildLoreColors(lore, tier.rarity());
+        lore.add(lang.getTextForLang("items." + tier.langPath() + ".mode_lore." + mode.modeKey(), serverLanguage));
+        colors.add(null);
+        ItemMetaCompat.setLore(meta, lore);
+        item.setItemMeta(meta);
+
+        if (useClientSideTranslations()) {
+            List<String> keys = buildLoreKeys(tier.translationKeyBase(), tier.loreLineCount());
+            keys.add(tier.translationKeyBase() + ".mode." + mode.modeKey());
+            DataComponentCompat.applyTranslatableItemTextData(item, tier.translationKeyBase() + ".name",
+                    tier.nameColor().colorName(), keys, colors);
+        }
+        if (!AttackAnimationCompat.apply(item, mode == RapierMode.THRUST)
+                && animationWarningLogged.compareAndSet(false, true)) {
+            plugin.getLogger().warning("This server has no supported attack animation API. "
+                    + "Rapiers retain their combat modes but use the default client animation.");
+        }
+    }
+
+    private void replaceRapierAttribute(ItemMeta meta, RapierTier tier, Attribute attribute,
+                                       String suffix, double amount) {
+        NamespacedKey key = new NamespacedKey("pepeforge", tier.itemId() + "_" + suffix);
+        var modifiers = meta.getAttributeModifiers(attribute);
+        if (modifiers != null) {
+            for (AttributeModifier modifier : new ArrayList<>(modifiers)) {
+                if (key.equals(modifier.getKey())) {
+                    meta.removeAttributeModifier(attribute, modifier);
+                }
+            }
+        }
+        ItemMetaCompat.addMainHandAttribute(meta, attribute, tier.itemId() + "_" + suffix, amount);
     }
 
     public @NonNull ItemStack createWindBlade(WindBladeTier tier) {
@@ -134,6 +386,23 @@ public final class ItemFactory {
                 List.of()));
     }
 
+    public ItemStack createCrescentKhopesh() {
+        return createItem(new ItemSpec(
+                CrescentKhopeshDefinition.ITEM_ID,
+                CrescentKhopeshDefinition.BASE_MATERIAL,
+                CrescentKhopeshDefinition.LANG_PATH,
+                CrescentKhopeshDefinition.TRANSLATION_KEY_BASE,
+                CrescentKhopeshDefinition.LORE_LINE_COUNT,
+                CrescentKhopeshDefinition.RARITY,
+                CrescentKhopeshDefinition.NAME_COLOR,
+                CrescentKhopeshDefinition.CUSTOM_MODEL_DATA,
+                CrescentKhopeshDefinition.MODEL_KEY,
+                List.<@NonNull ItemAttributeSpec>of(
+                        new ItemAttributeSpec(Attribute.ATTACK_DAMAGE, "attack_damage",
+                                CrescentKhopeshDefinition.BASE_ATTACK_DAMAGE - 1.0D),
+                        new ItemAttributeSpec(Attribute.ATTACK_SPEED, "attack_speed", -2.4D))));
+    }
+
     public ItemStack createChisel() {
         return createItem(new ItemSpec(
                 ChiselDefinition.ITEM_ID,
@@ -192,7 +461,7 @@ public final class ItemFactory {
             ItemMetaCompat.setDisplayName(meta, fallbackName);
         }
         ItemMetaCompat.setCustomModelData(meta, CrimsonSwordDefinition.CUSTOM_MODEL_DATA);
-        ItemMetaCompat.setItemModelIfSupported(meta, CrimsonSwordDefinition.MODEL_KEY);
+        ItemMetaCompat.setItemModel(meta, CrimsonSwordDefinition.MODEL_KEY);
         ItemMetaCompat.addMainHandAttribute(
                 meta,
                 Attribute.ATTACK_DAMAGE,
@@ -292,7 +561,7 @@ public final class ItemFactory {
                 List.<@NonNull ItemAttributeSpec>of(new ItemAttributeSpec(
                         Attribute.ATTACK_DAMAGE,
                         "attack_damage",
-                        EmberfangDefinition.ATTACK_DAMAGE_PENALTY))));
+                        EmberfangDefinition.ATTACK_DAMAGE_ATTRIBUTE))));
         emberfangTextManager.updateText(item);
         updateEmberfangAttackDamage(item);
         return item;
@@ -325,7 +594,7 @@ public final class ItemFactory {
                 meta,
                 Attribute.ATTACK_DAMAGE,
                 EmberfangDefinition.ITEM_ID + "_attack_damage",
-                EmberfangDefinition.ATTACK_DAMAGE_PENALTY);
+                EmberfangDefinition.ATTACK_DAMAGE_ATTRIBUTE);
         item.setItemMeta(meta);
     }
 
@@ -357,7 +626,7 @@ public final class ItemFactory {
         };
 
         ItemMetaCompat.setCustomModelData(meta, customModelData);
-        ItemMetaCompat.setItemModelIfSupported(meta, modelKey);
+        ItemMetaCompat.setItemModel(meta, modelKey);
         item.setItemMeta(meta);
     }
 
@@ -381,7 +650,7 @@ public final class ItemFactory {
             ItemMetaCompat.setCustomModelData(meta, spec.customModelData());
         }
         if (spec.modelKey() != null) {
-            ItemMetaCompat.setItemModelIfSupported(meta, spec.modelKey());
+            ItemMetaCompat.setItemModel(meta, spec.modelKey());
         }
         for (ItemAttributeSpec attribute : spec.attributes()) {
             ItemMetaCompat.addMainHandAttribute(
@@ -424,6 +693,8 @@ public final class ItemFactory {
         return switch (itemId) {
             case ItemIds.CRESCENT_BOW -> createCrescentBow();
             case ItemIds.CRESCENT_SPEAR -> createCrescentSpear();
+            case ItemIds.CRESCENT_KHOPESH -> createCrescentKhopesh();
+            case ItemIds.OBSIDIAN_GLAIVE -> createObsidianGlaive();
             case ItemIds.CHISEL -> createChisel();
             case ItemIds.KATANA -> createKatana();
             case ItemIds.IRON_WIND_BLADE -> createWindBlade(WindBladeTier.IRON);
@@ -432,6 +703,10 @@ public final class ItemFactory {
             case ItemIds.IRON_GREATSWORD -> createGreatsword(GreatswordTier.IRON);
             case ItemIds.DIAMOND_GREATSWORD -> createGreatsword(GreatswordTier.DIAMOND);
             case ItemIds.NETHERITE_GREATSWORD -> createGreatsword(GreatswordTier.NETHERITE);
+            case ItemIds.IRON_RAPIER -> createRapier(RapierTier.IRON);
+            case ItemIds.DIAMOND_RAPIER -> createRapier(RapierTier.DIAMOND);
+            case ItemIds.NETHERITE_RAPIER -> createRapier(RapierTier.NETHERITE);
+            case ItemIds.ICE_RAPIER -> createRapier(RapierTier.ICE);
             case ItemIds.IRON_SCYTHE -> createScythe(ScytheTier.IRON);
             case ItemIds.DIAMOND_SCYTHE -> createScythe(ScytheTier.DIAMOND);
             case ItemIds.NETHERITE_SCYTHE -> createScythe(ScytheTier.NETHERITE);
@@ -501,6 +776,10 @@ public final class ItemFactory {
         return ItemIds.CRESCENT_SPEAR.equals(getItemId(item)) && isItemEnabled(ItemIds.CRESCENT_SPEAR);
     }
 
+    public boolean isCrescentKhopesh(ItemStack item) {
+        return ItemIds.CRESCENT_KHOPESH.equals(getItemId(item)) && isItemEnabled(ItemIds.CRESCENT_KHOPESH);
+    }
+
     public boolean isChisel(ItemStack item) {
         return ItemIds.CHISEL.equals(getItemId(item)) && isItemEnabled(ItemIds.CHISEL);
     }
@@ -530,17 +809,33 @@ public final class ItemFactory {
     }
 
     public void setKatanaParryVisual(ItemStack item, boolean active) {
+        setKatanaVisual(item, active ? KatanaDefinition.VisualState.PARRY_A : KatanaDefinition.VisualState.NORMAL);
+    }
+
+    public void setKatanaVisual(ItemStack item, KatanaDefinition.VisualState state) {
         if (item == null || !isKatana(item) || !item.hasItemMeta()) {
             return;
         }
         ItemMeta meta = item.getItemMeta();
-        int targetData = active ? KatanaDefinition.PARRY_MODEL_DATA : KatanaDefinition.CUSTOM_MODEL_DATA;
-        if (ItemMetaCompat.hasCustomModelData(meta, targetData)) {
-            return;
+        int targetData;
+        NamespacedKey modelKey;
+        switch (state) {
+            case PARRY_A -> {
+                targetData = KatanaDefinition.PARRY_MODEL_A_DATA;
+                modelKey = KatanaDefinition.PARRY_MODEL_A_KEY;
+            }
+            case PARRY_B -> {
+                targetData = KatanaDefinition.PARRY_MODEL_B_DATA;
+                modelKey = KatanaDefinition.PARRY_MODEL_B_KEY;
+            }
+            case NORMAL -> {
+                targetData = KatanaDefinition.CUSTOM_MODEL_DATA;
+                modelKey = KatanaDefinition.MODEL_KEY;
+            }
+            default -> throw new IllegalStateException("Unhandled Katana visual state: " + state);
         }
         ItemMetaCompat.setCustomModelData(meta, targetData);
-        ItemMetaCompat.setItemModelIfSupported(meta,
-                active ? KatanaDefinition.PARRY_MODEL_KEY : KatanaDefinition.MODEL_KEY);
+        ItemMetaCompat.setItemModel(meta, modelKey);
         item.setItemMeta(meta);
     }
 
@@ -548,7 +843,8 @@ public final class ItemFactory {
         return item != null
                 && isKatana(item)
                 && item.hasItemMeta()
-                && ItemMetaCompat.hasCustomModelData(item.getItemMeta(), KatanaDefinition.PARRY_MODEL_DATA);
+                && (ItemMetaCompat.hasCustomModelData(item.getItemMeta(), KatanaDefinition.PARRY_MODEL_A_DATA)
+                        || ItemMetaCompat.hasCustomModelData(item.getItemMeta(), KatanaDefinition.PARRY_MODEL_B_DATA));
     }
 
     public boolean hasWindBlade(Inventory inventory, WindBladeTier wantedTier) {
@@ -638,6 +934,10 @@ public final class ItemFactory {
         if (itemId == null) {
             return null;
         }
+        RapierTier rapierTier = RapierTier.fromItemId(itemId);
+        if (rapierTier != null) {
+            return lang.itemFallbackName(rapierTier.langPath());
+        }
         for (WindBladeTier tier : WindBladeTier.values()) {
             if (tier.itemId().equals(itemId)) {
                 return lang.itemFallbackName(tier.langPath());
@@ -656,6 +956,8 @@ public final class ItemFactory {
         return switch (itemId) {
             case ItemIds.CRESCENT_BOW -> lang.itemFallbackName(CrescentBowDefinition.LANG_PATH);
             case ItemIds.CRESCENT_SPEAR -> lang.itemFallbackName(CrescentSpearDefinition.LANG_PATH);
+            case ItemIds.CRESCENT_KHOPESH -> lang.itemFallbackName(CrescentKhopeshDefinition.LANG_PATH);
+            case ItemIds.OBSIDIAN_GLAIVE -> lang.itemFallbackName(ObsidianGlaiveDefinition.LANG_PATH);
             case ItemIds.CHISEL -> lang.itemFallbackName(ChiselDefinition.LANG_PATH);
             case ItemIds.KATANA -> lang.itemFallbackName(KatanaDefinition.LANG_PATH);
             case ItemIds.CRIMSON_SWORD -> lang.itemFallbackName(CrimsonSwordDefinition.LANG_PATH);

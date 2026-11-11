@@ -82,7 +82,17 @@ A: The pack keeps custom models in the `pepeforge` namespace and does not replac
 
 Edit `plugins/PepeForge/config.yml` to configure item availability, crafting recipes, selected mechanics, language and translation behavior, resource-pack delivery, and anonymous metrics.
 
+In `/pepeforge config`, setting changes refresh the current menu and are saved immediately. Moving between configuration menus preserves the session; leaving any configuration menu shows one reload reminder if you changed settings that require a reload. Plugin reload closes configuration menus.
+
 Use `/pepeforge config` for the supported in-game item and recipe settings. Custom crafting recipes and smithing upgrades may be controlled separately where applicable.
+
+Rapiers expose their per-tier damage, shared attack speed and optional frontal bonus under `mechanics.rapier` and in `/pepeforge config`. Each tier has independent item and recipe switches; `items.netherite_rapier.recipe_enabled` controls the smithing upgrade. See [ITEMS.md](ITEMS.md#rapier) for controls and recipes.
+
+Ice Rapier has its own configuration page and `mechanics.ice_rapier` settings for damage endpoints, maximum durability and the native freeze meter. Its reset leaves shared rapier settings unchanged. Run `/pepeforge reload` after editing these values; existing blades keep their wear fraction when maximum durability changes.
+
+Crescent Khopesh supports two Moonstrike variants under `mechanics.crescent_khopesh`, selectable in YAML and `/pepeforge config`. The default `moonstrike_mode: SWEEP` immediately strikes a front half ellipse with total `sweep_width: 3.0` and forward `sweep_range: 2.0`. `WAVE` retains the moving piercing slash and its `wave_range`, `wave_width` and `wave_speed` settings. The menu edits the active variant's dimensions and shows speed only for WAVE; reset restores both variants and SWEEP mode. Range and width use blocks; speed uses blocks per tick. Both variants share `hits_required` (3 by default) and `shield_absorption`, a limit in HP (4 HP = 2 hearts); the menu shows hearts.
+
+Secondary damage remains 40% of base weapon damage. The main target takes no additional Moonstrike damage and grants 0.5 shield HP once; each accepted secondary target also grants 0.5 shield HP. A blue BossBar shows the shield HP and remaining time. Each grant refreshes the fixed 80-tick duration, including grants at the cap. The shield is independent of Golden Apple absorption and is consumed after armor and effects but before native absorption. It protects against combat and environmental damage except void, `/kill` and forced suicide.
 
 The generated `config.yml` contains the current settings and defaults for the installed plugin version. Missing default settings are added automatically while existing values are preserved. Run `/pepeforge reload` after making manual changes.
 
@@ -93,7 +103,9 @@ Bundled `en_us.yml` and `pl_pl.yml` files in `plugins/PepeForge/lang` are refres
 ### Statistics (bStats)
 
 Pepe's Forge uses [bStats](https://bstats.org/) to collect anonymous usage data, including crafting and give counts and which items are disabled in the server configuration.
-This helps guide the future development of the plugin. You can opt-out at any time by setting `metrics.enabled: false` in `config.yml`.
+This helps guide the future development of the plugin. You can opt out using the **bStats metrics** button in `/pepeforge config`; the choice is saved and applies immediately without reloading the plugin. The button requires `pepeforge.config` (OP by default).
+
+Alternatively, set `metrics.enabled: false` in `config.yml` and run `/pepeforge reload`. Enabling this option still respects the server-wide bStats setting in `plugins/bStats/config.yml`. This only controls bStats reporting; local crafting and give counts remain available.
 
 ## Commands
 
@@ -103,6 +115,36 @@ This helps guide the future development of the plugin. You can opt-out at any ti
 - `/pepeforge migration <on|pause|disable>` - Controls lazy legacy-item migration
 - `/pepeforge give <item> <player>` - Gives an item to an online player when their inventory has room; failed deliveries are not counted in item-given statistics
 - `/pepeforge setlevel <level>` - Sets the level of the Crimson Sword in your main hand (for debugging / testing)
+
+Available item IDs for `/pepeforge give`:
+
+```
+- `crescent_bow`
+- `crescent_spear`
+- `crescent_khopesh`
+- `chisel`
+- `katana`
+- `iron_wind_blade`
+- `diamond_wind_blade`
+- `netherite_wind_blade`
+- `iron_greatsword`
+- `diamond_greatsword`
+- `netherite_greatsword`
+- `iron_rapier`
+- `diamond_rapier`
+- `netherite_rapier`
+- `ice_rapier`
+- `iron_scythe`
+- `diamond_scythe`
+- `netherite_scythe`
+- `crimson_sword`
+- `solar_shield`
+- `anchor`
+- `throwing_knife`
+- `stormcleaver`
+- `emberfang`
+- `obsidian_glaive`
+```
 
 ## Permissions
 

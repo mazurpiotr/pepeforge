@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:item/handheld",
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [ 60, -30, 55 ],
+      "translation": [ 0.0, 4.0, 10.0 ],
+      "scale": [ 1.25, 1.25, 1.25 ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [ 60, -30, -55 ],
+      "translation": [ 0.0, 4.0, 10.0 ],
+      "scale": [ 1.25, 1.25, 1.25 ]
+    },
+    "firstperson_righthand": {
+      "rotation": [ 0, -30, 0 ],
+      "translation": [ -7, 0, -4 ],
+      "scale": [ 1.25, 1.25, 1.25 ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [ 0, -30, 0 ],
+      "translation": [ 7, 0, -4 ],
+      "scale": [ 1.25, 1.25, 1.25 ]
+    }
+  },
+  "textures": {
+    "layer0": "pepeforge:item/katana"
+  }
+}

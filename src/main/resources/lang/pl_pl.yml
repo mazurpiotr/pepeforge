@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cTylko gracze mogą użyć tej komendy."
     no_permission: "&cNie masz uprawnień do użycia tej komendy."
-    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife|stormcleaver|emberfang> <player> lub /pepeforge items"
+    usage: "&eUżycie: /pepeforge give <crescent_bow|crescent_spear|crescent_khopesh|obsidian_glaive|iron_rapier|diamond_rapier|netherite_rapier|ice_rapier|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife|stormcleaver|emberfang> <player> lub /pepeforge items"
     unknown_subcommand: "&cNieznana podkomenda."
     unknown_item: "&cNieznany przedmiot: {item}"
     item_disabled: "&cTen przedmiot jest obecnie wyłączony: {item}"
@@ -19,6 +19,11 @@ messages:
     item_received: "&aPrzedmiot dodany do ekwipunku."
   two_handed:
     offhand_required: "&cTa broń wymaga pustej drugiej ręki."
+  rapier:
+    mode_changed: "&eTryb rapiera: &f{mode}"
+    modes:
+      thrust: "Pchnięcie"
+      cut: "Cięcie"
   katana:
     cooldown: "&cKatana ładuje się... {bar} &7{seconds}s"
   wind_blade:
@@ -27,6 +32,10 @@ messages:
     charge: "&e☀ Słoneczny ładunek {bar} &6[{charges}/3]"
     ready: "&6☀ Słoneczny ładunek pełny! {bar} &6[3/3]"
     discharging: "&8☽ Rozładowywanie {bar} &6[{charges}/3]"
+  temporary_shield:
+    bar: "&b{name} &7· &f{current} / {limit} HP &7· &f{seconds} s"
+    sources:
+      moonshield: "Księżycowa Tarcza"
   crescent_spear:
     charge: "&dŁadunek księżyca {bar}"
     ready: "&dŁadunek księżyca gotowy! &fNastępne trafienie wzmocnione {bar}"
@@ -38,9 +47,90 @@ messages:
     charge: "&bŁadunek elektryczny {bar} &7[{charges}/{required}]"
     ready: "&bŁadunek elektryczny gotowy! &fPPM, aby uderzyć {bar}"
   config:
+    metrics:
+      title: "&6Statystyki bStats"
+      description: "&7Anonimowe raportowanie użycia PepeForge."
+      enabled: "&aWłączone"
+      disabled: "&cWyłączone"
+      disable: "&eKliknij, aby wyłączyć."
+      enable: "&eKliknij, aby włączyć."
+      immediate: "&7Zmiana działa od razu."
     reloaded: "&aPepeForge przeładowano pomyślnie."
+    reload_in_progress: "&ePepeForge jest już przeładowywany. Spróbuj ponownie za chwilę."
     reload_reminder: "&eKonfiguracja zapisana. Użyj przycisku &6Reload Plugin &elub &6/pepeforge reload &eaby zastosować zmiany."
+    obsidian_glaive:
+      reset:
+        title: "&cPrzywróć ustawienia Glewii Obsydianowej"
+        lore: "&7Przywraca domyślne obrażenia i ataki."
+      damage:
+        title: "&6Obrażenia: &a{damage} HP"
+        range: "&7Zakres: {min}-{max} HP"
+        decrease: "&7LPM: -0,5 HP"
+        increase: "&7PPM: +0,5 HP"
+      stab:
+        title: "&6Atak Pchnięciem: {state}"
+        enabled: "&aWŁĄCZONY"
+        disabled: "&cWYŁĄCZONY"
+        description: "&7Używa Pchnięcia przy trzecim zaakceptowanym trafieniu."
+      stab_lift:
+        title: "&6Uniesienie po Pchnięciu: {state}"
+        enabled: "&aWŁĄCZONE"
+        disabled: "&cWYŁĄCZONE"
+        description: "&7Unosi cele po zaakceptowanym Pchnięciu."
+      toggle: "&eKliknij, aby przełączyć."
 items:
+  ice_rapier:
+    fallback_name: "Lodowy rapier"
+    lore:
+      - "&6---------------"
+      - "&eAtak: &bPchnięcie / Cięcie"
+      - "&3Obrażenia maleją wraz ze zużyciem ostrza."
+      - "&3Pchnięcia i cięcia wywołują naturalne zamarzanie."
+      - "&3Skradanie + prawy przycisk zmienia tryb."
+      - "Rzadki"
+      - "&6---------------"
+    mode_lore:
+      thrust: "&eTryb: &fPchnięcie &7(zasięg 3,75 bloku w trybie przetrwania)"
+      cut: "&eTryb: &fCięcie"
+  iron_rapier:
+    fallback_name: "Żelazny rapier"
+    lore:
+      - "&6---------------"
+      - "&eAtak: &bPchnięcie / Cięcie"
+      - "&3Lewy przycisk atakuje w wybranym trybie."
+      - "&3Skradanie + prawy przycisk zmienia tryb."
+      - "&7Jednoręczny: tarcza działa w drugiej ręce."
+      - "Pospolity"
+      - "&6---------------"
+    mode_lore:
+      thrust: "&eTryb: &fPchnięcie &7(zasięg 3,75 bloku)"
+      cut: "&eTryb: &fCięcie"
+  diamond_rapier:
+    fallback_name: "Diamentowy rapier"
+    lore:
+      - "&6---------------"
+      - "&eAtak: &bPchnięcie / Cięcie"
+      - "&3Lewy przycisk atakuje w wybranym trybie."
+      - "&3Skradanie + prawy przycisk zmienia tryb."
+      - "&7Jednoręczny: tarcza działa w drugiej ręce."
+      - "Rzadki"
+      - "&6---------------"
+    mode_lore:
+      thrust: "&eTryb: &fPchnięcie &7(zasięg 3,75 bloku)"
+      cut: "&eTryb: &fCięcie"
+  netherite_rapier:
+    fallback_name: "Netherytowy rapier"
+    lore:
+      - "&6---------------"
+      - "&eAtak: &bPchnięcie / Cięcie"
+      - "&3Lewy przycisk atakuje w wybranym trybie."
+      - "&3Skradanie + prawy przycisk zmienia tryb."
+      - "&7Jednoręczny: tarcza działa w drugiej ręce."
+      - "Epicki"
+      - "&6---------------"
+    mode_lore:
+      thrust: "&eTryb: &fPchnięcie &7(zasięg 3,75 bloku)"
+      cut: "&eTryb: &fCięcie"
   crescent_bow:
     fallback_name: "Łuk Półksiężyca"
     lore:
@@ -59,6 +149,16 @@ items:
       - "&3Trafienia ładują wzmocnione uderzenie. Naładowany atak zadaje 3 szybkie cięcia."
       - "&3Za dnia zadaje 1 mniej obrażeń, ale pod światłem księżyca zadaje 2 więcej."
       - "Epicka"
+      - "&6---------------"
+  crescent_khopesh:
+    fallback_name: "Khopesz Półksiężyca"
+    lore:
+      - "&6---------------"
+      - "&eUmiejętność: &dKsiężycowe Uderzenie"
+      - "&3Co trzecie trafienie wręcz wyzwala księżycowe cięcie."
+      - "&3Każdy cel daje 0,5 HP tarczy, do 4 HP na 4 sekundy."
+      - "&3Za dnia zadaje 1 mniej obrażeń, ale pod światłem księżyca zadaje 2 więcej."
+      - "Epicki"
       - "&6---------------"
   chisel:
     fallback_name: "Dłuto"
@@ -235,3 +335,12 @@ items:
       - "&3Trafienia mogą na krótko podpalić cel."
       - "&cParzy właściciela, chyba że nosi element zbroi z zaklęciem Ochrona przed ogniem."
       - "Epicki"
+  obsidian_glaive:
+    fallback_name: "Obsydianowa Glewia"
+    lore:
+      - "&eKombo: &bCięcie > Cięcie > Pchnięcie"
+      - "&3Cięcie sięga 4 bloków i może trafić pobliskie cele."
+      - "&3Poniżej 1,5 bloku: 30% obrażeń i dodatkowe odepchnięcie."
+      - "&3Pchnięcie przeszywa cele w linii; pancerz nadal działa."
+      - "&3Zasięg 0–4,5 bloku (Przetrwanie) / 0–6,5 (Kreatywny); trafienia unoszą i tworzą cząsteczki wiatru."
+      - "Rzadki"

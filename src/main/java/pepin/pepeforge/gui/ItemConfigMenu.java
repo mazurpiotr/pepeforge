@@ -5,14 +5,17 @@ import java.util.Objects;
 import org.jspecify.annotations.NonNull;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.gui.itemconfig.anchor.AnchorConfig;
+import pepin.pepeforge.gui.itemconfig.rapier.RapierConfig;
+import pepin.pepeforge.gui.itemconfig.rapier.IceRapierConfig;
+import pepin.pepeforge.gui.itemconfig.crescentkhopesh.CrescentKhopeshConfig;
 import pepin.pepeforge.gui.itemconfig.emberfang.EmberfangConfig;
+import pepin.pepeforge.gui.itemconfig.obsidianglaive.ObsidianGlaiveConfig;
 import pepin.pepeforge.gui.itemconfig.greatsword.GreatswordConfig;
 import pepin.pepeforge.gui.itemconfig.stormcleaver.StormcleaverConfig;
 import pepin.pepeforge.gui.itemconfig.windblade.WindBladeConfig;
@@ -31,6 +34,16 @@ public final class ItemConfigMenu {
                 27,
                 ColorUtil.DARK_GRAY + "Config: " + itemId));
 
+        refresh(inventory, itemFactory, plugin);
+        return inventory;
+    }
+
+    public static void refresh(Inventory inventory, ItemFactory itemFactory, PepeForgePlugin plugin) {
+        String itemId = getItemId(inventory);
+        if (itemId == null) {
+            throw new IllegalArgumentException("Expected an item configuration inventory");
+        }
+        inventory.clear();
         buildCommonButtons(itemId, itemFactory, inventory);
 
         if ("anchor".equals(itemId)) {
@@ -41,6 +54,12 @@ public final class ItemConfigMenu {
         if (isWindBlade(itemId)) {
             WindBladeConfig windBladeConfig = new WindBladeConfig(plugin);
             windBladeConfig.build(inventory);
+        }
+
+        if (ItemIds.ICE_RAPIER.equals(itemId)) {
+            new IceRapierConfig(plugin).build(inventory);
+        } else if (isRapier(itemId)) {
+            new RapierConfig(plugin).build(inventory);
         }
 
         if (isGreatsword(itemId)) {
@@ -58,14 +77,21 @@ public final class ItemConfigMenu {
             emberfangConfig.build(inventory);
         }
 
-        return inventory;
+        if (ItemIds.OBSIDIAN_GLAIVE.equals(itemId)) {
+            new ObsidianGlaiveConfig(plugin, plugin.getPluginLang()).build(inventory);
+        }
+
+        if (ItemIds.CRESCENT_KHOPESH.equals(itemId)) {
+            new CrescentKhopeshConfig(plugin).build(inventory);
+        }
+
     }
 
     private static void buildCommonButtons(String itemId, ItemFactory itemFactory, Inventory inventory) {
         boolean isEnabled = itemFactory.isItemEnabled(itemId);
         boolean isRecipeEnabled = itemFactory.isRecipeEnabled(itemId);
 
-        ItemStack enabledBtn = new ItemStack(isEnabled ? ConfigIconography.ENABLED : ConfigIconography.DISABLED);
+        ItemStack enabledBtn = ConfigIconography.createStateButton(isEnabled);
         ItemMeta enabledMeta = enabledBtn.getItemMeta();
         if (enabledMeta != null) {
             enabledMeta.setDisplayName(ColorUtil.WHITE + "Item Enabled: "
@@ -75,7 +101,7 @@ public final class ItemConfigMenu {
         inventory.setItem(11, enabledBtn);
 
         if (hasRecipeToggle(itemId)) {
-            ItemStack recipeBtn = new ItemStack(isRecipeEnabled ? ConfigIconography.ENABLED : ConfigIconography.DISABLED);
+            ItemStack recipeBtn = ConfigIconography.createStateButton(isRecipeEnabled);
             ItemMeta recipeMeta = recipeBtn.getItemMeta();
             if (recipeMeta != null) {
                 recipeMeta.setDisplayName(ColorUtil.WHITE + "Crafting Recipe Enabled: "
@@ -85,13 +111,7 @@ public final class ItemConfigMenu {
             inventory.setItem(15, recipeBtn);
         }
 
-        ItemStack backBtn = new ItemStack(Material.ARROW);
-        ItemMeta backMeta = backBtn.getItemMeta();
-        if (backMeta != null) {
-            backMeta.setDisplayName(ColorUtil.YELLOW + "Back");
-            backBtn.setItemMeta(backMeta);
-        }
-        inventory.setItem(26, backBtn);
+        inventory.setItem(26, ConfigIconography.createBackButton());
     }
 
     public static boolean isItemConfigMenu(Inventory inventory) {
@@ -107,8 +127,13 @@ public final class ItemConfigMenu {
 
     public static boolean hasRecipeToggle(String itemId) {
         return switch (itemId) {
-            case ItemIds.CRESCENT_BOW,
+            case ItemIds.ICE_RAPIER,
+                    ItemIds.IRON_RAPIER,
+                    ItemIds.DIAMOND_RAPIER,
+                    ItemIds.NETHERITE_RAPIER,
+                    ItemIds.CRESCENT_BOW,
                     ItemIds.CRESCENT_SPEAR,
+                    ItemIds.CRESCENT_KHOPESH,
                     ItemIds.CHISEL,
                     ItemIds.KATANA,
                     ItemIds.IRON_WIND_BLADE,
@@ -121,7 +146,8 @@ public final class ItemConfigMenu {
                     ItemIds.ANCHOR,
                     ItemIds.THROWING_KNIFE,
                     ItemIds.STORMCLEAVER,
-                    ItemIds.EMBERFANG -> true;
+                    ItemIds.EMBERFANG,
+                    ItemIds.OBSIDIAN_GLAIVE -> true;
             default -> false;
         };
     }
@@ -130,6 +156,13 @@ public final class ItemConfigMenu {
         return "iron_wind_blade".equals(itemId)
                 || "diamond_wind_blade".equals(itemId)
                 || "netherite_wind_blade".equals(itemId);
+    }
+
+    public static boolean isRapier(String itemId) {
+        return ItemIds.ICE_RAPIER.equals(itemId)
+                || ItemIds.IRON_RAPIER.equals(itemId)
+                || ItemIds.DIAMOND_RAPIER.equals(itemId)
+                || ItemIds.NETHERITE_RAPIER.equals(itemId);
     }
 
     public static boolean isGreatsword(String itemId) {

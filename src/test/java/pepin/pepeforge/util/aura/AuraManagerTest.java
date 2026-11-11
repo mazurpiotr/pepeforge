@@ -9,6 +9,8 @@ import org.bukkit.scheduler.BukkitTask;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +28,63 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AuraManagerTest {
+
+    @Test
+    void selectiveRemovalStopsOnlyTheRequestedAuraExactlyOnce() {
+        JavaPlugin plugin = mock(JavaPlugin.class);
+        Player player = mock(Player.class);
+        when(player.getUniqueId()).thenReturn(UUID.randomUUID());
+        ScheduledTaskCompat global = mock(ScheduledTaskCompat.class);
+        ScheduledTaskCompat firstTask = mock(ScheduledTaskCompat.class);
+        ScheduledTaskCompat otherTask = mock(ScheduledTaskCompat.class);
+        TestTimedAuraEffect first = new TestTimedAuraEffect(new AtomicInteger());
+        OtherTimedAuraEffect other = new OtherTimedAuraEffect();
+        try (MockedStatic<SchedulerCompat> scheduler = mockStatic(SchedulerCompat.class)) {
+            scheduler.when(() -> SchedulerCompat.runTimer(any(), any(), anyLong(), anyLong())).thenReturn(global);
+            scheduler.when(() -> SchedulerCompat.runTimerForEntity(any(), any(), any(), any(), anyLong(), anyLong()))
+                    .thenReturn(firstTask, otherTask);
+            AuraManager manager = new AuraManager(plugin);
+            manager.startTask();
+            manager.addOrExtendActiveAura(player, first, 20);
+            manager.addOrExtendActiveAura(player, other, 20);
+            manager.removeActiveAura(player, TestTimedAuraEffect.class);
+            manager.removeActiveAura(player.getUniqueId(), TestTimedAuraEffect.class);
+            verify(firstTask).cancel();
+            verify(otherTask, never()).cancel();
+            assertEquals(1, first.stops.get());
+            assertEquals(0, other.stops.get());
+            manager.stop();
+            assertEquals(1, first.stops.get());
+            assertEquals(1, other.stops.get());
+        }
+    }
+
+    @Test
+    void retirementStopsTheEffectAndReleasesItsTaskOnce() {
+        JavaPlugin plugin = mock(JavaPlugin.class);
+        Player player = mock(Player.class);
+        when(player.getUniqueId()).thenReturn(UUID.randomUUID());
+        ScheduledTaskCompat global = mock(ScheduledTaskCompat.class);
+        ScheduledTaskCompat active = mock(ScheduledTaskCompat.class);
+        TestTimedAuraEffect effect = new TestTimedAuraEffect(new AtomicInteger());
+        List<Runnable> retired = new java.util.ArrayList<>();
+        try (MockedStatic<SchedulerCompat> scheduler = mockStatic(SchedulerCompat.class)) {
+            scheduler.when(() -> SchedulerCompat.runTimer(any(), any(), anyLong(), anyLong())).thenReturn(global);
+            scheduler.when(() -> SchedulerCompat.runTimerForEntity(any(), any(), any(), any(), anyLong(), anyLong()))
+                    .thenAnswer(call -> {
+                        retired.add(call.getArgument(3));
+                        return active;
+                    });
+            AuraManager manager = new AuraManager(plugin);
+            manager.startTask();
+            manager.addOrExtendActiveAura(player, effect, 20);
+            retired.getFirst().run();
+            retired.getFirst().run();
+            manager.stop();
+            verify(active).cancel();
+            assertEquals(1, effect.stops.get());
+        }
+    }
 
     @Test
     void stopCancelsGlobalAndActiveAuraTasks() {
@@ -132,6 +191,7 @@ class AuraManagerTest {
     private static final class TestTimedAuraEffect implements TimedAuraEffect {
 
         private final AtomicInteger ticks;
+        private final AtomicInteger stops = new AtomicInteger();
         private long expiresAtMillis = System.currentTimeMillis() + 10_000L;
 
         private TestTimedAuraEffect(AtomicInteger ticks) {
@@ -156,6 +216,38 @@ class AuraManagerTest {
         @Override
         public void extendDuration(int ticks) {
             expiresAtMillis = Math.max(expiresAtMillis, System.currentTimeMillis() + ticks * 50L);
+        }
+
+        @Override
+        public void stop() {
+            stops.incrementAndGet();
+        }
+    }
+
+    private static final class OtherTimedAuraEffect implements TimedAuraEffect {
+        private final AtomicInteger stops = new AtomicInteger();
+
+        @Override
+        public void tick(Player player) {
+        }
+
+        @Override
+        public int getTickInterval() {
+            return 1;
+        }
+
+        @Override
+        public boolean isExpired() {
+            return false;
+        }
+
+        @Override
+        public void extendDuration(int ticks) {
+        }
+
+        @Override
+        public void stop() {
+            stops.incrementAndGet();
         }
     }
 

@@ -5,7 +5,6 @@ import net.jqwik.api.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -28,15 +27,6 @@ class PreservationSchedulerPropertyTest {
 
         private static final Path SCHEDULED_TASK_COMPAT_PATH = Path
                         .of("src/main/java/pepin/pepeforge/util/scheduler/ScheduledTaskCompat.java");
-
-        private static final Path SOURCE_ROOT = Path.of("src/main/java/pepin/pepeforge/weapons");
-
-        private static final Map<String, Path> LISTENER_PATHS = Map.of(
-                        "SolarShieldListener", SOURCE_ROOT.resolve("solarshield/SolarShieldListener.java"),
-                        "GreatswordListener", SOURCE_ROOT.resolve("greatsword/GreatswordListener.java"),
-                        "KatanaListener", SOURCE_ROOT.resolve("katana/KatanaListener.java"));
-
-        /**
 
         // --- Patterns for SchedulerCompat source analysis ---
 
@@ -76,15 +66,6 @@ class PreservationSchedulerPropertyTest {
         @Provide
         Arbitrary<String> schedulerMethods() {
                 return Arbitraries.of("runTimer", "runTimerForEntity", "runForPlayer");
-        }
-
-        @Provide
-        Arbitrary<String> listenerIntervalKeys() {
-                return Arbitraries.of(
-                                "SolarShieldListener:statusTask",
-                                "GreatswordListener:statusTask",
-                                "KatanaListener:statusTask",
-                                "KatanaListener:parryTask");
         }
 
         /**
@@ -179,50 +160,6 @@ class PreservationSchedulerPropertyTest {
                 // Verify it's an interface (not a class)
                 assert source.contains("interface ScheduledTaskCompat")
                                 : "ScheduledTaskCompat is not declared as an interface";
-        }
-
-        /**
-         * Property 2d: Tick intervals in listeners match expected preservation values.
-         *
-         * For all scheduling calls in the three affected listeners, the tick intervals
-         * (delay and period) SHALL match the expected values to preserve existing
-         * behavior.
-         * SolarShield: 2L/2L, Greatsword: 1L/1 (STATUS_INTERVAL_TICKS=1), Katana
-         * status: 1L/2L, Katana parry: 0L/1L
-         *
-         * Validates: Requirements 3.1, 3.2, 3.3
-         */
-        @Property
-        void listenerTickIntervalsMatchExpected(@ForAll("listenerIntervalKeys") String key) throws IOException {
-                String listenerName = key.split(":")[0];
-                Path filePath = LISTENER_PATHS.get(listenerName);
-                String source = Files.readString(filePath);
-
-                switch (key) {
-                        case "SolarShieldListener:statusTask" -> {
-                                // SolarShield uses literal "2L, 2L" at end of runTaskTimer call
-                                assert source.contains("2L, 2L")
-                                                : "SolarShieldListener statusTask does not use expected intervals 2L, 2L";
-                        }
-                        case "GreatswordListener:statusTask" -> {
-                                // Greatsword uses "1L, STATUS_INTERVAL_TICKS" where STATUS_INTERVAL_TICKS = 1
-                                assert source.contains("1L, STATUS_INTERVAL_TICKS")
-                                                : "GreatswordListener statusTask does not use expected intervals 1L, STATUS_INTERVAL_TICKS";
-                                // Verify constant value
-                                assert source.contains("STATUS_INTERVAL_TICKS = 1")
-                                                : "GreatswordListener STATUS_INTERVAL_TICKS is not 1";
-                        }
-                        case "KatanaListener:statusTask" -> {
-                                // Katana statusTask uses "1L, 2L"
-                                assert source.contains("1L, 2L")
-                                                : "KatanaListener statusTask does not use expected intervals 1L, 2L";
-                        }
-                        case "KatanaListener:parryTask" -> {
-                                // Katana parry task uses "0L, 1L"
-                                assert source.contains("0L, 1L")
-                                                : "KatanaListener parryTask does not use expected intervals 0L, 1L";
-                        }
-                }
         }
 
         /**

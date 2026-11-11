@@ -8,15 +8,19 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
+import pepin.pepeforge.util.combat.TwoHandedEquipmentObserver;
 
 public final class CustomItemsMenuListener implements Listener {
 
     private final PluginLang lang;
     private final ItemFactory itemFactory;
+    private final TwoHandedEquipmentObserver equipmentObserver;
 
-    public CustomItemsMenuListener(PluginLang lang, ItemFactory itemFactory) {
+    public CustomItemsMenuListener(PluginLang lang, ItemFactory itemFactory,
+            TwoHandedEquipmentObserver equipmentObserver) {
         this.lang = lang;
         this.itemFactory = itemFactory;
+        this.equipmentObserver = equipmentObserver;
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -52,6 +56,7 @@ public final class CustomItemsMenuListener implements Listener {
         ItemStack granted = clicked.clone();
         player.getInventory().addItem(granted).values()
                 .forEach(overflow -> player.getWorld().dropItemNaturally(player.getLocation(), overflow));
+        equipmentObserver.requestRefresh(player);
         player.sendMessage(lang.message("messages.menu.item_received"));
     }
 

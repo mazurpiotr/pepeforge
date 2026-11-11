@@ -4,15 +4,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +24,8 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.aura.AuraManager;
 import pepin.pepeforge.util.cooldown.CooldownManager;
+import pepin.pepeforge.util.scheduler.SchedulerCompat;
+import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.weapons.anchor.AnchorListener;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordListener;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
@@ -199,14 +204,24 @@ class CombatProtectionTest {
     }
 
     private KatanaListener katana() {
-        return new KatanaListener(plugin, items, mock(PluginLang.class), mock(CooldownManager.class));
+        var listener = new KatanaListener(plugin, items, mock(PluginLang.class), mock(CooldownManager.class));
+        listener.start();
+        return listener;
     }
 
-    @SuppressWarnings("unchecked")
-    private void activateParry(KatanaListener katana, Player player) throws ReflectiveOperationException {
-        var field = KatanaListener.class.getDeclaredField("activeParryUntil");
-        field.setAccessible(true);
-        ((Map<UUID, Long>) field.get(katana)).put(player.getUniqueId(), System.currentTimeMillis() + 60_000L);
+    private void activateParry(KatanaListener katana, Player player) {
+        ItemStack katanaItem = new ItemStack(Material.DIAMOND_SWORD);
+        when(player.getInventory().getItemInMainHand()).thenReturn(katanaItem);
+        when(items.isKatana(katanaItem)).thenReturn(true);
+        PlayerInteractEvent event = mock(PlayerInteractEvent.class);
+        when(event.getPlayer()).thenReturn(player);
+        when(event.getHand()).thenReturn(EquipmentSlot.HAND);
+        when(event.getAction()).thenReturn(Action.RIGHT_CLICK_AIR);
+        try (var scheduler = mockStatic(SchedulerCompat.class)) {
+            scheduler.when(() -> SchedulerCompat.runTimerForEntity(eq(player), eq(plugin), any(Runnable.class),
+                    any(Runnable.class), anyLong(), anyLong())).thenReturn(mock(ScheduledTaskCompat.class));
+            katana.onRightClick(event);
+        }
     }
 
     private void dispatchCounterattack(DamageEvents events) {

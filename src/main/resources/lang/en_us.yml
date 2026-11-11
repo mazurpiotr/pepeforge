@@ -3,7 +3,7 @@ messages:
   command:
     players_only: "&cOnly players can use this command."
     no_permission: "&cYou do not have permission to use this command."
-    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife|stormcleaver|emberfang> <player> or /pepeforge items"
+    usage: "&eUsage: /pepeforge give <crescent_bow|crescent_spear|crescent_khopesh|obsidian_glaive|iron_rapier|diamond_rapier|netherite_rapier|ice_rapier|chisel|katana|iron_wind_blade|diamond_wind_blade|netherite_wind_blade|iron_greatsword|diamond_greatsword|netherite_greatsword|iron_scythe|diamond_scythe|netherite_scythe|crimson_sword|anchor|throwing_knife|stormcleaver|emberfang> <player> or /pepeforge items"
     unknown_subcommand: "&cUnknown subcommand."
     unknown_item: "&cUnknown item: {item}"
     item_disabled: "&cThat item is currently disabled: {item}"
@@ -19,6 +19,11 @@ messages:
     item_received: "&aItem added to your inventory."
   two_handed:
     offhand_required: "&cThis weapon requires an empty off-hand."
+  rapier:
+    mode_changed: "&eRapier mode: &f{mode}"
+    modes:
+      thrust: "Thrust"
+      cut: "Cut"
   katana:
     cooldown: "&cKatana recharging... {bar} &7{seconds}s"
   wind_blade:
@@ -27,6 +32,10 @@ messages:
     charge: "&e☀ Solar charge {bar} &6[{charges}/3]"
     ready: "&6☀ Solar charge ready! {bar} &6[3/3]"
     discharging: "&8☽ Discharging {bar} &6[{charges}/3]"
+  temporary_shield:
+    bar: "&b{name} &7· &f{current} / {limit} HP &7· &f{seconds} s"
+    sources:
+      moonshield: "Moonshield"
   crescent_spear:
     charge: "&dMoon charge {bar}"
     ready: "&dMoon charge ready! &fNext strike empowered {bar}"
@@ -38,9 +47,90 @@ messages:
     charge: "&bStatic Charge {bar} &7[{charges}/{required}]"
     ready: "&bStatic Charge ready! &fRight-click to unleash {bar}"
   config:
+    metrics:
+      title: "&6bStats metrics"
+      description: "&7Anonymous usage reporting for PepeForge."
+      enabled: "&aEnabled"
+      disabled: "&cDisabled"
+      disable: "&eClick to disable."
+      enable: "&eClick to enable."
+      immediate: "&7Applies immediately."
     reloaded: "&aPepeForge reloaded successfully."
+    reload_in_progress: "&ePepeForge is already reloading. Please try again shortly."
     reload_reminder: "&eConfiguration saved. Use the &6Reload Plugin &ebutton or &6/pepeforge reload &eto apply changes."
+    obsidian_glaive:
+      reset:
+        title: "&cReset Obsidian Glaive Defaults"
+        lore: "&7Reset damage and attack options."
+      damage:
+        title: "&6Damage: &a{damage} HP"
+        range: "&7Range: {min}-{max} HP"
+        decrease: "&7Left-Click: -0.5 HP"
+        increase: "&7Right-Click: +0.5 HP"
+      stab:
+        title: "&6Thrust Attack: {state}"
+        enabled: "&aENABLED"
+        disabled: "&cDISABLED"
+        description: "&7Use the Thrust attack on the third accepted hit."
+      stab_lift:
+        title: "&6Thrust Lift: {state}"
+        enabled: "&aENABLED"
+        disabled: "&cDISABLED"
+        description: "&7Lift targets on accepted Thrust hits."
+      toggle: "&eClick to toggle."
 items:
+  ice_rapier:
+    fallback_name: "Ice Rapier"
+    lore:
+      - "&6---------------"
+      - "&eAttack: &bThrust / Cut"
+      - "&3Damage decreases as the blade wears."
+      - "&3Thrust and Cut hits apply native freezing."
+      - "&3Sneak + right-click switches mode."
+      - "Rare"
+      - "&6---------------"
+    mode_lore:
+      thrust: "&eMode: &fThrust &7(3.75-block reach in Survival)"
+      cut: "&eMode: &fCut"
+  iron_rapier:
+    fallback_name: "Iron Rapier"
+    lore:
+      - "&6---------------"
+      - "&eAttack: &bThrust / Cut"
+      - "&3Left-click attacks in the selected mode."
+      - "&3Sneak + right-click switches mode."
+      - "&7One-Handed: use a shield in the off-hand."
+      - "Common"
+      - "&6---------------"
+    mode_lore:
+      thrust: "&eMode: &fThrust &7(3.75-block reach)"
+      cut: "&eMode: &fCut"
+  diamond_rapier:
+    fallback_name: "Diamond Rapier"
+    lore:
+      - "&6---------------"
+      - "&eAttack: &bThrust / Cut"
+      - "&3Left-click attacks in the selected mode."
+      - "&3Sneak + right-click switches mode."
+      - "&7One-Handed: use a shield in the off-hand."
+      - "Rare"
+      - "&6---------------"
+    mode_lore:
+      thrust: "&eMode: &fThrust &7(3.75-block reach)"
+      cut: "&eMode: &fCut"
+  netherite_rapier:
+    fallback_name: "Netherite Rapier"
+    lore:
+      - "&6---------------"
+      - "&eAttack: &bThrust / Cut"
+      - "&3Left-click attacks in the selected mode."
+      - "&3Sneak + right-click switches mode."
+      - "&7One-Handed: use a shield in the off-hand."
+      - "Epic"
+      - "&6---------------"
+    mode_lore:
+      thrust: "&eMode: &fThrust &7(3.75-block reach)"
+      cut: "&eMode: &fCut"
   crescent_bow:
     fallback_name: "Crescent Bow"
     lore:
@@ -57,6 +147,16 @@ items:
       - "&6---------------"
       - "&eAbility: &dMoonlit Flurry"
       - "&3Hits charge an empowered strike. A charged attack unleashes 3 rapid slashes."
+      - "&3Deals 1 less damage by day, but 2 bonus damage under moonlight."
+      - "Epic"
+      - "&6---------------"
+  crescent_khopesh:
+    fallback_name: "Crescent Khopesh"
+    lore:
+      - "&6---------------"
+      - "&eAbility: &dMoonstrike"
+      - "&3Every third melee hit unleashes a lunar slash."
+      - "&3Each target grants 0.5 shield HP, up to 4 HP for 4 seconds."
       - "&3Deals 1 less damage by day, but 2 bonus damage under moonlight."
       - "Epic"
       - "&6---------------"
@@ -235,3 +335,12 @@ items:
       - "&3Strikes can briefly set targets ablaze."
       - "&cBurns its wielder unless they wear armor enchanted with Fire Protection."
       - "Epic"
+  obsidian_glaive:
+    fallback_name: "Obsidian Glaive"
+    lore:
+      - "&eCombo: &bCut > Cut > Thrust"
+      - "&3Cut reaches 4 blocks and can sweep nearby targets."
+      - "&3Below 1.5 blocks: 30% damage and extra knockback."
+      - "&3Thrust pierces targets along your aim line; armor applies."
+      - "&3Thrust 0-4.5 Survival / 0-6.5 Creative; lift and wind on accepted hits."
+      - "Rare"

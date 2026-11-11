@@ -1,6 +1,7 @@
 package pepin.pepeforge.gui;
 
 import java.util.Objects;
+import java.util.List;
 
 import org.jspecify.annotations.NonNull;
 
@@ -11,14 +12,17 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import pepin.pepeforge.item.ItemFactory;
+import org.bukkit.plugin.java.JavaPlugin;
+import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ColorUtil;
 
 public final class ConfigMenu {
+    public static final int METRICS_SLOT = 51;
 
     private ConfigMenu() {
     }
 
-    public static @NonNull Inventory create(ItemFactory itemFactory) {
+    public static @NonNull Inventory create(ItemFactory itemFactory, JavaPlugin plugin, PluginLang lang) {
         Inventory inventory = Objects.requireNonNull(Bukkit.createInventory(
                 new Holder(),
                 54,
@@ -49,8 +53,25 @@ public final class ConfigMenu {
             reloadBtn.setItemMeta(meta);
         }
         inventory.setItem(53, reloadBtn);
+        updateMetricsButton(inventory, plugin, lang);
 
         return inventory;
+    }
+
+    public static void updateMetricsButton(Inventory inventory, JavaPlugin plugin, PluginLang lang) {
+        boolean enabled = plugin.getConfig().getBoolean("metrics.enabled", true);
+        ItemStack button = ConfigIconography.createStateButton(enabled);
+        ItemMeta meta = button.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(lang.text("messages.config.metrics.title"));
+            meta.setLore(List.of(
+                    lang.text("messages.config.metrics.description"),
+                    lang.text("messages.config.metrics." + (enabled ? "enabled" : "disabled")),
+                    lang.text("messages.config.metrics." + (enabled ? "disable" : "enable")),
+                    lang.text("messages.config.metrics.immediate")));
+            button.setItemMeta(meta);
+        }
+        inventory.setItem(METRICS_SLOT, button);
     }
 
     public static boolean isConfigMenu(Inventory inventory) {

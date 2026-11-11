@@ -7,11 +7,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
+import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.gui.CustomItemsMenu;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.ColorUtil;
+import pepin.pepeforge.util.combat.TwoHandedEquipmentObserver;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordDefinition;
 import pepin.pepeforge.weapons.crimsonsword.CrimsonSwordManager;
@@ -23,23 +24,26 @@ import java.util.stream.Collectors;
 
 public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
 
-    private final JavaPlugin plugin;
+    private final PepeForgePlugin plugin;
     private final PluginLang lang;
     private final ItemFactory itemFactory;
     private final CrimsonSwordManager crimsonSwordManager;
     private final pepin.pepeforge.stats.StatisticsManager statsManager;
     private final pepin.pepeforge.item.ItemMigrator itemMigrator;
     private final OnlinePlayerNames onlinePlayerNames;
+    private final TwoHandedEquipmentObserver equipmentObserver;
 
-    public PepeForgeCommand(JavaPlugin plugin, PluginLang lang, ItemFactory itemFactory,
+    public PepeForgeCommand(PepeForgePlugin plugin, PluginLang lang, ItemFactory itemFactory,
             CrimsonSwordManager crimsonSwordManager,
-            pepin.pepeforge.stats.StatisticsManager statsManager, pepin.pepeforge.item.ItemMigrator itemMigrator) {
+            pepin.pepeforge.stats.StatisticsManager statsManager, pepin.pepeforge.item.ItemMigrator itemMigrator,
+            TwoHandedEquipmentObserver equipmentObserver) {
         this.plugin = plugin;
         this.lang = lang;
         this.itemFactory = itemFactory;
         this.crimsonSwordManager = crimsonSwordManager;
         this.statsManager = statsManager;
         this.itemMigrator = itemMigrator;
+        this.equipmentObserver = equipmentObserver;
         this.onlinePlayerNames = new OnlinePlayerNames();
     }
 
@@ -72,7 +76,7 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage(lang.message("messages.command.players_only"));
                 return true;
             }
-            player.openInventory(pepin.pepeforge.gui.ConfigMenu.create(itemFactory));
+            plugin.openConfigMenu(player);
             return true;
         }
 
@@ -83,8 +87,8 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
             }
             org.bukkit.plugin.Plugin plugin = Bukkit.getPluginManager().getPlugin("PepeForge");
             if (plugin instanceof pepin.pepeforge.PepeForgePlugin pepePlugin) {
-                pepePlugin.reloadPlugin();
-                sender.sendMessage(lang.message("messages.config.reloaded"));
+                sender.sendMessage(lang.message(pepePlugin.reloadPlugin()
+                        ? "messages.config.reloaded" : "messages.config.reload_in_progress"));
             }
             return true;
         }
@@ -193,6 +197,7 @@ public final class PepeForgeCommand implements CommandExecutor, TabCompleter {
             }
 
             Map<Integer, ItemStack> remaining = target.getInventory().addItem(item.clone());
+            equipmentObserver.requestRefresh(target);
             if (!remaining.isEmpty()) {
                 sendGiveFailure(sender, itemName, targetName);
                 return;

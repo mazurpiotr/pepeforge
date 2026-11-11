@@ -24,6 +24,26 @@ resource_pack:
 
 # Shared Wind Blade family settings.
 mechanics:
+  rapier:
+    # Final attack damage in HP (1-40) for each tier.
+    damage:
+      iron: 5.0
+      diamond: 6.0
+      netherite: 7.0
+    # Attacks per second (0.5-4).
+    attack_speed: 2.0
+    frontal_bonus_enabled: false
+    # Damage bonus (0-100%) within the frontal cone (1-180 degrees).
+    frontal_bonus_percent: 20.0
+    frontal_cone_degrees: 120.0
+  ice_rapier:
+    # Damage in HP (1-40), decreasing from maximum to minimum as the blade wears.
+    min_damage: 4.0
+    max_damage: 8.0
+    # Custom maximum durability (1-250).
+    max_durability: 32
+    # Native freeze meter on Thrust and Cut hits (1-600); naturally decays, not a duration.
+    freeze_ticks: 200
   wind_blade:
     dash_cooldown: 5000
     dash_strength: 1.5
@@ -38,6 +58,16 @@ mechanics:
   crescent_spear:
     charges_required: 5
     active_hit_count: 2
+  crescent_khopesh:
+    moonstrike_mode: SWEEP
+    hits_required: 3
+    # Maximum temporary shield in HP; 2 HP = 1 heart. Duration is fixed at 80 ticks.
+    shield_absorption: 4.0
+    wave_range: 4.5
+    wave_width: 2.8
+    wave_speed: 0.65
+    sweep_width: 3.0
+    sweep_range: 2.0
   stormcleaver:
     charges_required: 5
     jump_velocity_multiplier: 1.5
@@ -48,15 +78,34 @@ mechanics:
     micro_dash_strength: 0.15
   emberfang:
     fire_damage: 4.0
+  obsidian_glaive:
+    damage: 7.0
+    stab_enabled: true
+    stab_lift_enabled: true
 
 # Item availability settings
 # enabled: hard on/off switch for the item itself
 # recipe_enabled: controls custom crafting-table recipes separately and must be set explicitly
 items:
+  ice_rapier:
+    enabled: true
+    recipe_enabled: true
+  iron_rapier:
+    enabled: true
+    recipe_enabled: true
+  diamond_rapier:
+    enabled: true
+    recipe_enabled: true
+  netherite_rapier:
+    enabled: true
+    recipe_enabled: true
   crescent_bow:
     enabled: true
     recipe_enabled: true
   crescent_spear:
+    enabled: true
+    recipe_enabled: true
+  crescent_khopesh:
     enabled: true
     recipe_enabled: true
   chisel:
@@ -98,6 +147,9 @@ items:
     enabled: true
     recipe_enabled: true
   stormcleaver:
+    enabled: true
+    recipe_enabled: true
+  obsidian_glaive:
     enabled: true
     recipe_enabled: true
   emberfang:
