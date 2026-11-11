@@ -22,7 +22,7 @@ public final class EmberfangDefinition {
     public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.EMBERFANG;
     public static final String FIRE_DAMAGE_CONFIG_PATH = "mechanics.emberfang.fire_damage";
     public static final double FIRE_DAMAGE = 4.0D;
-    public static final double ATTACK_DAMAGE_PENALTY = -2.0D;
+    public static final double ATTACK_DAMAGE_ATTRIBUTE = 4.0D;
     public static final double MIN_FIRE_DAMAGE = 0.0D;
     public static final double MAX_FIRE_DAMAGE = 6.0D;
     public static final double FIRE_DAMAGE_STEP = 0.5D;

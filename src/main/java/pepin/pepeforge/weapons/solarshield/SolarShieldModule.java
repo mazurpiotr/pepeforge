@@ -16,7 +16,7 @@ public class SolarShieldModule implements ItemModule {
 
     private SolarShieldRecipes recipes;
     private SolarShieldListener listener;
-    private SolarShieldRecipeDiscoveryListener discoveryListener;
+    private SolarShieldRecipeDiscovery recipeDiscovery;
 
     public SolarShieldModule(PepeForgePlugin plugin, ItemFactory itemFactory, PluginLang lang, BossBarManager bossBarManager) {
         this.plugin = plugin;
@@ -34,8 +34,7 @@ public class SolarShieldModule implements ItemModule {
         this.listener.startStatusTask();
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
         
-        this.discoveryListener = new SolarShieldRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new SolarShieldRecipeDiscovery(plugin);
     }
 
     @Override
@@ -50,8 +49,8 @@ public class SolarShieldModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

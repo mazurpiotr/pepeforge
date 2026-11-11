@@ -11,7 +11,7 @@ public class CrescentBowModule implements ItemModule {
     private final ItemFactory itemFactory;
 
     private CrescentBowRecipes recipes;
-    private CrescentBowRecipeDiscoveryListener discoveryListener;
+    private CrescentBowRecipeDiscovery recipeDiscovery;
 
     public CrescentBowModule(PepeForgePlugin plugin, ItemFactory itemFactory) {
         this.plugin = plugin;
@@ -25,8 +25,7 @@ public class CrescentBowModule implements ItemModule {
 
         plugin.getServer().getPluginManager().registerEvents(new CrescentBowListener(itemFactory), plugin);
 
-        this.discoveryListener = new CrescentBowRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new CrescentBowRecipeDiscovery();
     }
 
     @Override
@@ -38,8 +37,8 @@ public class CrescentBowModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

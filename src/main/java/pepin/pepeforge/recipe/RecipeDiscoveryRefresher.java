@@ -3,6 +3,7 @@ package pepin.pepeforge.recipe;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -11,6 +12,8 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
@@ -82,6 +85,16 @@ public final class RecipeDiscoveryRefresher implements Listener {
 
     @EventHandler
     public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+        refreshSoon(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemDamage(PlayerItemDamageEvent event) {
+        refreshSoon(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemMend(PlayerItemMendEvent event) {
         refreshSoon(event.getPlayer());
     }
 
@@ -157,6 +170,7 @@ public final class RecipeDiscoveryRefresher implements Listener {
         private final long generation;
         private final boolean coalesced;
         private ScheduledTaskCompat task;
+        private volatile boolean cancelled;
 
         private RefreshTask(Player player, long generation, boolean coalesced) {
             this.player = player;
@@ -168,7 +182,7 @@ public final class RecipeDiscoveryRefresher implements Listener {
         @Override
         public void run() {
             try {
-                if (!stopped && generation == lifecycleGeneration) {
+                if (!cancelled && !stopped && generation == lifecycleGeneration) {
                     refresh(player);
                 }
             } finally {
@@ -182,6 +196,7 @@ public final class RecipeDiscoveryRefresher implements Listener {
         }
 
         private void cancel() {
+            cancelled = true;
             if (task != null) {
                 task.cancel();
             }

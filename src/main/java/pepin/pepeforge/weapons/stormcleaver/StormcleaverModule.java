@@ -13,7 +13,7 @@ public final class StormcleaverModule implements ItemModule {
     private final PluginLang lang;
     private StormcleaverRecipes recipes;
     private StormcleaverListener listener;
-    private StormcleaverRecipeDiscoveryListener discoveryListener;
+    private StormcleaverRecipeDiscovery recipeDiscovery;
 
     public StormcleaverModule(PepeForgePlugin plugin, ItemFactory itemFactory, PluginLang lang) {
         this.plugin = plugin;
@@ -30,8 +30,7 @@ public final class StormcleaverModule implements ItemModule {
         plugin.getServer().getPluginManager().registerEvents(listener, plugin);
         listener.startStatusTask();
 
-        discoveryListener = new StormcleaverRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(discoveryListener, plugin);
+        recipeDiscovery = new StormcleaverRecipeDiscovery();
     }
 
     @Override
@@ -47,8 +46,8 @@ public final class StormcleaverModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (discoveryListener != null) {
-            discoveryListener.discoverFor(player);
+        if (recipeDiscovery != null) {
+            recipeDiscovery.discoverFor(player);
         }
     }
 }

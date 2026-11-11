@@ -11,7 +11,7 @@ public final class EmberfangModule implements ItemModule {
     private final ItemFactory itemFactory;
     private EmberfangListener listener;
     private EmberfangRecipes recipes;
-    private EmberfangRecipeDiscoveryListener discoveryListener;
+    private EmberfangRecipeDiscovery recipeDiscovery;
 
     public EmberfangModule(PepeForgePlugin plugin, ItemFactory itemFactory) {
         this.plugin = plugin;
@@ -27,8 +27,7 @@ public final class EmberfangModule implements ItemModule {
         plugin.getServer().getPluginManager().registerEvents(listener, plugin);
         listener.start();
 
-        discoveryListener = new EmberfangRecipeDiscoveryListener(plugin, itemFactory);
-        plugin.getServer().getPluginManager().registerEvents(discoveryListener, plugin);
+        recipeDiscovery = new EmberfangRecipeDiscovery(itemFactory);
     }
 
     @Override
@@ -41,13 +40,13 @@ public final class EmberfangModule implements ItemModule {
             recipes.unregisterAll();
             recipes = null;
         }
-        discoveryListener = null;
+        recipeDiscovery = null;
     }
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (discoveryListener != null) {
-            discoveryListener.discoverFor(player);
+        if (recipeDiscovery != null) {
+            recipeDiscovery.discoverFor(player);
         }
     }
 }

@@ -17,8 +17,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -38,6 +36,7 @@ import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
 import pepin.pepeforge.util.scheduler.SchedulerCompat;
 import pepin.pepeforge.util.combat.CombatUtils;
+import pepin.pepeforge.util.combat.TwoHandedEquipmentHandler;
 import pepin.pepeforge.util.ui.ActionBarHelper;
 import pepin.pepeforge.util.combat.DamageFlow;
 
@@ -50,10 +49,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
-public final class GreatswordListener implements Listener {
+public final class GreatswordListener implements Listener, TwoHandedEquipmentHandler {
 
     private static final int COMBO_STAGE_MAX = 5;
     private static final int STATUS_INTERVAL_TICKS = 1;
@@ -81,6 +79,9 @@ public final class GreatswordListener implements Listener {
     private static final float RHYTHM_CUE_VOLUME = 0.55f;
     private static final float RHYTHM_CUE_PITCH = 1.7f;
 
+    private static final Map<UUID, Object> equipmentOwners = new ConcurrentHashMap<>();
+
+    private final Object equipmentOwner = new Object();
     private final JavaPlugin plugin;
     private final ItemFactory itemFactory;
     private final PluginLang lang;
@@ -93,7 +94,11 @@ public final class GreatswordListener implements Listener {
     private final Map<UUID, Long> rhythmCueTicks = new ConcurrentHashMap<>();
     private final Set<UUID> rhythmBarShown = ConcurrentHashMap.newKeySet();
     private final Set<UUID> cleavingPlayers = ConcurrentHashMap.newKeySet();
-    private final Map<UUID, ScheduledTaskCompat> projectileKnockbackTasks = new ConcurrentHashMap<>();
+    private final Map<UUID, PlayerTask> projectileKnockbackTasks = new ConcurrentHashMap<>();
+    private final Map<UUID, PlayerTask> statusTasks = new ConcurrentHashMap<>();
+    private final Set<UUID> invalidEquipment = ConcurrentHashMap.newKeySet();
+    private volatile boolean running;
+    private volatile long generation;
     private boolean transientModifierLogged = false;
 
     public GreatswordListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang) {
@@ -104,65 +109,126 @@ public final class GreatswordListener implements Listener {
         this.projectileKnockbackResistanceKey = new NamespacedKey(plugin, "greatsword_projectile_knockback");
     }
 
-    private ScheduledTaskCompat statusTask;
+    public void start() {
+        if (!running) {
+            generation++;
+            running = true;
+        }
+    }
 
-    public void startStatusTask() {
-        statusTask = SchedulerCompat.runTimer(plugin, () -> {
-            for (Player player : plugin.getServer().getOnlinePlayers()) {
-                SchedulerCompat.runForPlayer(player, plugin, () -> {
-                    if (player == null || !player.isOnline()) {
-                        return;
-                    }
-                    GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
-                    if (tier == null) {
-                        clearPlayerState(player);
-                        return;
-                    }
-
-                    if (!CombatUtils.hasEmptyOffHand(player)) {
-                        clearPlayerState(player);
-                        ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
-                        return;
-                    }
-
-                    long currentTick = currentTick(player);
-                    cleanupResolvedHitTick(player.getUniqueId(), currentTick);
-                    cleanupNonCombatInteractionTick(player.getUniqueId(), currentTick);
-                    expirePendingSwing(player, tier, currentTick);
-
-                    ComboState state = comboStates.get(player.getUniqueId());
-                    if (state != null && state.stage() > 0
-                            && currentTick - state.lastSuccessTick() > RHYTHM_GRACE_END_TICK) {
-                        breakCombo(player);
-                        applyReachModifier(player, FIXED_REACH_BONUS);
-                        return;
-                    }
-
-                    int currentStage = state == null ? 0 : state.stage();
-                    applyReachModifier(player, FIXED_REACH_BONUS);
-                    if (currentStage > 0) {
-                        playRhythmCue(player, state, currentTick);
-                        showRhythmActionBar(player, state, currentTick);
-                    }
-                });
+    @Override
+    public void refreshEquipment(Player player, boolean notify) {
+        if (!running) {
+            return;
+        }
+        UUID playerId = player.getUniqueId();
+        equipmentOwners.put(playerId, equipmentOwner);
+        GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
+        if (tier == null) {
+            invalidEquipment.remove(playerId);
+            clearPlayerState(player);
+        } else if (!CombatUtils.hasEmptyOffHand(player)) {
+            clearPlayerState(player);
+            if (notify && invalidEquipment.add(playerId)) {
+                ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
             }
-        }, 1L, STATUS_INTERVAL_TICKS);
+        } else {
+            invalidEquipment.remove(playerId);
+            applyReachModifier(player, FIXED_REACH_BONUS);
+            PlayerTask registration = statusTasks.get(playerId);
+            if (registration != null) {
+                registration.tier = tier;
+            }
+        }
+        equipmentOwners.put(playerId, equipmentOwner);
+    }
+
+    private boolean canUse(Player player) {
+        refreshEquipment(player, true);
+        return running
+                && itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null
+                && CombatUtils.hasEmptyOffHand(player);
+    }
+
+    private void ensureStatusTask(Player player, GreatswordTier tier) {
+        UUID playerId = player.getUniqueId();
+        if (!running || statusTasks.containsKey(playerId)
+                || (!pendingSwings.containsKey(playerId) && !comboStates.containsKey(playerId))) {
+            return;
+        }
+        PlayerTask registration = new PlayerTask(generation);
+        registration.tier = tier;
+        statusTasks.put(playerId, registration);
+        registration.attach(SchedulerCompat.runTimerForEntity(player, plugin, () -> {
+            if (!running || generation != registration.generation || statusTasks.get(playerId) != registration) {
+                return;
+            }
+            if (!player.isOnline()) {
+                retireStatusTask(playerId, registration);
+                registration.cancel();
+                return;
+            }
+            long currentTick = currentTick(player);
+            expirePendingSwing(player, registration.tier, currentTick);
+            ComboState state = comboStates.get(playerId);
+            if (state != null && state.stage() > 0
+                    && currentTick - state.lastSuccessTick() > RHYTHM_GRACE_END_TICK) {
+                breakCombo(player);
+            } else if (state != null && state.stage() > 0) {
+                playRhythmCue(player, state, currentTick);
+                showRhythmActionBar(player, state, currentTick);
+            }
+            if (!pendingSwings.containsKey(playerId) && !comboStates.containsKey(playerId)) {
+                cancelStatusTask(playerId);
+            }
+        }, () -> retireStatusTask(playerId, registration), 1L, STATUS_INTERVAL_TICKS));
+    }
+
+    private void retireStatusTask(UUID playerId, PlayerTask registration) {
+        if (statusTasks.remove(playerId, registration)) {
+            forgetPlayerState(playerId);
+            invalidEquipment.remove(playerId);
+            equipmentOwners.remove(playerId, equipmentOwner);
+        }
+    }
+
+    private void cancelStatusTask(UUID playerId) {
+        PlayerTask registration = statusTasks.remove(playerId);
+        if (registration != null) {
+            registration.cancel();
+        }
     }
 
     public void stop() {
-        if (statusTask != null) {
-            statusTask.cancel();
-            statusTask = null;
-        }
+        running = false;
+        generation++;
+        statusTasks.values().forEach(PlayerTask::cancel);
+        statusTasks.clear();
+        projectileKnockbackTasks.values().forEach(PlayerTask::cancel);
+        projectileKnockbackTasks.clear();
+        invalidEquipment.clear();
         clearAllPlayerState();
     }
 
     public void clearAllPlayerState() {
+        long cleanupGeneration = generation;
         for (Player player : plugin.getServer().getOnlinePlayers()) {
+            UUID playerId = player.getUniqueId();
+            Runnable cleanup = () -> {
+                if (generation == cleanupGeneration) {
+                    clearPlayerState(player);
+                }
+            };
             if (SchedulerCompat.isOwnedByCurrentRegion(player)) {
-                clearPlayerState(player);
+                cleanup.run();
             } else {
-                SchedulerCompat.runForPlayer(player, plugin, () -> clearPlayerState(player));
+                SchedulerCompat.runForPlayer(player, plugin, cleanup,
+                        () -> {
+                            if (generation == cleanupGeneration) {
+                                forgetPlayerState(playerId);
+                                equipmentOwners.remove(playerId, equipmentOwner);
+                            }
+                        });
             }
         }
     }
@@ -179,14 +245,14 @@ public final class GreatswordListener implements Listener {
             return;
         }
 
-        if (!CombatUtils.hasEmptyOffHand(player)) {
-            clearPlayerState(player);
-            ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+        if (!canUse(player)) {
             return;
         }
 
         UUID playerId = player.getUniqueId();
         long currentTick = currentTick(player);
+        cleanupResolvedHitTick(playerId, currentTick);
+        cleanupNonCombatInteractionTick(playerId, currentTick);
         if (wasHitResolvedRecently(playerId, currentTick)
                 || wasNonCombatInteractionRecently(playerId, currentTick)) {
             return;
@@ -197,8 +263,8 @@ public final class GreatswordListener implements Listener {
 
         if (!timingResult.canContinueCombo()) {
             breakCombo(player);
-            applyReachModifier(player, FIXED_REACH_BONUS);
         }
+        ensureStatusTask(player, tier);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -220,9 +286,7 @@ public final class GreatswordListener implements Listener {
             return;
         }
 
-        if (!CombatUtils.hasEmptyOffHand(player)) {
-            clearPlayerState(player);
-            ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+        if (!canUse(player)) {
             return;
         }
 
@@ -233,7 +297,6 @@ public final class GreatswordListener implements Listener {
 
         if (!swing.timingResult().canContinueCombo()) {
             breakCombo(player);
-            applyReachModifier(player, FIXED_REACH_BONUS);
             return;
         }
 
@@ -243,7 +306,7 @@ public final class GreatswordListener implements Listener {
         applyAreaAttack(player, areaTargets, event.getDamage() * AREA_DAMAGE_MULTIPLIER, currentStage, false);
 
         advanceCombo(player, currentStage, currentTick);
-        applyReachModifier(player, FIXED_REACH_BONUS);
+        ensureStatusTask(player, tier);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -255,7 +318,7 @@ public final class GreatswordListener implements Listener {
                         GreatswordDefinition.DEFAULT_PROJECTILE_KNOCKBACK_IMMUNITY)
                 || currentStage(player.getUniqueId()) < 1
                 || itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) == null
-                || !CombatUtils.hasEmptyOffHand(player)) {
+                || !canUse(player)) {
             return;
         }
 
@@ -272,7 +335,7 @@ public final class GreatswordListener implements Listener {
         }
 
         GreatswordTier tier = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand());
-        if (tier == null || !CombatUtils.hasEmptyOffHand(player)) {
+        if (tier == null || !canUse(player)) {
             return;
         }
 
@@ -314,34 +377,9 @@ public final class GreatswordListener implements Listener {
         clearPlayerState(event.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-
-        boolean mainHandGreatsword = itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null;
-        if (mainHandGreatsword && !CombatUtils.hasEmptyOffHand(player)) {
-            SchedulerCompat.runForPlayer(player, plugin,
-                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onInventoryDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-
-        if (itemFactory.getGreatswordTier(player.getInventory().getItemInMainHand()) != null
-                && !CombatUtils.hasEmptyOffHand(player)) {
-            SchedulerCompat.runForPlayer(player, plugin,
-                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
-        }
-    }
-
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
+        invalidEquipment.remove(event.getPlayer().getUniqueId());
         clearPlayerState(event.getPlayer());
     }
 
@@ -377,7 +415,6 @@ public final class GreatswordListener implements Listener {
                     currentStage,
                     true);
             advanceCombo(player, currentStage, swing.tick());
-            applyReachModifier(player, FIXED_REACH_BONUS);
             return;
         }
 
@@ -579,27 +616,27 @@ public final class GreatswordListener implements Listener {
         }
 
         UUID playerId = player.getUniqueId();
-        ScheduledTaskCompat previousTask = projectileKnockbackTasks.remove(playerId);
+        PlayerTask previousTask = projectileKnockbackTasks.remove(playerId);
         if (previousTask != null) {
             previousTask.cancel();
         }
-
-        AtomicReference<ScheduledTaskCompat> scheduledReference = new AtomicReference<>();
-        ScheduledTaskCompat scheduledTask = SchedulerCompat.runLaterForPlayer(
+        PlayerTask registration = new PlayerTask(generation);
+        projectileKnockbackTasks.put(playerId, registration);
+        registration.attach(SchedulerCompat.runLaterForPlayer(
                 player,
                 plugin,
                 () -> {
-                    if (projectileKnockbackTasks.remove(playerId, scheduledReference.get())) {
+                    if (running && generation == registration.generation
+                            && projectileKnockbackTasks.remove(playerId, registration)) {
                         removeProjectileKnockbackResistance(player);
                     }
                 },
-                GreatswordDefinition.PROJECTILE_KNOCKBACK_WINDOW_TICKS);
-        scheduledReference.set(scheduledTask);
-        projectileKnockbackTasks.put(playerId, scheduledTask);
+                () -> projectileKnockbackTasks.remove(playerId, registration),
+                GreatswordDefinition.PROJECTILE_KNOCKBACK_WINDOW_TICKS));
     }
 
     private void removeProjectileKnockbackResistance(Player player) {
-        ScheduledTaskCompat task = projectileKnockbackTasks.remove(player.getUniqueId());
+        PlayerTask task = projectileKnockbackTasks.remove(player.getUniqueId());
         if (task != null) {
             task.cancel();
         }
@@ -698,6 +735,7 @@ public final class GreatswordListener implements Listener {
 
     private void resetCombo(Player player) {
         UUID playerId = player.getUniqueId();
+        cancelStatusTask(playerId);
         comboStates.remove(playerId);
         pendingSwings.remove(playerId);
         rhythmCueTicks.remove(playerId);
@@ -731,14 +769,29 @@ public final class GreatswordListener implements Listener {
 
     private void clearPlayerState(Player player) {
         UUID playerId = player.getUniqueId();
-        removeProjectileKnockbackResistance(player);
+        cancelStatusTask(playerId);
+        Object owner = equipmentOwners.get(playerId);
+        if (owner == null || owner == equipmentOwner) {
+            removeProjectileKnockbackResistance(player);
+            clearRhythmActionBar(player);
+            removeReachModifier(player);
+            equipmentOwners.remove(playerId, equipmentOwner);
+        } else {
+            PlayerTask projectileTask = projectileKnockbackTasks.remove(playerId);
+            if (projectileTask != null) {
+                projectileTask.cancel();
+            }
+        }
+        forgetPlayerState(playerId);
+    }
+
+    private void forgetPlayerState(UUID playerId) {
         comboStates.remove(playerId);
         pendingSwings.remove(playerId);
         resolvedHitTicks.remove(playerId);
         nonCombatInteractionTicks.remove(playerId);
         rhythmCueTicks.remove(playerId);
-        removeReachModifier(player);
-        clearRhythmActionBar(player);
+        rhythmBarShown.remove(playerId);
     }
 
     private long currentTick(Player player) {
@@ -838,6 +891,32 @@ public final class GreatswordListener implements Listener {
         int maxIndex = RHYTHM_BAR_SEGMENTS - 1;
         int index = (int) Math.round((double) tick / RHYTHM_CYCLE_TICKS * maxIndex);
         return Math.max(0, Math.min(maxIndex, index));
+    }
+
+    private static final class PlayerTask {
+        private final long generation;
+        private ScheduledTaskCompat task;
+        private GreatswordTier tier;
+        private boolean cancelled;
+
+        private PlayerTask(long generation) {
+            this.generation = generation;
+        }
+
+        private synchronized void attach(ScheduledTaskCompat task) {
+            if (cancelled) {
+                task.cancel();
+            } else {
+                this.task = task;
+            }
+        }
+
+        private synchronized void cancel() {
+            cancelled = true;
+            if (task != null) {
+                task.cancel();
+            }
+        }
     }
 
     private record ComboState(int stage, long lastSuccessTick) {

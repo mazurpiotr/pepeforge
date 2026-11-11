@@ -24,10 +24,10 @@ public final class CrescentBowRecipes {
     public void registerAll() {
 
         NamespacedKey key = CrescentBowRecipeKeys.CRESCENT_BOW;
-        NamespacedKey keyMirrored = CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED;
+        NamespacedKey legacyMirroredKey = CrescentBowRecipeKeys.CRESCENT_BOW_MIRRORED;
 
         RecipeRegistrar.remove(plugin, key);
-        RecipeRegistrar.remove(plugin, keyMirrored);
+        RecipeRegistrar.remove(plugin, legacyMirroredKey);
 
         if (!itemFactory.isRecipeEnabled(CrescentBowDefinition.ITEM_ID)) {
             return;
@@ -45,19 +45,6 @@ public final class CrescentBowRecipes {
         recipe.setIngredient('A', CORE_MATERIAL);
         recipe.setIngredient('S', HANDLE_MATERIAL);
         RecipeRegistrar.add(plugin, key, recipe);
-
-        ShapedRecipe mirroredRecipe = new ShapedRecipe(keyMirrored, itemFactory.createCrescentBow());
-        mirroredRecipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
-        /*
-         * [S][A][P]
-         * [A][ ][P]
-         * [S][A][P]
-         */
-        mirroredRecipe.shape("SAP", "A P", "SAP");
-        mirroredRecipe.setIngredient('P', CURVE_MATERIAL);
-        mirroredRecipe.setIngredient('A', CORE_MATERIAL);
-        mirroredRecipe.setIngredient('S', HANDLE_MATERIAL);
-        RecipeRegistrar.add(plugin, keyMirrored, mirroredRecipe);
     }
 
     public void unregisterAll() {

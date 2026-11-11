@@ -23,10 +23,10 @@ public final class KatanaRecipes {
     public void registerAll() {
 
         NamespacedKey key = KatanaRecipeKeys.KATANA;
-        NamespacedKey keyMirrored = KatanaRecipeKeys.KATANA_MIRRORED;
+        NamespacedKey legacyMirroredKey = KatanaRecipeKeys.KATANA_MIRRORED;
 
         RecipeRegistrar.remove(plugin, key);
-        RecipeRegistrar.remove(plugin, keyMirrored);
+        RecipeRegistrar.remove(plugin, legacyMirroredKey);
 
         if (!itemFactory.isRecipeEnabled(KatanaDefinition.ITEM_ID)) {
             return;
@@ -43,18 +43,6 @@ public final class KatanaRecipes {
         recipe.setIngredient('I', CORE_MATERIAL);
         recipe.setIngredient('S', HANDLE_MATERIAL);
         RecipeRegistrar.add(plugin, key, recipe);
-
-        ShapedRecipe mirroredRecipe = new ShapedRecipe(keyMirrored, itemFactory.createKatana());
-        mirroredRecipe.setCategory(org.bukkit.inventory.recipe.CraftingBookCategory.EQUIPMENT);
-        /*
-         * [I][ ][ ]
-         * [ ][I][ ]
-         * [ ][ ][S]
-         */
-        mirroredRecipe.shape("I  ", " I ", "  S");
-        mirroredRecipe.setIngredient('I', CORE_MATERIAL);
-        mirroredRecipe.setIngredient('S', HANDLE_MATERIAL);
-        RecipeRegistrar.add(plugin, keyMirrored, mirroredRecipe);
     }
 
     public void unregisterAll() {

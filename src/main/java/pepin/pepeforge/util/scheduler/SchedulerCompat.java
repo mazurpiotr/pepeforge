@@ -83,6 +83,11 @@ public final class SchedulerCompat {
         return !REGIONIZED || Bukkit.isOwnedByCurrentRegion(entity);
     }
 
+    public static boolean isOwnedByCurrentRegion(org.bukkit.World world,
+            int minChunkX, int minChunkZ, int maxChunkX, int maxChunkZ) {
+        return !REGIONIZED || Bukkit.isOwnedByCurrentRegion(world, minChunkX, minChunkZ, maxChunkX, maxChunkZ);
+    }
+
     public static void teleport(Entity entity, Location location) {
         if (teleportAsyncMethod != null) {
             try {
@@ -329,14 +334,27 @@ public final class SchedulerCompat {
             Runnable runnable,
             long delayTicks
     ) {
+        return runLaterForPlayer(player, plugin, runnable, null, delayTicks);
+    }
+
+    public static ScheduledTaskCompat runLaterForPlayer(
+            Player player,
+            JavaPlugin plugin,
+            Runnable runnable,
+            Runnable retired,
+            long delayTicks
+    ) {
         if (isRegionized()) {
             long foliaDelay = Math.max(1L, delayTicks);
             var task = player.getScheduler().runDelayed(
                     plugin,
                     taskRef -> runnable.run(),
-                    null,
+                    retired,
                     foliaDelay
             );
+            if (task == null && retired != null) {
+                retired.run();
+            }
             return task != null ? task::cancel : () -> {};
         }
 

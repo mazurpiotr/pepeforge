@@ -17,7 +17,7 @@ public final class AnchorModule implements ItemModule {
 
     private AnchorRecipes recipes;
     private AnchorListener listener;
-    private AnchorRecipeDiscoveryListener discoveryListener;
+    private AnchorRecipeDiscovery recipeDiscovery;
 
     public AnchorModule(PepeForgePlugin plugin, ItemFactory itemFactory, CooldownManager cooldownManager, PluginLang lang) {
         this.plugin = plugin;
@@ -34,8 +34,7 @@ public final class AnchorModule implements ItemModule {
         this.listener = new AnchorListener(plugin, itemFactory, cooldownManager, lang);
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
 
-        this.discoveryListener = new AnchorRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new AnchorRecipeDiscovery();
     }
 
     @Override
@@ -50,8 +49,8 @@ public final class AnchorModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

@@ -18,10 +18,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -34,6 +32,7 @@ import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.util.combat.CombatUtils;
 import pepin.pepeforge.util.combat.DamageFlow;
+import pepin.pepeforge.util.combat.TwoHandedEquipmentHandler;
 import pepin.pepeforge.util.ui.ActionBarHelper;
 import pepin.pepeforge.util.cooldown.CooldownManager;
 import pepin.pepeforge.util.scheduler.ScheduledTaskCompat;
@@ -41,10 +40,11 @@ import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class KatanaListener implements Listener {
+public final class KatanaListener implements Listener, TwoHandedEquipmentHandler {
     private static final String PARRY_COOLDOWN_KEY = "katana:parry";
 
     private final JavaPlugin plugin;
@@ -52,8 +52,13 @@ public final class KatanaListener implements Listener {
     private final PluginLang lang;
     private final CooldownManager cooldownManager;
     private final NamespacedKey reflectUntilKey;
-    private final Map<UUID, Long> activeParryUntil = new ConcurrentHashMap<>();
-    private final Map<UUID, ScheduledTaskCompat> activeTasks = new ConcurrentHashMap<>();
+    private final NamespacedKey parrySessionKey;
+    private final Map<UUID, ParrySession> activeParries = new ConcurrentHashMap<>();
+    private final Map<UUID, CooldownTask> cooldownTasks = new ConcurrentHashMap<>();
+    private final Set<UUID> invalidEquipment = ConcurrentHashMap.newKeySet();
+    private final Object taskLock = new Object();
+    private volatile boolean running;
+    private volatile long lifecycleGeneration;
 
     public KatanaListener(JavaPlugin plugin, ItemFactory itemFactory, PluginLang lang,
             CooldownManager cooldownManager) {
@@ -62,44 +67,65 @@ public final class KatanaListener implements Listener {
         this.lang = lang;
         this.cooldownManager = cooldownManager;
         this.reflectUntilKey = new NamespacedKey(plugin, "katana_reflect_until");
+        this.parrySessionKey = new NamespacedKey(plugin, "katana_parry_session");
     }
 
-    private ScheduledTaskCompat statusTask;
-
-    public void startStatusTask() {
-        statusTask = SchedulerCompat.runTimer(plugin, () -> {
-            for (Player player : plugin.getServer().getOnlinePlayers()) {
-                SchedulerCompat.runForPlayer(player, plugin, () -> {
-                    if (!itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
-                        clearActiveParry(player);
-                        return;
-                    }
-
-                    if (!CombatUtils.hasEmptyOffHand(player)) {
-                        clearActiveParry(player);
-                        ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
-                        return;
-                    }
-
-                    long remainingMillis = cooldownManager.getRemainingCooldownMillis(player, PARRY_COOLDOWN_KEY);
-                    if (remainingMillis > 0L) {
-                        showCooldownActionBar(player, remainingMillis);
-                    }
-                });
+    public void start() {
+        synchronized (taskLock) {
+            if (!running) {
+                lifecycleGeneration++;
+                running = true;
             }
-        }, 1L, 2L);
+        }
     }
 
     public void stop() {
-        if (statusTask != null) {
-            statusTask.cancel();
-            statusTask = null;
+        synchronized (taskLock) {
+            running = false;
+            lifecycleGeneration++;
+            cooldownTasks.values().forEach(CooldownTask::cancel);
+            cooldownTasks.clear();
+            for (ParrySession session : activeParries.values()) {
+                session.cancel();
+                Runnable reset = () -> resetParryVisual(session);
+                if (SchedulerCompat.isOwnedByCurrentRegion(session.player)) {
+                    reset.run();
+                } else {
+                    SchedulerCompat.runForPlayer(session.player, plugin, reset);
+                }
+            }
+            activeParries.clear();
+            invalidEquipment.clear();
         }
-        for (ScheduledTaskCompat task : activeTasks.values()) {
-            task.cancel();
+    }
+
+    @Override
+    public void refreshEquipment(Player player, boolean notify) {
+        if (!running || !player.isOnline()) {
+            return;
         }
-        activeTasks.clear();
-        activeParryUntil.clear();
+        UUID playerId = player.getUniqueId();
+        ParrySession session = activeParries.get(playerId);
+        if (session != null && !holdsParryingKatana(session)) {
+            clearActiveParry(session);
+            session = null;
+        }
+        if (!itemFactory.isKatana(player.getInventory().getItemInMainHand()) || player.isDead()) {
+            invalidEquipment.remove(playerId);
+            stopCooldown(playerId);
+            return;
+        }
+        if (session == null || !isParryActive(player, System.currentTimeMillis())) {
+            boolean invalid = !CombatUtils.hasEmptyOffHand(player);
+            if (invalid) {
+                if (invalidEquipment.add(playerId) && notify) {
+                    showOffhandWarning(player);
+                }
+            } else {
+                invalidEquipment.remove(playerId);
+            }
+        }
+        ensureCooldownTask(player);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -115,25 +141,31 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        if (!CombatUtils.hasEmptyOffHand(player)) {
-            // Katana stays equipable with an occupied off-hand, but its custom
-            // mechanics are disabled until the player goes back to a valid 2H state.
+        if (!running) {
             return;
         }
-
+        long now = System.currentTimeMillis();
+        boolean attemptedParry = event.getHand() != EquipmentSlot.OFF_HAND
+                && isAttemptedParryInput(player, action, event.getClickedBlock());
+        if (isParryActive(player, now)) {
+            if (attemptedParry || event.getHand() == EquipmentSlot.OFF_HAND) {
+                denyInteraction(event);
+            }
+            return;
+        }
+        if (!CombatUtils.hasEmptyOffHand(player)) {
+            if (attemptedParry) {
+                invalidEquipment.add(player.getUniqueId());
+                showOffhandWarning(player);
+            }
+            return;
+        }
+        invalidEquipment.remove(player.getUniqueId());
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
             denyInteraction(event);
             return;
         }
-
-        boolean attemptedParry = isAttemptedParryInput(player, action, event.getClickedBlock());
         if (!attemptedParry) {
-            return;
-        }
-
-        long now = System.currentTimeMillis();
-        if (isParryActive(player, now)) {
-            denyInteraction(event);
             return;
         }
 
@@ -148,42 +180,6 @@ public final class KatanaListener implements Listener {
         denyInteraction(event);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onItemHeld(PlayerItemHeldEvent event) {
-        Player player = event.getPlayer();
-        PlayerInventory inventory = player.getInventory();
-        ItemStack newMainHandItem = inventory.getItem(event.getNewSlot());
-        if (itemFactory.isKatana(newMainHandItem) && !CombatUtils.hasEmptyOffHand(player)) {
-            SchedulerCompat.runForPlayer(player, plugin,
-                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-
-        boolean mainHandKatana = itemFactory.isKatana(player.getInventory().getItemInMainHand());
-        if (mainHandKatana && !CombatUtils.hasEmptyOffHand(player)) {
-            SchedulerCompat.runForPlayer(player, plugin,
-                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onInventoryDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-
-        if (itemFactory.isKatana(player.getInventory().getItemInMainHand()) && !CombatUtils.hasEmptyOffHand(player)) {
-            SchedulerCompat.runForPlayer(player, plugin,
-                    () -> ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required")));
-        }
-    }
-
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
@@ -196,7 +192,8 @@ public final class KatanaListener implements Listener {
         }
 
         long now = System.currentTimeMillis();
-        if (!isParryActive(player, now) || !CombatUtils.hasEmptyOffHand(player)) {
+        ParrySession session = getActiveParry(player, now);
+        if (!running || session == null) {
             return;
         }
 
@@ -207,6 +204,7 @@ public final class KatanaListener implements Listener {
             }
             event.setCancelled(true);
             reflectProjectile(player, projectile, now);
+            registerProjectileReflection(session, player.getWorld().getGameTime());
             playReflectEffects(player.getWorld(), player.getEyeLocation());
             return;
         }
@@ -235,13 +233,27 @@ public final class KatanaListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        UUID playerId = event.getPlayer().getUniqueId();
-        ScheduledTaskCompat task = activeTasks.remove(playerId);
-        if (task != null) {
-            task.cancel();
-        }
-        activeParryUntil.remove(playerId);
+        clearPlayer(event.getPlayer());
         cooldownManager.clearCooldown(event.getPlayer(), PARRY_COOLDOWN_KEY);
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        ParrySession session = activeParries.get(event.getEntity().getUniqueId());
+        if (session != null) {
+            event.getDrops().forEach(item -> resetMatchingStack(item, session));
+        }
+        clearPlayer(event.getEntity());
+    }
+
+    private void clearPlayer(Player player) {
+        UUID playerId = player.getUniqueId();
+        ParrySession session = activeParries.get(playerId);
+        if (session != null) {
+            clearActiveParry(session);
+        }
+        stopCooldown(playerId);
+        invalidEquipment.remove(playerId);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -252,11 +264,17 @@ public final class KatanaListener implements Listener {
             return;
         }
 
-        boolean parryVisualWasActive = itemFactory.hasKatanaParryVisual(droppedItem);
-        itemFactory.setKatanaParryVisual(droppedItem, false);
+        ParrySession session = activeParries.get(event.getPlayer().getUniqueId());
+        boolean activeStackDropped = session != null && matchesSession(droppedItem, session);
+        itemFactory.setKatanaVisual(droppedItem, KatanaDefinition.VisualState.NORMAL);
+        if (droppedItem.hasItemMeta()) {
+            var meta = droppedItem.getItemMeta();
+            meta.getPersistentDataContainer().remove(parrySessionKey);
+            droppedItem.setItemMeta(meta);
+        }
         droppedEntity.setItemStack(droppedItem);
-        if (parryVisualWasActive) {
-            clearActiveParry(event.getPlayer(), droppedItem);
+        if (activeStackDropped) {
+            clearActiveParry(session);
         }
     }
 
@@ -264,10 +282,28 @@ public final class KatanaListener implements Listener {
         long durationMillis = KatanaDefinition.PARRY_DURATION_TICKS * 50L;
         long cooldownMillis = KatanaDefinition.COOLDOWN_TICKS * 50L;
         long activeUntil = now + durationMillis;
+        long maxUntil = now + KatanaDefinition.PARRY_MAX_DURATION_TICKS * 50L;
 
-        activeParryUntil.put(player.getUniqueId(), activeUntil);
         cooldownManager.setCooldown(player, PARRY_COOLDOWN_KEY, cooldownMillis);
-        itemFactory.setKatanaParryVisual(katana, true);
+        ParrySession session = new ParrySession(player, katana, activeUntil, maxUntil, lifecycleGeneration);
+        itemFactory.setKatanaVisual(katana, session.visualState);
+        synchronized (taskLock) {
+            if (!running || session.generation != lifecycleGeneration) {
+                resetMatchingStack(katana, session);
+                return;
+            }
+            ParrySession previous = activeParries.put(player.getUniqueId(), session);
+            if (previous != null) {
+                previous.cancel();
+                resetParryVisual(previous);
+            }
+            session.task = SchedulerCompat.runTimerForEntity(player, plugin, session,
+                    session::retire, 0L, 1L);
+            if (session.cancelled) {
+                session.cancel();
+            }
+        }
+        ensureCooldownTask(player);
 
         World world = player.getWorld();
         Location eyeLocation = player.getEyeLocation();
@@ -275,33 +311,13 @@ public final class KatanaListener implements Listener {
         world.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.9f, 1.2f);
         world.playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.75f, 1.4f);
         world.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.35f, 1.7f);
-
-        ScheduledTaskCompat previousTask = activeTasks.remove(player.getUniqueId());
-        if (previousTask != null) {
-            previousTask.cancel();
-        }
-
-        ScheduledTaskCompat task = SchedulerCompat.runTimerForEntity(player, plugin, () -> {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime >= activeParryUntil.getOrDefault(player.getUniqueId(), 0L) || !player.isOnline()) {
-                clearActiveParry(player, katana);
-                return;
-            }
-
-            if (!CombatUtils.hasEmptyOffHand(player)
-                    || !itemFactory.isKatana(player.getInventory().getItemInMainHand())) {
-                clearActiveParry(player, katana);
-                return;
-            }
-            reflectNearbyProjectiles(player, currentTime);
-        }, 0L, 1L);
-
-        activeTasks.put(player.getUniqueId(), task);
     }
 
-    private void reflectNearbyProjectiles(Player player, long now) {
+    private void reflectNearbyProjectiles(ParrySession session, long now) {
+        Player player = session.player;
         Location eyeLocation = player.getEyeLocation();
         double radius = KatanaDefinition.PROJECTILE_SCAN_RADIUS;
+        long worldTick = player.getWorld().getGameTime();
         for (Entity entity : player.getWorld().getNearbyEntities(eyeLocation, radius, radius, radius)) {
             if (!(entity instanceof Projectile projectile)) {
                 continue;
@@ -310,8 +326,21 @@ public final class KatanaListener implements Listener {
                 continue;
             }
             reflectProjectile(player, projectile, now);
+            registerProjectileReflection(session, worldTick);
             playReflectEffects(player.getWorld(), projectile.getLocation());
         }
+    }
+
+    private void registerProjectileReflection(ParrySession session, long worldTick) {
+        if (session.lastReflectionTick != worldTick) {
+            session.lastReflectionTick = worldTick;
+            session.until = Math.min(session.until
+                    + KatanaDefinition.PARRY_EXTENSION_TICKS * 50L, session.maxUntil);
+        }
+        session.visualState = session.visualState == KatanaDefinition.VisualState.PARRY_A
+                ? KatanaDefinition.VisualState.PARRY_B
+                : KatanaDefinition.VisualState.PARRY_A;
+        itemFactory.setKatanaVisual(session.katana, session.visualState);
     }
 
     private boolean isProjectileReflectable(Player player, Projectile projectile, long now) {
@@ -362,8 +391,17 @@ public final class KatanaListener implements Listener {
         }
     }
 
+    private ParrySession getActiveParry(Player player, long now) {
+        ParrySession session = activeParries.get(player.getUniqueId());
+        if (session == null || session.cancelled || session.until <= now
+                || session.generation != lifecycleGeneration || !holdsParryingKatana(session)) {
+            return null;
+        }
+        return session;
+    }
+
     private boolean isParryActive(Player player, long now) {
-        return activeParryUntil.getOrDefault(player.getUniqueId(), 0L) > now;
+        return getActiveParry(player, now) != null;
     }
 
     private boolean isAttemptedParryInput(Player player, Action action, Block clickedBlock) {
@@ -378,23 +416,180 @@ public final class KatanaListener implements Listener {
                 || !clickedBlock.getType().isInteractable();
     }
 
-    private void clearActiveParry(Player player) {
-        clearActiveParry(player, player.getInventory().getItemInMainHand());
+    private boolean holdsParryingKatana(ParrySession session) {
+        PlayerInventory inventory = session.player.getInventory();
+        ItemStack held = inventory.getItemInMainHand();
+        return inventory.getHeldItemSlot() == session.slot
+                && itemFactory.isKatana(held) && matchesSession(held, session);
     }
 
-    private void clearActiveParry(Player player, ItemStack katana) {
-        UUID playerId = player.getUniqueId();
-        if (!activeParryUntil.containsKey(playerId) && !activeTasks.containsKey(playerId)) {
-            return;
+    private void clearActiveParry(ParrySession session) {
+        if (activeParries.remove(session.playerId, session)) {
+            session.cancel();
+            resetParryVisual(session);
+        }
+    }
+
+    private void resetParryVisual(ParrySession session) {
+        resetMatchingStack(session.katana, session);
+        PlayerInventory inventory = session.player.getInventory();
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            ItemStack item = inventory.getItem(slot);
+            if (resetMatchingStack(item, session)) {
+                inventory.setItem(slot, item);
+            }
+        }
+        ItemStack cursor = session.player.getItemOnCursor();
+        if (resetMatchingStack(cursor, session)) {
+            session.player.setItemOnCursor(cursor);
+        }
+        var view = session.player.getOpenInventory();
+        if (view != null) {
+            var top = view.getTopInventory();
+            for (int slot = 0; slot < top.getSize(); slot++) {
+                ItemStack item = top.getItem(slot);
+                if (resetMatchingStack(item, session)) {
+                    top.setItem(slot, item);
+                }
+            }
+        }
+    }
+
+    private boolean matchesSession(ItemStack item, ParrySession session) {
+        return item != null && item.hasItemMeta()
+                && session.token.equals(item.getItemMeta().getPersistentDataContainer()
+                        .get(parrySessionKey, PersistentDataType.STRING));
+    }
+
+    private boolean resetMatchingStack(ItemStack item, ParrySession session) {
+        if (!matchesSession(item, session)) {
+            return false;
+        }
+        itemFactory.setKatanaVisual(item, KatanaDefinition.VisualState.NORMAL);
+        var meta = item.getItemMeta();
+        meta.getPersistentDataContainer().remove(parrySessionKey);
+        item.setItemMeta(meta);
+        return true;
+    }
+
+    private void ensureCooldownTask(Player player) {
+        synchronized (taskLock) {
+            if (!running || cooldownTasks.containsKey(player.getUniqueId())
+                    || cooldownManager.getRemainingCooldownMillis(player, PARRY_COOLDOWN_KEY) <= 0L) {
+                return;
+            }
+            CooldownTask task = new CooldownTask(player, lifecycleGeneration);
+            cooldownTasks.put(task.playerId, task);
+            task.task = SchedulerCompat.runTimerForEntity(player, plugin, task, task::retire, 1L, 2L);
+            if (task.cancelled) {
+                task.cancel();
+            }
+        }
+    }
+
+    private void stopCooldown(UUID playerId) {
+        CooldownTask task = cooldownTasks.remove(playerId);
+        if (task != null) {
+            task.cancel();
+        }
+    }
+
+    private void showOffhandWarning(Player player) {
+        ActionBarHelper.showActionBar(player, lang.text("messages.two_handed.offhand_required"));
+    }
+
+    private final class ParrySession implements Runnable {
+        private final Player player;
+        private final UUID playerId;
+        private final ItemStack katana;
+        private final String token = UUID.randomUUID().toString();
+        private final int slot;
+        private volatile long until;
+        private final long maxUntil;
+        private final long generation;
+        private volatile long lastReflectionTick = Long.MIN_VALUE;
+        private volatile KatanaDefinition.VisualState visualState = KatanaDefinition.VisualState.PARRY_A;
+        private volatile ScheduledTaskCompat task;
+        private volatile boolean cancelled;
+
+        private ParrySession(Player player, ItemStack katana, long until, long maxUntil, long generation) {
+            this.player = player;
+            this.playerId = player.getUniqueId();
+            this.katana = katana;
+            var meta = katana.getItemMeta();
+            meta.getPersistentDataContainer().set(parrySessionKey, PersistentDataType.STRING, token);
+            katana.setItemMeta(meta);
+            this.slot = player.getInventory().getHeldItemSlot();
+            this.until = until;
+            this.maxUntil = maxUntil;
+            this.generation = generation;
         }
 
-        if (itemFactory.isKatana(katana)) {
-            itemFactory.setKatanaParryVisual(katana, false);
+        @Override
+        public void run() {
+            if (cancelled || !running || generation != lifecycleGeneration
+                    || activeParries.get(playerId) != this) {
+                return;
+            }
+            long now = System.currentTimeMillis();
+            if (now >= until || !player.isOnline() || player.isDead() || !holdsParryingKatana(this)) {
+                clearActiveParry(this);
+                return;
+            }
+            reflectNearbyProjectiles(this, now);
         }
-        activeParryUntil.remove(playerId);
-        ScheduledTaskCompat activeTask = activeTasks.remove(playerId);
-        if (activeTask != null) {
-            activeTask.cancel();
+
+        private void cancel() {
+            cancelled = true;
+            if (task != null) {
+                task.cancel();
+            }
+        }
+
+        private void retire() {
+            activeParries.remove(playerId, this);
+            cancel();
+        }
+    }
+
+    private final class CooldownTask implements Runnable {
+        private final Player player;
+        private final UUID playerId;
+        private final long generation;
+        private volatile ScheduledTaskCompat task;
+        private volatile boolean cancelled;
+
+        private CooldownTask(Player player, long generation) {
+            this.player = player;
+            this.playerId = player.getUniqueId();
+            this.generation = generation;
+        }
+
+        @Override
+        public void run() {
+            if (cancelled || !running || generation != lifecycleGeneration
+                    || cooldownTasks.get(playerId) != this) {
+                return;
+            }
+            long remaining = cooldownManager.getRemainingCooldownMillis(player, PARRY_COOLDOWN_KEY);
+            if (!player.isOnline() || player.isDead()
+                    || !itemFactory.isKatana(player.getInventory().getItemInMainHand()) || remaining <= 0L) {
+                retire();
+                return;
+            }
+            showCooldownActionBar(player, remaining);
+        }
+
+        private void cancel() {
+            cancelled = true;
+            if (task != null) {
+                task.cancel();
+            }
+        }
+
+        private void retire() {
+            cooldownTasks.remove(playerId, this);
+            cancel();
         }
     }
 

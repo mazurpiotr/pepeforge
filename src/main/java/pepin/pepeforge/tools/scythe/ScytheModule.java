@@ -11,7 +11,7 @@ public class ScytheModule implements ItemModule {
     private final ItemFactory itemFactory;
 
     private ScytheRecipes recipes;
-    private ScytheRecipeDiscoveryListener discoveryListener;
+    private ScytheRecipeDiscovery recipeDiscovery;
 
     public ScytheModule(PepeForgePlugin plugin, ItemFactory itemFactory) {
         this.plugin = plugin;
@@ -25,8 +25,7 @@ public class ScytheModule implements ItemModule {
 
         plugin.getServer().getPluginManager().registerEvents(new ScytheListener(itemFactory), plugin);
 
-        this.discoveryListener = new ScytheRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new ScytheRecipeDiscovery();
     }
 
     @Override
@@ -38,8 +37,8 @@ public class ScytheModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

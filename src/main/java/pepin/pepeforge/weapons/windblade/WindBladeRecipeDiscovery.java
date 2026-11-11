@@ -1,0 +1,19 @@
+package pepin.pepeforge.weapons.windblade;
+
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+public final class WindBladeRecipeDiscovery {
+
+    public void discoverFor(Player player) {
+        Inventory inventory = player.getInventory();
+
+        if (inventory.contains(Material.BREEZE_ROD)) {
+            player.discoverRecipe(WindBladeRecipeKeys.IRON_WIND_BLADE);
+            player.discoverRecipe(WindBladeRecipeKeys.DIAMOND_WIND_BLADE);
+        }
+        if (inventory.contains(Material.NETHERITE_INGOT)) {
+            player.discoverRecipe(WindBladeRecipeKeys.NETHERITE_WIND_BLADE);
+        }
+    }
+}

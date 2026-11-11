@@ -18,7 +18,7 @@ public class WindBladeModule implements ItemModule {
 
     private WindBladeRecipes recipes;
     private WindBladeListener listener;
-    private WindBladeRecipeDiscoveryListener discoveryListener;
+    private WindBladeRecipeDiscovery recipeDiscovery;
 
     public WindBladeModule(PepeForgePlugin plugin, ItemFactory itemFactory, PluginLang lang, CooldownManager cooldownManager, AuraManager auraManager) {
         this.plugin = plugin;
@@ -37,8 +37,7 @@ public class WindBladeModule implements ItemModule {
         this.listener.startHoldingTask();
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
 
-        this.discoveryListener = new WindBladeRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new WindBladeRecipeDiscovery();
     }
 
     @Override
@@ -53,8 +52,8 @@ public class WindBladeModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

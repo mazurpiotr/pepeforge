@@ -19,12 +19,10 @@ public final class KatanaDefinition {
     public static final Material BASE_MATERIAL = Material.IRON_SWORD;
     public static final NamespacedKey MODEL_KEY = new NamespacedKey("pepeforge", "katana");
     public static final int CUSTOM_MODEL_DATA = CustomModelDataIds.KATANA;
-    /*
-     * This temporary parry visual uses a second flat item model.
-     * Later we can replace it with a dedicated Blockbench pose if we want a stronger animation.
-     */
-    public static final NamespacedKey PARRY_MODEL_KEY = new NamespacedKey("pepeforge", "katana_parry");
-    public static final int PARRY_MODEL_DATA = CustomModelDataIds.KATANA_PARRY;
+    public static final NamespacedKey PARRY_MODEL_A_KEY = new NamespacedKey("pepeforge", "katana_parry_a");
+    public static final NamespacedKey PARRY_MODEL_B_KEY = new NamespacedKey("pepeforge", "katana_parry_b");
+    public static final int PARRY_MODEL_A_DATA = CustomModelDataIds.KATANA_PARRY_A;
+    public static final int PARRY_MODEL_B_DATA = CustomModelDataIds.KATANA_PARRY_B;
 
     public static final double ATTACK_DAMAGE = 5.0;
     public static final double ATTACK_SPEED = 2.4;
@@ -32,6 +30,8 @@ public final class KatanaDefinition {
     public static final double VISUAL_SCALE = 1.25;
 
     public static final int PARRY_DURATION_TICKS = 12;
+    public static final int PARRY_EXTENSION_TICKS = 4;
+    public static final int PARRY_MAX_DURATION_TICKS = 24;
     public static final int COOLDOWN_TICKS = 40;
     public static final double PROJECTILE_SCAN_RADIUS = 3.25D;
     public static final double PARRY_FRONT_DOT_THRESHOLD = 0.10D;
@@ -39,6 +39,12 @@ public final class KatanaDefinition {
     public static final double REFLECT_MIN_SPEED = 1.6D;
     public static final double MELEE_KNOCKBACK_STRENGTH = 0.75D;
     public static final double COUNTERATTACK_DAMAGE = 1.0D;
+
+    public enum VisualState {
+        NORMAL,
+        PARRY_A,
+        PARRY_B
+    }
 
     private KatanaDefinition() {
     }

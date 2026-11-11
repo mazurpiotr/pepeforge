@@ -15,10 +15,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import pepin.pepeforge.item.ItemFactory;
+import pepin.pepeforge.item.ItemIds;
 import pepin.pepeforge.util.itemmeta.ItemMetaCompat;
 import pepin.pepeforge.weapons.greatsword.GreatswordTier;
 import pepin.pepeforge.tools.scythe.ScytheTier;
 import pepin.pepeforge.weapons.windblade.WindBladeTier;
+import pepin.pepeforge.weapons.rapier.RapierTier;
 
 import java.util.Map;
 
@@ -49,6 +51,10 @@ public final class SmithingUpgradeListener implements Listener {
             ItemStack result = calculateCustomSmithingResult(inventory);
             
             if (result != null) {
+                if (result.getType().isAir()) {
+                    event.setCancelled(true);
+                    return;
+                }
                 // Replace the item being taken with our custom result
                 event.setCurrentItem(result); 
             }
@@ -73,6 +79,15 @@ public final class SmithingUpgradeListener implements Listener {
 
         // Match based on custom ID to determine the correct upgrade result
         switch (customId) {
+            case ItemIds.DIAMOND_RAPIER:
+                if (baseItem.getType() != Material.DIAMOND_SWORD
+                        || !itemFactory.isItemEnabled(ItemIds.DIAMOND_RAPIER)
+                        || !itemFactory.isRecipeEnabled(ItemIds.NETHERITE_RAPIER)) {
+                    return new ItemStack(Material.AIR);
+                }
+                properResult = itemFactory.createRapier(RapierTier.NETHERITE);
+                itemFactory.updateRapierMode(properResult, itemFactory.getRapierMode(baseItem));
+                break;
             case "diamond_greatsword":
                 properResult = itemFactory.createGreatsword(GreatswordTier.NETHERITE);
                 break;
@@ -83,7 +98,8 @@ public final class SmithingUpgradeListener implements Listener {
                 properResult = itemFactory.createScythe(ScytheTier.NETHERITE);
                 break;
             case "crescent_spear":
-                // Explicitly block upgrade to Netherite Spear to prevent losing model/identity
+            case "crescent_khopesh":
+                // Prevent unsupported upgrades from losing custom item identity.
                 return new ItemStack(Material.AIR);
             default:
                 return null;

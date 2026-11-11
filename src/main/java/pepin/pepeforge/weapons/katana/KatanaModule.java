@@ -5,6 +5,7 @@ import pepin.pepeforge.PepeForgePlugin;
 import pepin.pepeforge.item.ItemFactory;
 import pepin.pepeforge.lang.PluginLang;
 import pepin.pepeforge.module.ItemModule;
+import pepin.pepeforge.util.combat.TwoHandedEquipmentObserver;
 import pepin.pepeforge.util.cooldown.CooldownManager;
 
 public class KatanaModule implements ItemModule {
@@ -12,16 +13,19 @@ public class KatanaModule implements ItemModule {
     private final PepeForgePlugin plugin;
     private final ItemFactory itemFactory;
     private final PluginLang lang;
+    private final TwoHandedEquipmentObserver equipmentObserver;
     private final CooldownManager cooldownManager;
 
     private KatanaRecipes recipes;
     private KatanaListener listener;
-    private KatanaRecipeDiscoveryListener discoveryListener;
+    private KatanaRecipeDiscovery recipeDiscovery;
 
-    public KatanaModule(PepeForgePlugin plugin, ItemFactory itemFactory, PluginLang lang, CooldownManager cooldownManager) {
+    public KatanaModule(PepeForgePlugin plugin, ItemFactory itemFactory, PluginLang lang, CooldownManager cooldownManager,
+            TwoHandedEquipmentObserver equipmentObserver) {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.lang = lang;
+        this.equipmentObserver = equipmentObserver;
         this.cooldownManager = cooldownManager;
     }
 
@@ -31,16 +35,17 @@ public class KatanaModule implements ItemModule {
         this.recipes.registerAll();
 
         this.listener = new KatanaListener(plugin, itemFactory, lang, cooldownManager);
-        this.listener.startStatusTask();
+        this.listener.start();
+        equipmentObserver.register(this.listener);
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
 
-        this.discoveryListener = new KatanaRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new KatanaRecipeDiscovery();
     }
 
     @Override
     public void onDisable() {
         if (this.listener != null) {
+            equipmentObserver.unregister(this.listener);
             this.listener.stop();
         }
         if (this.recipes != null) {
@@ -50,8 +55,8 @@ public class KatanaModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

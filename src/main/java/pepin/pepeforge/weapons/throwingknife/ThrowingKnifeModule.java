@@ -13,7 +13,7 @@ public final class ThrowingKnifeModule implements ItemModule {
     private final CooldownManager cooldownManager;
 
     private ThrowingKnifeRecipes recipes;
-    private ThrowingKnifeRecipeDiscoveryListener discoveryListener;
+    private ThrowingKnifeRecipeDiscovery recipeDiscovery;
     private ThrowingKnifeListener listener;
 
     public ThrowingKnifeModule(PepeForgePlugin plugin, ItemFactory itemFactory, CooldownManager cooldownManager) {
@@ -30,8 +30,7 @@ public final class ThrowingKnifeModule implements ItemModule {
         this.listener = new ThrowingKnifeListener(plugin, itemFactory, cooldownManager);
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
 
-        this.discoveryListener = new ThrowingKnifeRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new ThrowingKnifeRecipeDiscovery();
     }
 
     @Override
@@ -46,8 +45,8 @@ public final class ThrowingKnifeModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

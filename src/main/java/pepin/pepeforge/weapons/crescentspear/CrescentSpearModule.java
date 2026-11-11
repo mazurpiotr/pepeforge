@@ -14,7 +14,7 @@ public class CrescentSpearModule implements ItemModule {
 
     private CrescentSpearRecipes recipes;
     private CrescentSpearListener listener;
-    private CrescentSpearRecipeDiscoveryListener discoveryListener;
+    private CrescentSpearRecipeDiscovery recipeDiscovery;
 
     public CrescentSpearModule(PepeForgePlugin plugin, ItemFactory itemFactory, PluginLang lang) {
         this.plugin = plugin;
@@ -31,8 +31,7 @@ public class CrescentSpearModule implements ItemModule {
         this.listener.startStatusTask();
         plugin.getServer().getPluginManager().registerEvents(this.listener, plugin);
 
-        this.discoveryListener = new CrescentSpearRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new CrescentSpearRecipeDiscovery();
     }
 
     @Override
@@ -47,8 +46,8 @@ public class CrescentSpearModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

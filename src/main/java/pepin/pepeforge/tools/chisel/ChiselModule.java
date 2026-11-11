@@ -11,7 +11,7 @@ public class ChiselModule implements ItemModule {
     private final ItemFactory itemFactory;
 
     private ChiselRecipes recipes;
-    private ChiselRecipeDiscoveryListener discoveryListener;
+    private ChiselRecipeDiscovery recipeDiscovery;
 
     public ChiselModule(PepeForgePlugin plugin, ItemFactory itemFactory) {
         this.plugin = plugin;
@@ -25,8 +25,7 @@ public class ChiselModule implements ItemModule {
 
         plugin.getServer().getPluginManager().registerEvents(new ChiselListener(itemFactory), plugin);
 
-        this.discoveryListener = new ChiselRecipeDiscoveryListener(plugin);
-        plugin.getServer().getPluginManager().registerEvents(this.discoveryListener, plugin);
+        this.recipeDiscovery = new ChiselRecipeDiscovery();
     }
 
     @Override
@@ -38,8 +37,8 @@ public class ChiselModule implements ItemModule {
 
     @Override
     public void discoverRecipesFor(Player player) {
-        if (this.discoveryListener != null) {
-            this.discoveryListener.discoverFor(player);
+        if (this.recipeDiscovery != null) {
+            this.recipeDiscovery.discoverFor(player);
         }
     }
 }

@@ -1,13 +1,16 @@
 package pepin.pepeforge.util.itemmeta;
 
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import pepin.pepeforge.util.env.AdventureReflect;
 import pepin.pepeforge.util.env.ServerEnv;
 
 import java.util.List;
+import java.util.Locale;
 
 public final class ItemMetaCompat {
 
@@ -47,13 +50,6 @@ public final class ItemMetaCompat {
         meta.setCustomModelDataComponent(component);
     }
 
-    public static String readCustomModelData(ItemMeta meta) {
-        if (!meta.hasCustomModelDataComponent()) {
-            return "-";
-        }
-        return String.valueOf(meta.getCustomModelDataComponent().getFloats());
-    }
-
     public static boolean hasCustomModelData(ItemMeta meta, int targetData) {
         if (!meta.hasCustomModelDataComponent()) {
             return false;
@@ -62,22 +58,15 @@ public final class ItemMetaCompat {
         return !floats.isEmpty() && floats.get(0) == (float) targetData;
     }
 
-    public static String readItemModel(ItemMeta meta) {
-        if (!meta.hasItemModel()) {
-            return "-";
-        }
-        NamespacedKey key = meta.getItemModel();
-        return key == null ? "-" : key.toString();
-    }
-
     public static void addMainHandAttribute(ItemMeta meta, Attribute attribute, String name, double amount) {
+        NamespacedKey key = new NamespacedKey("pepeforge", name.toLowerCase(Locale.ROOT).replace(' ', '_'));
         meta.addAttributeModifier(
                 attribute,
-                AttributeModifierCompat.createMainHandAttributeModifier(name, amount)
+                new AttributeModifier(key, amount, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND)
         );
     }
 
-    public static void setItemModelIfSupported(ItemMeta meta, NamespacedKey itemModelKey) {
+    public static void setItemModel(ItemMeta meta, NamespacedKey itemModelKey) {
         meta.setItemModel(itemModelKey);
     }
 
