@@ -40,7 +40,9 @@ public final class CrescentAuraEffect implements AuraEffect {
     }
 
     private boolean isHoldingCrescentWeapon(ItemStack item) {
-        return itemFactory.isCrescentBow(item) || itemFactory.isCrescentSpear(item);
+        return itemFactory.isCrescentBow(item)
+                || itemFactory.isCrescentSpear(item)
+                || itemFactory.isCrescentKhopesh(item);
     }
 
     private void playCrescentMoonAura(Player player) {

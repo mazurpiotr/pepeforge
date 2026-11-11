@@ -1,0 +1,25 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "sweep": "pepeforge:item/crescent_sweep",
+    "particle": "pepeforge:item/crescent_sweep"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 8],
+      "to": [16, 16, 8],
+      "shade": false,
+      "faces": {
+        "north": {"uv": [12.8, 0, 9.6, 16], "texture": "#sweep"},
+        "south": {"uv": [9.6, 0, 12.8, 16], "texture": "#sweep"}
+      }
+    }
+  ],
+  "display": {
+    "fixed": {
+      "rotation": [0, 0, 90],
+      "translation": [0, 0, 0],
+      "scale": [1, 1, 1]
+    }
+  }
+}
