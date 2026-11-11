@@ -4,4 +4,7 @@ public interface TimedAuraEffect extends AuraEffect {
 
     boolean isExpired();
     void extendDuration(int ticks);
+
+    default void stop() {
+    }
 }

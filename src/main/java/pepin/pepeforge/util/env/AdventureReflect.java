@@ -22,15 +22,4 @@ public final class AdventureReflect {
         return ADVENTURE_SUPPORTED;
     }
 
-    public static Object invoke(String className, String methodName, Class<?>[] parameterTypes, Object... args) {
-        if (!ADVENTURE_SUPPORTED) {
-            return null;
-        }
-        try {
-            Class<?> clazz = Class.forName(className);
-            return clazz.getDeclaredMethod(methodName, parameterTypes).invoke(null, args);
-        } catch (Throwable t) {
-            return null;
-        }
-    }
 }

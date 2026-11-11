@@ -111,6 +111,7 @@ public final class AuraManager {
                         player,
                         plugin,
                         new ActiveAuraRunner(player, playerId, effectType, activeAura),
+                        () -> removeAura(playerId, effectType, activeAura),
                         1L,
                         effect.getTickInterval());
                 activeAura.setTask(scheduledTask);
@@ -131,6 +132,27 @@ public final class AuraManager {
             playerAuras = activeAuras.remove(player.getUniqueId());
         }
         cancelAuras(playerAuras);
+    }
+
+    public void removeActiveAura(Player player, Class<? extends TimedAuraEffect> effectType) {
+        removeActiveAura(player.getUniqueId(), effectType);
+    }
+
+    public void removeActiveAura(UUID playerId, Class<? extends TimedAuraEffect> effectType) {
+        ActiveAura removed;
+        synchronized (lifecycleLock) {
+            Map<Class<? extends TimedAuraEffect>, ActiveAura> playerAuras = activeAuras.get(playerId);
+            if (playerAuras == null) {
+                return;
+            }
+            removed = playerAuras.remove(effectType);
+            if (playerAuras.isEmpty()) {
+                activeAuras.remove(playerId, playerAuras);
+            }
+        }
+        if (removed != null) {
+            removed.cancel();
+        }
     }
 
     public void stop() {
@@ -187,6 +209,9 @@ public final class AuraManager {
                 return;
             }
             activeAura.effect.tick(player);
+            if (activeAura.effect.isExpired()) {
+                removeAura(playerId, effectType, activeAura);
+            }
         }
     }
 
@@ -234,12 +259,18 @@ public final class AuraManager {
             }
         }
 
-        private synchronized void cancel() {
-            cancelled = true;
-            if (task != null) {
-                task.cancel();
-                task = null;
+        private void cancel() {
+            synchronized (this) {
+                if (cancelled) {
+                    return;
+                }
+                cancelled = true;
+                if (task != null) {
+                    task.cancel();
+                    task = null;
+                }
             }
+            effect.stop();
         }
     }
 }

@@ -1,7 +1,8 @@
 target/
 dist/
 .m2/
-scripts/
+scripts/*
+!scripts/generate_client_translations.py
 .jqwik-database
 PepeForge-ResourcePack.zip
 PepeForge-ResourcePack.zip.sha1

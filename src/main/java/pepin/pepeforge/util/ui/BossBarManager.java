@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import pepin.pepeforge.util.scheduler.SchedulerCompat;
 
 import java.util.Map;
 import java.util.UUID;
@@ -35,7 +34,7 @@ public class BossBarManager implements Listener {
      * @param progress The progress from 0.0 to 1.0.
      * @param color    The color of the bar.
      */
-    public void updateBar(Player player, String barId, String title, double progress, BarColor color) {
+    public synchronized void updateBar(Player player, String barId, String title, double progress, BarColor color) {
         if (!acceptingUpdates) {
             return;
         }
@@ -63,7 +62,7 @@ public class BossBarManager implements Listener {
      * @param player The player.
      * @param barId  The unique identifier of the bar.
      */
-    public void removeBar(Player player, String barId) {
+    public synchronized void removeBar(Player player, String barId) {
         UUID playerId = player.getUniqueId();
         Map<String, BossBar> bars = playerBars.get(playerId);
         if (bars != null) {
@@ -77,10 +76,26 @@ public class BossBarManager implements Listener {
         }
     }
 
+    /** Removes a tracked bar without accessing a player entity during shutdown or retirement. */
+    public synchronized void removeBar(UUID playerId, String barId) {
+        Map<String, BossBar> bars = playerBars.get(playerId);
+        if (bars == null) {
+            return;
+        }
+        BossBar bar = bars.remove(barId);
+        if (bar != null) {
+            // Hiding sends the removal packet through the bar's existing connections.
+            bar.setVisible(false);
+        }
+        if (bars.isEmpty()) {
+            playerBars.remove(playerId, bars);
+        }
+    }
+
     /**
      * Removes all BossBars for a specific player.
      */
-    public void clearBars(Player player) {
+    public synchronized void clearBars(Player player) {
         UUID playerId = player.getUniqueId();
         Map<String, BossBar> bars = playerBars.remove(playerId);
         if (bars != null) {
@@ -94,20 +109,10 @@ public class BossBarManager implements Listener {
     /**
      * Clears all BossBars for all players. Useful during plugin disable.
      */
-    public void clearAll() {
+    public synchronized void clearAll() {
         acceptingUpdates = false;
-        for (UUID playerId : playerBars.keySet()) {
-            Player player = Bukkit.getPlayer(playerId);
-            if (player == null) {
-                Map<String, BossBar> bars = playerBars.remove(playerId);
-                if (bars != null) {
-                    bars.clear();
-                }
-                continue;
-            }
-
-            SchedulerCompat.runForPlayer(player, plugin, () -> clearBars(player));
-        }
+        playerBars.values().forEach(bars -> bars.values().forEach(bar -> bar.setVisible(false)));
+        playerBars.clear();
     }
 
     @EventHandler
